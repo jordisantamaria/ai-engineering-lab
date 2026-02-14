@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_metadata/
+
+# Data (too large for git)
+data/
+*.csv
+*.parquet
+*.h5
+*.hdf5
+!**/example_*.csv
+
+# Models (too large for git)
+models/
+*.pt
+*.pth
+*.onnx
+*.pkl
+*.joblib
+!**/example_*.pkl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.key
+
+# Docker
+docker-compose.override.yml
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Weights & Biases
+wandb/
