@@ -1,156 +1,156 @@
 # MLOps
 
-> **ML sin MLOps = una demo que nunca llega a producción.**
-> MLOps es la disciplina que convierte experimentos de ML en sistemas confiables, reproducibles y mantenibles en producción.
+> **ML without MLOps = a demo that never reaches production.**
+> MLOps is the discipline that turns ML experiments into reliable, reproducible, and maintainable systems in production.
 
 ---
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [Qué es MLOps y Por Qué Importa](#qué-es-mlops-y-por-qué-importa)
-- [Niveles de Madurez MLOps](#niveles-de-madurez-mlops)
+- [What is MLOps and Why It Matters](#what-is-mlops-and-why-it-matters)
+- [MLOps Maturity Levels](#mlops-maturity-levels)
 - [Experiment Tracking](#experiment-tracking)
 - [Data Versioning](#data-versioning)
 - [Feature Store](#feature-store)
 - [ML Pipelines](#ml-pipelines)
 - [Model Registry](#model-registry)
-- [Reentrenamiento Automático](#reentrenamiento-automático)
-- [Infraestructura](#infraestructura)
-- [Lo Que Realmente Necesitas](#lo-que-realmente-necesitas-para-consultoría)
+- [Automatic Retraining](#automatic-retraining)
+- [Infrastructure](#infrastructure)
+- [What You Really Need](#what-you-really-need-for-consulting)
 
 ---
 
-## Qué es MLOps y Por Qué Importa
+## What is MLOps and Why It Matters
 
-MLOps (Machine Learning Operations) aplica prácticas de DevOps al ciclo de vida de ML. El objetivo es llevar modelos de la experimentación a producción de forma reproducible, automatizada y monitorizada.
+MLOps (Machine Learning Operations) applies DevOps practices to the ML lifecycle. The goal is to take models from experimentation to production in a reproducible, automated, and monitored way.
 
-**Sin MLOps:**
-
-```
-Científico entrena modelo → Envía .pkl por email → Ingeniero intenta deployarlo
-→ "No funciona en mi máquina" → 3 semanas depurando → Ya hay datos nuevos
-→ El modelo ya no sirve → Vuelta a empezar
-```
-
-**Con MLOps:**
+**Without MLOps:**
 
 ```
-Commit en main → Pipeline automático → Train → Evaluar → Registrar modelo
-→ Test en staging → Deploy automático → Monitoring → Reentrenar si baja performance
+Scientist trains model → Sends .pkl via email → Engineer tries to deploy it
+→ "It doesn't work on my machine" → 3 weeks debugging → New data already arrived
+→ The model is no longer useful → Start over
 ```
 
-**Por qué importa para consultoría:**
+**With MLOps:**
 
-| Sin MLOps | Con MLOps |
+```
+Commit to main → Automatic pipeline → Train → Evaluate → Register model
+→ Test in staging → Automatic deploy → Monitoring → Retrain if performance drops
+```
+
+**Why it matters for consulting:**
+
+| Without MLOps | With MLOps |
 |-----------|-----------|
-| "Nuestro data scientist se fue y nadie sabe qué modelo usamos" | Modelos versionados y documentados |
-| "No sabemos con qué datos se entrenó" | Datos versionados, pipeline reproducible |
-| "El modelo dejó de funcionar y no nos dimos cuenta" | Alertas automáticas por drift |
-| "Reentrenar tarda 2 semanas de trabajo manual" | Reentrenamiento con un click (o automático) |
-| Proyecto de 6 meses que muere al entregar | Sistema que el cliente puede mantener |
+| "Our data scientist left and nobody knows which model we use" | Versioned and documented models |
+| "We don't know what data was used for training" | Versioned data, reproducible pipeline |
+| "The model stopped working and we didn't notice" | Automatic drift alerts |
+| "Retraining takes 2 weeks of manual work" | One-click retraining (or automatic) |
+| 6-month project that dies upon delivery | System the client can maintain |
 
 ---
 
-## Niveles de Madurez MLOps
+## MLOps Maturity Levels
 
-Google define tres niveles de madurez en MLOps. Es el framework más referenciado en la industria.
+Google defines three maturity levels for MLOps. It is the most referenced framework in the industry.
 
-### Tabla de Niveles
+### Levels Table
 
-| Aspecto | Level 0: Manual | Level 1: ML Pipeline | Level 2: CI/CD + Pipeline |
+| Aspect | Level 0: Manual | Level 1: ML Pipeline | Level 2: CI/CD + Pipeline |
 |---------|----------------|---------------------|--------------------------|
-| **Entrenamiento** | Manual en notebook | Pipeline automatizado | Pipeline + CI/CD |
-| **Deploy** | Manual (copy-paste) | Semi-automático | Automático |
-| **Tracking** | Nada o spreadsheet | MLflow/W&B | MLflow/W&B integrado en pipeline |
-| **Testing** | Ninguno | Validación básica de modelo | Tests de datos, modelo, código |
-| **Monitoring** | Ninguno | Métricas básicas | Drift detection + alertas |
-| **Reentrenamiento** | Cuando alguien se acuerda | Triggered (schedule/manual) | Automático por drift/schedule |
-| **Reproducibilidad** | Ninguna | Parcial (pipeline fijo) | Total (código + datos + config) |
-| **Tiempo de deploy** | Semanas | Días | Horas/minutos |
+| **Training** | Manual in notebook | Automated pipeline | Pipeline + CI/CD |
+| **Deploy** | Manual (copy-paste) | Semi-automatic | Automatic |
+| **Tracking** | Nothing or spreadsheet | MLflow/W&B | MLflow/W&B integrated in pipeline |
+| **Testing** | None | Basic model validation | Data, model, and code tests |
+| **Monitoring** | None | Basic metrics | Drift detection + alerts |
+| **Retraining** | Whenever someone remembers | Triggered (schedule/manual) | Automatic by drift/schedule |
+| **Reproducibility** | None | Partial (fixed pipeline) | Full (code + data + config) |
+| **Deploy time** | Weeks | Days | Hours/minutes |
 
-### Level 0: Manual (Donde están la mayoría de clientes)
+### Level 0: Manual (Where most clients are)
 
 ```
-Notebook Jupyter
+Jupyter Notebook
     ↓ (manual)
-Modelo .pkl en carpeta local
+Model .pkl in local folder
     ↓ (manual)
-"Oye, pásame el modelo por Slack"
+"Hey, send me the model on Slack"
     ↓ (manual)
-Deploy manual en un servidor
-    ↓ (nadie monitoriza)
-El modelo se degrada silenciosamente
+Manual deploy on a server
+    ↓ (nobody monitors)
+The model silently degrades
 ```
 
-**Características:**
-- Todo es manual y ad-hoc
-- No hay pipeline automatizado
-- Datos y modelos sin versionar
-- El conocimiento está en la cabeza del data scientist
-- Reproducir un experimento es prácticamente imposible
+**Characteristics:**
+- Everything is manual and ad-hoc
+- No automated pipeline
+- Unversioned data and models
+- Knowledge is in the data scientist's head
+- Reproducing an experiment is practically impossible
 
 ### Level 1: ML Pipeline Automation
 
 ```
-Datos nuevos (trigger)
-    ↓ (automático)
+New data (trigger)
+    ↓ (automatic)
 Pipeline: fetch → preprocess → train → evaluate
-    ↓ (automático)
-Modelo registrado en MLflow con métricas
+    ↓ (automatic)
+Model registered in MLflow with metrics
     ↓ (manual/semi-auto)
-Deploy si supera threshold
-    ↓ (automático)
-Monitoring básico
+Deploy if it exceeds threshold
+    ↓ (automatic)
+Basic monitoring
 ```
 
-**El gran salto:** El pipeline es reproducible. Cualquier persona puede ejecutarlo y obtener el mismo resultado.
+**The big leap:** The pipeline is reproducible. Anyone can run it and get the same result.
 
 ### Level 2: CI/CD Pipeline Automation
 
 ```
-Push a main
-    ↓ (CI automático)
-Tests de código + datos + modelo
-    ↓ (CD automático)
-Pipeline completo: train → evaluate → register → deploy
-    ↓ (automático)
-Canary deployment → monitoring → rollback si falla
-    ↓ (automático)
-Reentrenamiento por drift detection
+Push to main
+    ↓ (automatic CI)
+Code + data + model tests
+    ↓ (automatic CD)
+Full pipeline: train → evaluate → register → deploy
+    ↓ (automatic)
+Canary deployment → monitoring → rollback if it fails
+    ↓ (automatic)
+Retraining via drift detection
 ```
 
-> **Para consultoría:** La mayoría de clientes están en Level 0. Llevarlos a Level 1 ya es un **gran win** que justifica el proyecto. Level 2 raramente es necesario en una primera fase.
+> **For consulting:** Most clients are at Level 0. Taking them to Level 1 is already a **big win** that justifies the project. Level 2 is rarely needed in a first phase.
 
 ---
 
 ## Experiment Tracking
 
-### Por Qué Es Esencial
+### Why It's Essential
 
-Sin experiment tracking:
-- "Qué hiperparámetros usé en ese modelo que funcionaba bien?"
-- "Cuál era el accuracy del modelo de hace 3 semanas?"
-- "Qué versión de los datos usé?"
+Without experiment tracking:
+- "What hyperparameters did I use in that model that worked well?"
+- "What was the accuracy of the model from 3 weeks ago?"
+- "What version of the data did I use?"
 
-Con experiment tracking:
-- Cada experimento documentado automáticamente
-- Comparación visual de métricas
-- Reproducibilidad total
-- Poder mostrar al cliente el progreso del proyecto
+With experiment tracking:
+- Every experiment documented automatically
+- Visual comparison of metrics
+- Full reproducibility
+- Ability to show the client the project's progress
 
 ### MLflow
 
-MLflow es el estándar open-source para experiment tracking. Cuatro conceptos clave:
+MLflow is the open-source standard for experiment tracking. Four key concepts:
 
-| Concepto | Qué es | Ejemplo |
+| Concept | What it is | Example |
 |----------|--------|---------|
-| **Experiment** | Grupo de runs relacionados | "clasificador-fraude-v2" |
-| **Run** | Una ejecución de entrenamiento | "run con lr=0.01, epochs=50" |
-| **Parameters** | Configuración del run | learning_rate, batch_size, model_type |
-| **Metrics** | Resultados medibles | accuracy, f1, loss |
-| **Artifacts** | Archivos generados | modelo.pkl, confusion_matrix.png |
+| **Experiment** | Group of related runs | "fraud-classifier-v2" |
+| **Run** | A single training execution | "run with lr=0.01, epochs=50" |
+| **Parameters** | Run configuration | learning_rate, batch_size, model_type |
+| **Metrics** | Measurable results | accuracy, f1, loss |
+| **Artifacts** | Generated files | model.pkl, confusion_matrix.png |
 
-#### Código Completo: Training con MLflow
+#### Full Code: Training with MLflow
 
 ```python
 import mlflow
@@ -162,17 +162,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 
-# Configurar MLflow
-mlflow.set_tracking_uri("http://localhost:5000")  # o "sqlite:///mlflow.db" para local
-mlflow.set_experiment("clasificador-churn")
+# Configure MLflow
+mlflow.set_tracking_uri("http://localhost:5000")  # or "sqlite:///mlflow.db" for local
+mlflow.set_experiment("churn-classifier")
 
-# Cargar datos
+# Load data
 df = pd.read_csv("data/churn_dataset.csv")
 X = df.drop("churn", axis=1)
 y = df["churn"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Hiperparámetros
+# Hyperparameters
 params = {
     "n_estimators": 200,
     "max_depth": 10,
@@ -181,28 +181,28 @@ params = {
     "random_state": 42,
 }
 
-# Entrenar con tracking
+# Train with tracking
 with mlflow.start_run(run_name="rf-baseline-v2"):
-    # Loguear parámetros
+    # Log parameters
     mlflow.log_params(params)
     mlflow.log_param("dataset_version", "2024-01-15")
     mlflow.log_param("n_samples_train", len(X_train))
     mlflow.log_param("n_features", X_train.shape[1])
 
-    # Entrenar
+    # Train
     model = RandomForestClassifier(**params)
     model.fit(X_train, y_train)
 
-    # Predecir y evaluar
+    # Predict and evaluate
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average="weighted")
 
-    # Loguear métricas
+    # Log metrics
     mlflow.log_metric("accuracy", accuracy)
     mlflow.log_metric("f1_weighted", f1)
 
-    # Loguear artefactos
+    # Log artifacts
     report = classification_report(y_test, y_pred, output_dict=True)
     with open("classification_report.json", "w") as f:
         json.dump(report, f, indent=2)
@@ -220,7 +220,7 @@ with mlflow.start_run(run_name="rf-baseline-v2"):
     plt.savefig("feature_importance.png")
     mlflow.log_artifact("feature_importance.png")
 
-    # Loguear el modelo
+    # Log the model
     mlflow.sklearn.log_model(
         model,
         "model",
@@ -232,17 +232,17 @@ with mlflow.start_run(run_name="rf-baseline-v2"):
     print(f"F1: {f1:.4f}")
 ```
 
-#### MLflow UI: Comparar Runs
+#### MLflow UI: Compare Runs
 
 ```bash
-# Iniciar servidor MLflow
+# Start MLflow server
 mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db
 
-# Abrir http://localhost:5000 en el navegador
-# - Ver todos los runs de un experiment
-# - Comparar métricas lado a lado
-# - Ver gráficos de evolución
-# - Descargar artefactos
+# Open http://localhost:5000 in the browser
+# - View all runs in an experiment
+# - Compare metrics side by side
+# - View evolution charts
+# - Download artifacts
 ```
 
 #### Model Registry
@@ -252,40 +252,40 @@ from mlflow.tracking import MlflowClient
 
 client = MlflowClient()
 
-# Registrar un modelo
+# Register a model
 result = mlflow.register_model(
     f"runs:/{run_id}/model",
     "churn-classifier"
 )
 
-# Transicionar a staging
+# Transition to staging
 client.transition_model_version_stage(
     name="churn-classifier",
     version=result.version,
     stage="Staging",
 )
 
-# Después de tests, promover a producción
+# After tests, promote to production
 client.transition_model_version_stage(
     name="churn-classifier",
     version=result.version,
     stage="Production",
 )
 
-# Cargar modelo de producción
+# Load production model
 model = mlflow.sklearn.load_model("models:/churn-classifier/Production")
 ```
 
-#### Serving con MLflow
+#### Serving with MLflow
 
 ```bash
-# Servir modelo directamente desde MLflow
+# Serve model directly from MLflow
 mlflow models serve \
     -m "models:/churn-classifier/Production" \
     -p 5001 \
     --no-conda
 
-# Hacer predicción
+# Make a prediction
 curl -X POST http://localhost:5001/invocations \
     -H "Content-Type: application/json" \
     -d '{"inputs": [[1.0, 2.0, 3.0, 4.0, 5.0]]}'
@@ -293,14 +293,14 @@ curl -X POST http://localhost:5001/invocations \
 
 ### Weights & Biases (W&B)
 
-W&B es la alternativa cloud-first a MLflow. Mejor UI, mejor colaboración, más features pero con tier de pago.
+W&B is the cloud-first alternative to MLflow. Better UI, better collaboration, more features but with a paid tier.
 
 ```python
 import wandb
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 
-# Inicializar (crea un run en wandb.ai)
+# Initialize (creates a run on wandb.ai)
 wandb.init(
     project="churn-classifier",
     name="rf-baseline-v2",
@@ -312,24 +312,24 @@ wandb.init(
     },
 )
 
-# Entrenar
+# Train
 model = RandomForestClassifier(**wandb.config)
 model.fit(X_train, y_train)
 
-# Evaluar y loguear
+# Evaluate and log
 y_pred = model.predict(X_test)
 wandb.log({
     "accuracy": accuracy_score(y_test, y_pred),
     "f1_weighted": f1_score(y_test, y_pred, average="weighted"),
 })
 
-# Loguear tabla de datos para análisis
+# Log data table for analysis
 table = wandb.Table(columns=["true", "predicted"])
 for true, pred in zip(y_test[:100], y_pred[:100]):
     table.add_data(true, pred)
 wandb.log({"predictions": table})
 
-# Finalizar
+# Finish
 wandb.finish()
 ```
 
@@ -366,91 +366,91 @@ def train_sweep():
 
     wandb.log({"f1_weighted": f1_score(y_test, y_pred, average="weighted")})
 
-# Lanzar sweep
+# Launch sweep
 sweep_id = wandb.sweep(sweep_config, project="churn-classifier")
-wandb.agent(sweep_id, function=train_sweep, count=50)  # 50 experimentos
+wandb.agent(sweep_id, function=train_sweep, count=50)  # 50 experiments
 ```
 
 ### MLflow vs W&B
 
-| Aspecto | MLflow | W&B |
+| Aspect | MLflow | W&B |
 |---------|--------|-----|
-| **Hosting** | Self-hosted (o Databricks managed) | Cloud (wandb.ai) |
-| **Coste** | Gratis (open source) | Free tier + $50/user/mes pro |
-| **UI** | Funcional, básica | Excelente, interactiva |
-| **Experiment tracking** | Completo | Completo + tablas, media |
-| **Model registry** | Incluido | Incluido (Model Registry) |
-| **Hyperparameter tuning** | No nativo | Sweeps (bayesian, grid, random) |
-| **Colaboración** | Limitada | Excelente (teams, reports) |
-| **Integración** | Universal | Universal + PyTorch/HF nativo |
-| **Setup** | Más trabajo (self-host) | 1 línea de código |
-| **Control de datos** | Total (tus servidores) | Datos en cloud de W&B |
-| **Ideal para** | Enterprise, on-prem, regulación | Startups, equipos distribuidos |
+| **Hosting** | Self-hosted (or Databricks managed) | Cloud (wandb.ai) |
+| **Cost** | Free (open source) | Free tier + $50/user/month pro |
+| **UI** | Functional, basic | Excellent, interactive |
+| **Experiment tracking** | Complete | Complete + tables, media |
+| **Model registry** | Included | Included (Model Registry) |
+| **Hyperparameter tuning** | Not native | Sweeps (bayesian, grid, random) |
+| **Collaboration** | Limited | Excellent (teams, reports) |
+| **Integration** | Universal | Universal + PyTorch/HF native |
+| **Setup** | More work (self-host) | 1 line of code |
+| **Data control** | Full (your servers) | Data on W&B cloud |
+| **Ideal for** | Enterprise, on-prem, regulated industries | Startups, distributed teams |
 
-> **Recomendación para consultoría:** Empieza con MLflow (gratis, self-hosted, sin dependencias externas). Si el cliente ya usa W&B o necesita colaboración avanzada, usa W&B.
+> **Recommendation for consulting:** Start with MLflow (free, self-hosted, no external dependencies). If the client already uses W&B or needs advanced collaboration, use W&B.
 
 ---
 
 ## Data Versioning
 
-### El Problema
+### The Problem
 
 ```
-"Entrenamos el modelo con los datos de enero. Ahora los datos de febrero
-son diferentes. No sabemos qué cambió. El modelo nuevo es peor.
-¿Podemos volver a los datos de enero?"
+"We trained the model with January data. Now the February data
+is different. We don't know what changed. The new model is worse.
+Can we go back to the January data?"
 
-→ Sin data versioning, la respuesta es "probablemente no".
+→ Without data versioning, the answer is "probably not".
 ```
 
 ### DVC (Data Version Control)
 
-DVC funciona como git pero para archivos grandes (datos, modelos). Los archivos pesados se guardan en storage remoto (S3, GCS) y en git solo se guarda un puntero (.dvc file).
+DVC works like git but for large files (data, models). Heavy files are stored in remote storage (S3, GCS) and only a pointer (.dvc file) is committed to git.
 
 ```bash
-# Instalar DVC
-pip install dvc dvc-s3  # o dvc-gs, dvc-azure
+# Install DVC
+pip install dvc dvc-s3  # or dvc-gs, dvc-azure
 
-# Inicializar en un repo git
+# Initialize in a git repo
 dvc init
 
-# Agregar un archivo de datos
+# Add a data file
 dvc add data/training_data.csv
-# Esto crea:
-#   data/training_data.csv.dvc  (puntero, se commitea a git)
-#   data/.gitignore             (el archivo real se ignora en git)
+# This creates:
+#   data/training_data.csv.dvc  (pointer, committed to git)
+#   data/.gitignore             (the actual file is ignored in git)
 
 git add data/training_data.csv.dvc data/.gitignore
 git commit -m "Add training data v1"
 
-# Configurar remote storage
+# Configure remote storage
 dvc remote add -d myremote s3://my-bucket/dvc-storage
-dvc push  # Sube datos a S3
+dvc push  # Upload data to S3
 
-# Cuando cambian los datos
+# When data changes
 dvc add data/training_data.csv
 git add data/training_data.csv.dvc
 git commit -m "Update training data v2"
 dvc push
 
-# Volver a una versión anterior
+# Go back to a previous version
 git checkout HEAD~1 -- data/training_data.csv.dvc
-dvc checkout  # Descarga la versión anterior de S3
+dvc checkout  # Downloads the previous version from S3
 
-# En otra máquina, obtener los datos
+# On another machine, get the data
 git clone <repo>
-dvc pull  # Descarga datos desde S3
+dvc pull  # Download data from S3
 ```
 
-**Cómo funciona:**
+**How it works:**
 
 ```
 Git repo:
 ├── data/
-│   ├── training_data.csv.dvc   ← Puntero (hash del archivo)
-│   └── .gitignore               ← Ignora el CSV real
+│   ├── training_data.csv.dvc   ← Pointer (file hash)
+│   └── .gitignore               ← Ignores the actual CSV
 ├── models/
-│   └── model.pkl.dvc            ← Puntero al modelo
+│   └── model.pkl.dvc            ← Pointer to model
 └── dvc.yaml                     ← Pipeline definition
 
 S3 bucket (dvc remote):
@@ -459,9 +459,9 @@ S3 bucket (dvc remote):
 └── ff/eedd1122...               ← model.pkl
 ```
 
-### Alternativa Simple: Snapshots con Timestamp
+### Simple Alternative: Snapshots with Timestamp
 
-Para proyectos pequeños donde DVC es overkill:
+For small projects where DVC is overkill:
 
 ```python
 # scripts/snapshot_data.py
@@ -472,16 +472,16 @@ s3 = boto3.client("s3")
 BUCKET = "ml-project-data"
 
 def create_snapshot(local_path: str, dataset_name: str):
-    """Subir snapshot de datos con timestamp."""
+    """Upload a data snapshot with timestamp."""
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     s3_key = f"snapshots/{dataset_name}/{timestamp}/{dataset_name}.csv"
 
     s3.upload_file(local_path, BUCKET, s3_key)
-    print(f"Snapshot creado: s3://{BUCKET}/{s3_key}")
+    print(f"Snapshot created: s3://{BUCKET}/{s3_key}")
     return s3_key
 
 def list_snapshots(dataset_name: str):
-    """Listar snapshots disponibles."""
+    """List available snapshots."""
     response = s3.list_objects_v2(
         Bucket=BUCKET,
         Prefix=f"snapshots/{dataset_name}/",
@@ -490,7 +490,7 @@ def list_snapshots(dataset_name: str):
     for prefix in response.get("CommonPrefixes", []):
         print(prefix["Prefix"])
 
-# Uso
+# Usage
 create_snapshot("data/training.csv", "training")
 list_snapshots("training")
 ```
@@ -499,20 +499,20 @@ list_snapshots("training")
 
 ## Feature Store
 
-### Qué Es
+### What It Is
 
-Un feature store es un repositorio centralizado de features (variables) preparadas para ML. Almacena las transformaciones de datos listas para usar en entrenamiento e inference.
+A feature store is a centralized repository of features (variables) prepared for ML. It stores data transformations ready to use in training and inference.
 
 ```
-Sin Feature Store:
-  Modelo A: calcula "avg_purchases_30d" en su pipeline
-  Modelo B: calcula "avg_purchases_30d" en su pipeline (diferente)
-  Modelo C: calcula "avg_purchases_30d" en su pipeline (otra diferente)
-  → 3 implementaciones diferentes de la misma feature, posibles inconsistencias
+Without Feature Store:
+  Model A: computes "avg_purchases_30d" in its pipeline
+  Model B: computes "avg_purchases_30d" in its pipeline (different)
+  Model C: computes "avg_purchases_30d" in its pipeline (yet another)
+  → 3 different implementations of the same feature, possible inconsistencies
 
-Con Feature Store:
-  Feature Store: tiene "avg_purchases_30d" calculada una vez
-  Modelo A, B, C: leen la misma feature → consistencia garantizada
+With Feature Store:
+  Feature Store: has "avg_purchases_30d" computed once
+  Model A, B, C: read the same feature → guaranteed consistency
 ```
 
 ### Feast (Open Source)
@@ -533,13 +533,13 @@ from feast import Entity, Feature, FeatureView, FileSource
 from feast.types import Float32, Int64
 from datetime import timedelta
 
-# Fuente de datos
+# Data source
 customer_source = FileSource(
     path="data/customer_features.parquet",
     timestamp_field="event_timestamp",
 )
 
-# Entidad
+# Entity
 customer = Entity(
     name="customer_id",
     join_keys=["customer_id"],
@@ -560,14 +560,14 @@ customer_features = FeatureView(
 ```
 
 ```python
-# Usar features para entrenamiento
+# Use features for training
 from feast import FeatureStore
 
 store = FeatureStore(repo_path=".")
 
-# Obtener features históricas para training
+# Get historical features for training
 training_df = store.get_historical_features(
-    entity_df=entity_df,  # DataFrame con customer_id + timestamp
+    entity_df=entity_df,  # DataFrame with customer_id + timestamp
     features=[
         "customer_features:avg_purchases_30d",
         "customer_features:total_spend",
@@ -575,7 +575,7 @@ training_df = store.get_historical_features(
     ],
 ).to_df()
 
-# Obtener features online para inference
+# Get online features for inference
 feature_vector = store.get_online_features(
     features=[
         "customer_features:avg_purchases_30d",
@@ -585,36 +585,36 @@ feature_vector = store.get_online_features(
 ).to_dict()
 ```
 
-### Necesitas un Feature Store?
+### Do You Need a Feature Store?
 
-| Situación | Necesitas Feature Store? |
+| Situation | Need a Feature Store? |
 |-----------|------------------------|
-| 1 modelo, equipo pequeno | No. Pandas/SQL es suficiente. |
-| 2-3 modelos, features compartidas | Probablemente no. Módulos Python compartidos. |
-| 5+ modelos, muchas features compartidas | Probablemente sí. |
-| Necesitas consistencia train/serve | Sí, es el caso más fuerte. |
-| Equipo grande, muchos data scientists | Sí. |
+| 1 model, small team | No. Pandas/SQL is enough. |
+| 2-3 models, shared features | Probably not. Shared Python modules. |
+| 5+ models, many shared features | Probably yes. |
+| Need train/serve consistency | Yes, this is the strongest case. |
+| Large team, many data scientists | Yes. |
 
-> **Para la mayoría de proyectos de consultoría: NO necesitas un feature store.** Un módulo Python con funciones de feature engineering es suficiente. Cuando tengas 5+ modelos compartiendo features, evalúalo.
+> **For most consulting projects: you do NOT need a feature store.** A Python module with feature engineering functions is enough. When you have 5+ models sharing features, evaluate it.
 
 ---
 
 ## ML Pipelines
 
-### Qué Son
+### What They Are
 
-Un ML pipeline es un DAG (Directed Acyclic Graph) que define los pasos desde datos crudos hasta modelo deployado.
+An ML pipeline is a DAG (Directed Acyclic Graph) that defines the steps from raw data to deployed model.
 
 ```
-Datos crudos → Preprocesar → Feature Engineering → Train → Evaluate → Deploy
+Raw data → Preprocess → Feature Engineering → Train → Evaluate → Deploy
     │              │                │                │         │         │
     ▼              ▼                ▼                ▼         ▼         ▼
-   S3         datos limpios     features.csv    model.pkl  metrics   endpoint
+   S3         clean data      features.csv    model.pkl  metrics   endpoint
 ```
 
-### Niveles de Complejidad
+### Complexity Levels
 
-#### Simple: Scripts Python + Makefile
+#### Simple: Python Scripts + Makefile
 
 ```makefile
 # Makefile
@@ -642,14 +642,14 @@ clean:
 ```
 
 ```bash
-# Ejecutar pipeline completo
+# Run the full pipeline
 make all
 
-# Solo reentrenar (asume datos ya procesados)
+# Only retrain (assumes data is already processed)
 make train evaluate
 ```
 
-#### Intermedio: Prefect
+#### Intermediate: Prefect
 
 ```python
 # pipeline.py
@@ -662,19 +662,19 @@ import joblib
 
 @task(retries=2, retry_delay_seconds=60)
 def fetch_data(source: str) -> pd.DataFrame:
-    """Extraer datos de la fuente."""
+    """Extract data from source."""
     return pd.read_sql(f"SELECT * FROM {source}", engine)
 
 @task
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-    """Limpiar y transformar datos."""
+    """Clean and transform data."""
     df = df.dropna(subset=["target"])
     df = df.fillna(df.median(numeric_only=True))
     return df
 
 @task
 def train_model(df: pd.DataFrame, params: dict):
-    """Entrenar modelo con tracking."""
+    """Train model with tracking."""
     X = df.drop("target", axis=1)
     y = df["target"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
@@ -692,16 +692,16 @@ def train_model(df: pd.DataFrame, params: dict):
 
 @task
 def evaluate_and_deploy(model, accuracy: float, threshold: float = 0.85):
-    """Deploy si accuracy supera threshold."""
+    """Deploy if accuracy exceeds threshold."""
     if accuracy >= threshold:
         joblib.dump(model, "models/model_latest.pkl")
-        print(f"Modelo deployado con accuracy {accuracy:.4f}")
+        print(f"Model deployed with accuracy {accuracy:.4f}")
     else:
-        print(f"Modelo rechazado: accuracy {accuracy:.4f} < {threshold}")
+        print(f"Model rejected: accuracy {accuracy:.4f} < {threshold}")
 
 @flow(name="ML Training Pipeline")
 def training_pipeline(source: str = "customers", params: dict = None):
-    """Pipeline completo de entrenamiento."""
+    """Full training pipeline."""
     if params is None:
         params = {"n_estimators": 200, "max_depth": 10}
 
@@ -714,39 +714,39 @@ if __name__ == "__main__":
     training_pipeline()
 ```
 
-#### Avanzado: Kubeflow / SageMaker Pipelines
+#### Advanced: Kubeflow / SageMaker Pipelines
 
-Para escala enterprise. Cada paso es un container independiente, escalable, con recursos dedicados.
+For enterprise scale. Each step is an independent container, scalable, with dedicated resources.
 
-| Herramienta | Complejidad | Escalabilidad | Hosting | Ideal Para |
+| Tool | Complexity | Scalability | Hosting | Ideal For |
 |-------------|------------|--------------|---------|-----------|
-| Scripts + Makefile | Baja | Baja | Local/servidor | POC, proyectos pequenos |
-| Scripts + cron | Baja | Baja | Servidor | Batch scheduling simple |
-| Prefect | Media | Media | Cloud/self-hosted | Equipos medianos |
-| Airflow | Media-Alta | Alta | Self-hosted/Cloud | Pipelines complejos, data eng |
-| Kubeflow | Alta | Muy alta | Kubernetes | Enterprise, muchos modelos |
-| SageMaker Pipelines | Media | Alta | AWS managed | Full AWS ecosystem |
-| Vertex AI Pipelines | Media | Alta | GCP managed | Full GCP ecosystem |
+| Scripts + Makefile | Low | Low | Local/server | POC, small projects |
+| Scripts + cron | Low | Low | Server | Simple batch scheduling |
+| Prefect | Medium | Medium | Cloud/self-hosted | Mid-size teams |
+| Airflow | Medium-High | High | Self-hosted/Cloud | Complex pipelines, data eng |
+| Kubeflow | High | Very high | Kubernetes | Enterprise, many models |
+| SageMaker Pipelines | Medium | High | AWS managed | Full AWS ecosystem |
+| Vertex AI Pipelines | Medium | High | GCP managed | Full GCP ecosystem |
 
-> **Recomendación para consultoría:** Empieza con scripts + Makefile (o cron). Si necesitas retries, scheduling, y UI, sube a Prefect o Airflow. Kubeflow solo si el cliente ya tiene Kubernetes y necesita escala seria.
+> **Recommendation for consulting:** Start with scripts + Makefile (or cron). If you need retries, scheduling, and UI, move up to Prefect or Airflow. Kubeflow only if the client already has Kubernetes and needs serious scale.
 
 ---
 
 ## Model Registry
 
-### Concepto
+### Concept
 
-El Model Registry es un catálogo centralizado de modelos con versionado y ciclo de vida. Piénsalo como un "app store" interno para modelos ML.
+The Model Registry is a centralized catalog of models with versioning and lifecycle management. Think of it as an internal "app store" for ML models.
 
 ```
-Stages de un modelo:
+Model stages:
 
 None → Staging → Production → Archived
                ↑            │
-               └────────────┘ (rollback si falla)
+               └────────────┘ (rollback if it fails)
 ```
 
-### Workflow Completo con MLflow Model Registry
+### Full Workflow with MLflow Model Registry
 
 ```python
 import mlflow
@@ -754,21 +754,21 @@ from mlflow.tracking import MlflowClient
 
 client = MlflowClient()
 
-# 1. TRAIN: Entrenar y registrar
+# 1. TRAIN: Train and register
 with mlflow.start_run():
     model = train_my_model(X_train, y_train)
     accuracy = evaluate(model, X_test, y_test)
 
     mlflow.log_metric("accuracy", accuracy)
 
-    # Registrar automáticamente
+    # Register automatically
     mlflow.sklearn.log_model(
         model,
         "model",
         registered_model_name="churn-classifier",
     )
 
-# 2. STAGING: Promover versión a staging
+# 2. STAGING: Promote version to staging
 latest_version = client.get_latest_versions("churn-classifier", stages=["None"])[0]
 client.transition_model_version_stage(
     name="churn-classifier",
@@ -776,13 +776,13 @@ client.transition_model_version_stage(
     stage="Staging",
 )
 
-# 3. TEST: Evaluar en staging
+# 3. TEST: Evaluate in staging
 staging_model = mlflow.sklearn.load_model("models:/churn-classifier/Staging")
 staging_accuracy = evaluate(staging_model, X_staging_test, y_staging_test)
 
-# 4. PRODUCTION: Si pasa validación, promover
+# 4. PRODUCTION: If validation passes, promote
 if staging_accuracy >= PRODUCTION_THRESHOLD:
-    # Archivar modelo actual en producción
+    # Archive current production model
     prod_versions = client.get_latest_versions("churn-classifier", stages=["Production"])
     for v in prod_versions:
         client.transition_model_version_stage(
@@ -791,33 +791,33 @@ if staging_accuracy >= PRODUCTION_THRESHOLD:
             stage="Archived",
         )
 
-    # Promover nuevo modelo
+    # Promote new model
     client.transition_model_version_stage(
         name="churn-classifier",
         version=latest_version.version,
         stage="Production",
     )
-    print(f"Modelo v{latest_version.version} en producción")
+    print(f"Model v{latest_version.version} in production")
 
-# 5. SERVE: Cargar modelo de producción
+# 5. SERVE: Load production model
 production_model = mlflow.sklearn.load_model("models:/churn-classifier/Production")
 ```
 
 ---
 
-## Reentrenamiento Automático
+## Automatic Retraining
 
-### Triggers para Reentrenamiento
+### Retraining Triggers
 
-| Trigger | Cuándo | Cómo Detectar |
+| Trigger | When | How to Detect |
 |---------|--------|---------------|
-| **Schedule** | Cada semana/mes | Cron, Airflow schedule |
-| **Data drift** | Distribución de inputs cambia | KS test, Evidently AI |
-| **Performance drop** | Accuracy baja en producción | Monitoring de métricas |
-| **Nuevos datos** | Llegan datos etiquetados nuevos | Trigger por evento (S3, DB) |
-| **Manual** | El equipo decide | Botón en UI, API call |
+| **Schedule** | Every week/month | Cron, Airflow schedule |
+| **Data drift** | Input distribution changes | KS test, Evidently AI |
+| **Performance drop** | Accuracy drops in production | Metrics monitoring |
+| **New data** | New labeled data arrives | Event trigger (S3, DB) |
+| **Manual** | The team decides | Button in UI, API call |
 
-### Pipeline de Reentrenamiento
+### Retraining Pipeline
 
 ```python
 # retrain_pipeline.py
@@ -825,45 +825,45 @@ import mlflow
 from datetime import datetime, timedelta
 
 def should_retrain() -> tuple[bool, str]:
-    """Decidir si hay que reentrenar."""
+    """Decide whether retraining is needed."""
     reasons = []
 
-    # Check 1: Tiempo desde último entrenamiento
+    # Check 1: Time since last training
     client = mlflow.tracking.MlflowClient()
     prod_model = client.get_latest_versions("my-model", stages=["Production"])[0]
     last_trained = datetime.fromtimestamp(prod_model.creation_timestamp / 1000)
     if datetime.utcnow() - last_trained > timedelta(days=30):
-        reasons.append("Han pasado más de 30 días desde el último entrenamiento")
+        reasons.append("More than 30 days since last training")
 
     # Check 2: Data drift
-    drift_score = check_data_drift()  # Tu función de drift detection
+    drift_score = check_data_drift()  # Your drift detection function
     if drift_score > 0.3:
-        reasons.append(f"Data drift detectado: {drift_score:.2f}")
+        reasons.append(f"Data drift detected: {drift_score:.2f}")
 
     # Check 3: Performance drop
-    current_accuracy = get_production_accuracy()  # De tu monitoring
+    current_accuracy = get_production_accuracy()  # From your monitoring
     baseline_accuracy = float(prod_model.tags.get("accuracy", "0.9"))
     if current_accuracy < baseline_accuracy - 0.05:
         reasons.append(
-            f"Accuracy bajó de {baseline_accuracy:.3f} a {current_accuracy:.3f}"
+            f"Accuracy dropped from {baseline_accuracy:.3f} to {current_accuracy:.3f}"
         )
 
     return len(reasons) > 0, "; ".join(reasons)
 
 def retrain_and_evaluate():
-    """Pipeline completo de reentrenamiento."""
+    """Full retraining pipeline."""
     should, reason = should_retrain()
 
     if not should:
-        print("No es necesario reentrenar")
+        print("No retraining needed")
         return
 
-    print(f"Reentrenando: {reason}")
+    print(f"Retraining: {reason}")
 
-    # 1. Fetch datos nuevos
+    # 1. Fetch new data
     X_train, X_test, y_train, y_test = fetch_latest_data()
 
-    # 2. Entrenar nuevo modelo
+    # 2. Train new model
     with mlflow.start_run(run_name=f"retrain-{datetime.utcnow().isoformat()}"):
         new_model = train(X_train, y_train)
         new_accuracy = evaluate(new_model, X_test, y_test)
@@ -871,66 +871,66 @@ def retrain_and_evaluate():
         mlflow.log_metric("accuracy", new_accuracy)
         mlflow.log_param("retrain_reason", reason)
 
-        # 3. Comparar con modelo en producción
+        # 3. Compare with production model
         prod_model = mlflow.sklearn.load_model("models:/my-model/Production")
         prod_accuracy = evaluate(prod_model, X_test, y_test)
 
-        print(f"Nuevo modelo: {new_accuracy:.4f} vs Producción: {prod_accuracy:.4f}")
+        print(f"New model: {new_accuracy:.4f} vs Production: {prod_accuracy:.4f}")
 
-        # 4. Deploy solo si es mejor
+        # 4. Deploy only if better
         if new_accuracy > prod_accuracy:
             mlflow.sklearn.log_model(
                 new_model, "model",
                 registered_model_name="my-model",
             )
-            print("Nuevo modelo registrado. Listo para promover a producción.")
+            print("New model registered. Ready to promote to production.")
         else:
-            print("Modelo nuevo no supera al actual. No se deploya.")
+            print("New model does not outperform current one. Not deploying.")
 ```
 
-### Shadow Deployment y Canary
+### Shadow Deployment and Canary
 
 ```
 Shadow Deployment:
-  Request → Modelo A (producción) → Respuesta al usuario
-         → Modelo B (shadow)     → Log para comparar (no se envía al usuario)
+  Request → Model A (production) → Response to user
+         → Model B (shadow)     → Log for comparison (not sent to user)
 
-  Período: 1-2 semanas
-  Objetivo: validar Modelo B sin riesgo
-  Decidir: si B es consistentemente mejor → promover
+  Period: 1-2 weeks
+  Goal: validate Model B without risk
+  Decide: if B is consistently better → promote
 
 Canary Deployment:
-  Request → [90%] Modelo A (producción)  → Respuesta
-         → [10%] Modelo B (canary)       → Respuesta
+  Request → [90%] Model A (production)  → Response
+         → [10%] Model B (canary)       → Response
 
-  Período: gradual (10% → 25% → 50% → 100%)
-  Objetivo: detectar problemas con tráfico real limitado
-  Rollback: si B falla → volver a 100% A
+  Period: gradual (10% → 25% → 50% → 100%)
+  Goal: detect problems with limited real traffic
+  Rollback: if B fails → go back to 100% A
 ```
 
 ---
 
-## Infraestructura
+## Infrastructure
 
-### Tabla de Decisión
+### Decision Table
 
-| Escala | Infra Recomendada | Coste Mensual | Complejidad |
+| Scale | Recommended Infra | Monthly Cost | Complexity |
 |--------|------------------|---------------|-------------|
-| **POC / MVP** | Laptop + Docker | $0 | Baja |
-| **1-2 modelos, bajo tráfico** | Single server (EC2/VM) + Docker | $50-200 | Baja |
-| **2-5 modelos, tráfico medio** | ECS/Cloud Run + managed DB | $200-1000 | Media |
-| **5+ modelos, alto tráfico** | Kubernetes + Seldon/KServe | $1000-5000 | Alta |
-| **Enterprise** | SageMaker/Vertex AI (managed) | $2000+ | Media (managed) |
-| **Edge / IoT** | ONNX/TFLite en dispositivos | Variable | Alta |
+| **POC / MVP** | Laptop + Docker | $0 | Low |
+| **1-2 models, low traffic** | Single server (EC2/VM) + Docker | $50-200 | Low |
+| **2-5 models, medium traffic** | ECS/Cloud Run + managed DB | $200-1000 | Medium |
+| **5+ models, high traffic** | Kubernetes + Seldon/KServe | $1000-5000 | High |
+| **Enterprise** | SageMaker/Vertex AI (managed) | $2000+ | Medium (managed) |
+| **Edge / IoT** | ONNX/TFLite on devices | Variable | High |
 
-### Diagrama de Infraestructura Típica
+### Typical Infrastructure Diagram
 
 ```
-Consultoría - Setup Típico:
+Consulting - Typical Setup:
 
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │   GitHub     │────▶│GitHub Actions│────▶│  Docker Hub  │
-│   (código)   │     │  (CI/CD)     │     │  / ECR       │
+│   (code)     │     │  (CI/CD)     │     │  / ECR       │
 └──────────────┘     └──────────────┘     └──────┬───────┘
                                                   │
                      ┌────────────────────────────▼──────────┐
@@ -943,74 +943,74 @@ Consultoría - Setup Típico:
                      │  └────┬────┘     └─────────────────┘  │
                      │       │                                │
                      │  ┌────▼────┐     ┌─────────────────┐  │
-                     │  │CloudWatch│    │  S3 (modelos,   │  │
-                     │  │/Grafana │     │  datos, logs)    │  │
+                     │  │CloudWatch│    │  S3 (models,    │  │
+                     │  │/Grafana │     │  data, logs)     │  │
                      │  └─────────┘     └─────────────────┘  │
                      └────────────────────────────────────────┘
 ```
 
 ---
 
-## Lo Que Realmente Necesitas para Consultoría
+## What You Really Need for Consulting
 
-La mayoría de proyectos de consultoría AI no necesitan un stack MLOps complejo. Este es el stack pragmático que cubre el 90% de los casos:
+Most AI consulting projects do not need a complex MLOps stack. This is the pragmatic stack that covers 90% of cases:
 
-### El Stack Mínimo Viable
+### The Minimum Viable Stack
 
-| Necesidad | Herramienta | Por Qué |
+| Need | Tool | Why |
 |-----------|-------------|---------|
-| **Código** | Git + GitHub | Estándar universal, sin discusión |
-| **Experimentos** | MLflow | Gratis, open source, experiment tracking + model registry |
-| **Empaquetado** | Docker | Reproducibilidad, "funciona en cualquier máquina" |
-| **Servir modelo** | FastAPI | Rápido, tipado, documentación automática |
-| **CI/CD** | GitHub Actions | Integrado con GitHub, gratis para repos públicos |
-| **Monitoring** | CloudWatch + Prometheus | Métricas de infra + custom metrics |
+| **Code** | Git + GitHub | Universal standard, no debate |
+| **Experiments** | MLflow | Free, open source, experiment tracking + model registry |
+| **Packaging** | Docker | Reproducibility, "works on any machine" |
+| **Model serving** | FastAPI | Fast, typed, automatic documentation |
+| **CI/CD** | GitHub Actions | Integrated with GitHub, free for public repos |
+| **Monitoring** | CloudWatch + Prometheus | Infra metrics + custom metrics |
 
-### Cuándo Añadir Más
-
-```
-"¿Necesito X?"
-
-Feature Store → ¿Tienes 5+ modelos compartiendo features? → Si no, NO.
-Kubernetes   → ¿Tienes 10+ microservicios? → Si no, NO.
-Kubeflow     → ¿Tienes 20+ pipelines ML? → Si no, NO.
-Airflow      → ¿Tienes 5+ pipelines con dependencias? → Si no, scripts + cron.
-Kafka        → ¿Necesitas procesar 10k+ eventos/seg? → Si no, SQS o batch.
-Terraform    → ¿Tu infra tiene 20+ recursos cloud? → Si no, consola/CLI.
-```
-
-### Checklist de MLOps para Consultoría
+### When to Add More
 
 ```
-Fase 1: Proyecto empieza
-  [x] Repo Git
+"Do I need X?"
+
+Feature Store → Do you have 5+ models sharing features? → If not, NO.
+Kubernetes   → Do you have 10+ microservices? → If not, NO.
+Kubeflow     → Do you have 20+ ML pipelines? → If not, NO.
+Airflow      → Do you have 5+ pipelines with dependencies? → If not, scripts + cron.
+Kafka        → Do you need to process 10k+ events/sec? → If not, SQS or batch.
+Terraform    → Does your infra have 20+ cloud resources? → If not, console/CLI.
+```
+
+### MLOps Checklist for Consulting
+
+```
+Phase 1: Project starts
+  [x] Git repo
   [x] requirements.txt / pyproject.toml
-  [x] README con instrucciones de setup
-  [x] MLflow local para tracking
-  [ ] (Opcional) DVC si datos son grandes
+  [x] README with setup instructions
+  [x] Local MLflow for tracking
+  [ ] (Optional) DVC if data is large
 
-Fase 2: Modelo listo
-  [x] Modelo registrado en MLflow
-  [x] Métricas baseline documentadas
-  [x] Tests básicos del modelo
-  [x] Dockerfile funcional
-  [ ] (Opcional) GitHub Actions para tests
+Phase 2: Model ready
+  [x] Model registered in MLflow
+  [x] Baseline metrics documented
+  [x] Basic model tests
+  [x] Working Dockerfile
+  [ ] (Optional) GitHub Actions for tests
 
-Fase 3: En producción
-  [x] FastAPI endpoint deployado
-  [x] CI/CD configurado (build + test + deploy)
-  [x] Monitoring de latencia y errores
+Phase 3: In production
+  [x] FastAPI endpoint deployed
+  [x] CI/CD configured (build + test + deploy)
+  [x] Latency and error monitoring
   [x] Health check endpoint
-  [ ] (Opcional) Drift detection
+  [ ] (Optional) Drift detection
 
-Fase 4: Mantenimiento
-  [x] Pipeline de reentrenamiento (al menos manual)
-  [x] Alertas configuradas
-  [x] Documentación para el equipo del cliente
-  [ ] (Opcional) Reentrenamiento automático
-  [ ] (Opcional) A/B testing
+Phase 4: Maintenance
+  [x] Retraining pipeline (at least manual)
+  [x] Alerts configured
+  [x] Documentation for the client's team
+  [ ] (Optional) Automatic retraining
+  [ ] (Optional) A/B testing
 ```
 
 ---
 
-> **Resumen para llevar:** MLOps no es instalar todas las herramientas del ecosistema. Es tener un proceso reproducible y mantenible para llevar modelos a producción. Para consultoría, Git + MLflow + Docker + FastAPI + GitHub Actions te dan el 90% de lo que necesitas. Añade complejidad solo cuando el problema lo justifique.
+> **Key takeaway:** MLOps is not about installing every tool in the ecosystem. It is about having a reproducible and maintainable process for taking models to production. For consulting, Git + MLflow + Docker + FastAPI + GitHub Actions give you 90% of what you need. Add complexity only when the problem justifies it.

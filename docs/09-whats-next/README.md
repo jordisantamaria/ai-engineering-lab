@@ -1,15 +1,15 @@
-# Qué Falta por Aprender
+# What's Left to Learn
 
-> Este repositorio cubre lo esencial para empezar a hacer consultoría AI/ML. Pero el campo es enorme. Aquí están los temas avanzados que podrías necesitar según el tipo de proyecto que te llegue.
+> This repository covers the essentials for getting started with AI/ML consulting. But the field is enormous. Here are the advanced topics you might need depending on the type of project that comes your way.
 
 ---
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [Mapa de Temas Avanzados](#mapa-de-temas-avanzados)
+- [Advanced Topics Map](#advanced-topics-map)
 - [1. Time Series Forecasting](#1-time-series-forecasting)
 - [2. Reinforcement Learning](#2-reinforcement-learning)
-- [3. Generative AI (más allá de LLMs)](#3-generative-ai-más-allá-de-llms)
+- [3. Generative AI (beyond LLMs)](#3-generative-ai-beyond-llms)
 - [4. Audio / Speech](#4-audio--speech)
 - [5. Multimodal AI](#5-multimodal-ai)
 - [6. Graph Neural Networks](#6-graph-neural-networks)
@@ -17,19 +17,19 @@
 - [8. Edge AI / TinyML](#8-edge-ai--tinyml)
 - [9. AutoML](#9-automl)
 - [10. Responsible AI / Fairness](#10-responsible-ai--fairness)
-- [Prioridad Sugerida para Consultoría](#prioridad-sugerida-para-consultoría)
-- [Resumen Rápido](#resumen-rápido)
+- [Suggested Priority for Consulting](#suggested-priority-for-consulting)
+- [Quick Summary](#quick-summary)
 
 ---
 
-## Mapa de Temas Avanzados
+## Advanced Topics Map
 
 ```
                          ┌──────────────────┐
-                         │   LO QUE SABES   │
-                         │   (este repo)    │
+                         │  WHAT YOU KNOW   │
+                         │   (this repo)    │
                          │                  │
-                         │ ML clásico, DL,  │
+                         │ Classical ML, DL,│
                          │ NLP, LLMs, RAG,  │
                          │ CV, MLOps,       │
                          │ Deployment       │
@@ -38,17 +38,17 @@
               ┌───────────────────┼───────────────────┐
               │                   │                   │
      ┌────────▼────────┐  ┌──────▼───────┐  ┌───────▼────────┐
-     │  DATOS NUEVOS   │  │  MODALIDADES │  │  DEPLOYMENT    │
-     │                 │  │  NUEVAS      │  │  AVANZADO      │
-     │ Time Series     │  │              │  │                │
-     │ Graph Data      │  │ Audio/Speech │  │ Edge AI/TinyML │
-     │                 │  │ Multimodal   │  │ Federated      │
-     └────────┬────────┘  │ Gen AI       │  │ Learning       │
-              │           └──────┬───────┘  └───────┬────────┘
+     │    NEW DATA     │  │     NEW      │  │   ADVANCED     │
+     │    TYPES        │  │  MODALITIES  │  │   DEPLOYMENT   │
+     │                 │  │              │  │                │
+     │ Time Series     │  │ Audio/Speech │  │ Edge AI/TinyML │
+     │ Graph Data      │  │ Multimodal   │  │ Federated      │
+     │                 │  │ Gen AI       │  │ Learning       │
+     └────────┬────────┘  └──────┬───────┘  └───────┬────────┘
               │                  │                   │
      ┌────────▼────────┐  ┌─────▼────────┐  ┌──────▼─────────┐
-     │  AUTOMATIZACIÓN │  │  ÉTICA &     │  │  ESPECIALIZADO │
-     │                 │  │  REGULACIÓN  │  │                │
+     │  AUTOMATION     │  │  ETHICS &    │  │  SPECIALIZED   │
+     │                 │  │  REGULATION  │  │                │
      │ AutoML          │  │              │  │ Reinforcement  │
      │                 │  │ Responsible  │  │ Learning       │
      │                 │  │ AI/Fairness  │  │                │
@@ -59,114 +59,114 @@
 
 ## 1. Time Series Forecasting
 
-### Qué es
+### What It Is
 
-Predicción de valores futuros basándose en datos históricos ordenados temporalmente. Demanda de productos, ventas, precio de acciones, consumo energético, datos de sensores.
+Prediction of future values based on historically ordered temporal data. Product demand, sales, stock prices, energy consumption, sensor data.
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-- **Retail:** Forecasting de demanda e inventario
-- **Finanzas:** Predicción de ingresos, cashflow, precios
-- **Manufactura:** Mantenimiento predictivo, producción
-- **Energía:** Consumo, generación renovable
-- **Logística:** Volúmenes de envío, tiempos de entrega
+- **Retail:** Demand and inventory forecasting
+- **Finance:** Revenue, cashflow, and price prediction
+- **Manufacturing:** Predictive maintenance, production
+- **Energy:** Consumption, renewable generation
+- **Logistics:** Shipping volumes, delivery times
 
-### Stack Tecnológico
+### Technology Stack
 
-| Herramienta | Tipo | Mejor Para | Complejidad |
+| Tool | Type | Best For | Complexity |
 |-------------|------|-----------|-------------|
-| **Prophet** (Meta) | Estadístico | Series con estacionalidad, rápido de implementar | Baja |
-| **NeuralProphet** | Híbrido | Prophet + redes neuronales | Baja-Media |
-| **statsmodels** | Estadístico | ARIMA, SARIMA, modelos clásicos | Media |
-| **N-BEATS** | Deep Learning | Múltiples series, alta accuracy | Media |
-| **Temporal Fusion Transformer** | Deep Learning | Series complejas con variables exógenas | Alta |
-| **Darts** (Unit8) | Framework | Unifica múltiples modelos en una API | Media |
-| **GluonTS** (Amazon) | Framework | Modelos probabilísticos, AWS integration | Media-Alta |
+| **Prophet** (Meta) | Statistical | Series with seasonality, quick to implement | Low |
+| **NeuralProphet** | Hybrid | Prophet + neural networks | Low-Medium |
+| **statsmodels** | Statistical | ARIMA, SARIMA, classical models | Medium |
+| **N-BEATS** | Deep Learning | Multiple series, high accuracy | Medium |
+| **Temporal Fusion Transformer** | Deep Learning | Complex series with exogenous variables | High |
+| **Darts** (Unit8) | Framework | Unifies multiple models under one API | Medium |
+| **GluonTS** (Amazon) | Framework | Probabilistic models, AWS integration | Medium-High |
 
-### Ejemplo Rápido: Prophet
+### Quick Example: Prophet
 
 ```python
 from prophet import Prophet
 import pandas as pd
 
-# Datos: columnas "ds" (fecha) y "y" (valor)
+# Data: columns "ds" (date) and "y" (value)
 df = pd.read_csv("ventas.csv")
 df.columns = ["ds", "y"]
 
 model = Prophet(
     yearly_seasonality=True,
     weekly_seasonality=True,
-    changepoint_prior_scale=0.05,  # Flexibilidad de la tendencia
+    changepoint_prior_scale=0.05,  # Trend flexibility
 )
 model.fit(df)
 
-# Predecir 90 días
+# Predict 90 days
 future = model.make_future_dataframe(periods=90)
 forecast = model.predict(future)
 
-# Visualizar
+# Visualize
 model.plot(forecast)
-model.plot_components(forecast)  # Tendencia + estacionalidad
+model.plot_components(forecast)  # Trend + seasonality
 ```
 
-### Dificultad: Media
+### Difficulty: Medium
 
-Lo estadístico (Prophet, ARIMA) es accesible. Los modelos deep learning (TFT, N-BEATS) requieren más experiencia. El reto real no es el modelo sino entender la estacionalidad, eventos especiales, y evaluar correctamente (time-series cross-validation, no random split).
+The statistical methods (Prophet, ARIMA) are accessible. Deep learning models (TFT, N-BEATS) require more experience. The real challenge is not the model but understanding seasonality, special events, and evaluating correctly (time-series cross-validation, not random split).
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Libro:** "Forecasting: Principles and Practice" (Hyndman & Athanasopoulos) - gratis online
-- **Curso:** Kaggle Time Series course
-- **Práctica:** Kaggle competitions de forecasting (Store Sales, M5)
-- **Documentación:** Prophet docs, Darts docs
+- **Book:** "Forecasting: Principles and Practice" (Hyndman & Athanasopoulos) - free online
+- **Course:** Kaggle Time Series course
+- **Practice:** Kaggle forecasting competitions (Store Sales, M5)
+- **Documentation:** Prophet docs, Darts docs
 
 ---
 
 ## 2. Reinforcement Learning
 
-### Qué es
+### What It Is
 
-Paradigma de ML donde un agente aprende a tomar decisiones mediante prueba y error, recibiendo recompensas o penalizaciones por sus acciones. El agente optimiza su comportamiento para maximizar la recompensa acumulada.
+An ML paradigm where an agent learns to make decisions through trial and error, receiving rewards or penalties for its actions. The agent optimizes its behavior to maximize cumulative reward.
 
 ```
-Agente observa estado → Toma acción → Recibe recompensa → Actualiza política
+Agent observes state → Takes action → Receives reward → Updates policy
          ↑                                                        │
          └────────────────────────────────────────────────────────┘
 ```
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-- **Robótica:** Control de brazos robóticos, navegación
-- **Juegos:** Estrategia, NPCs inteligentes
-- **Optimización de procesos:** Scheduling, asignación de recursos
-- **Pricing dinámico:** Ajustar precios en tiempo real
-- **Sistemas de recomendación:** Secuencias de recomendaciones
-- **Control industrial:** HVAC, cadenas de suministro
+- **Robotics:** Robotic arm control, navigation
+- **Games:** Strategy, intelligent NPCs
+- **Process optimization:** Scheduling, resource allocation
+- **Dynamic pricing:** Adjusting prices in real time
+- **Recommendation systems:** Recommendation sequences
+- **Industrial control:** HVAC, supply chains
 
-### Stack Tecnológico
+### Technology Stack
 
-| Herramienta | Tipo | Mejor Para |
+| Tool | Type | Best For |
 |-------------|------|-----------|
-| **Stable-Baselines3** | Algoritmos RL | Implementación rápida de PPO, SAC, DQN |
-| **Gymnasium** (antes Gym) | Entornos | Entornos estándar para experimentar |
-| **RLlib** (Ray) | Distribuido | RL a escala, multi-agente |
-| **CleanRL** | Educativo | Implementaciones simples y legibles |
-| **PettingZoo** | Multi-agente | Entornos multi-agente |
+| **Stable-Baselines3** | RL algorithms | Quick implementation of PPO, SAC, DQN |
+| **Gymnasium** (formerly Gym) | Environments | Standard environments for experimentation |
+| **RLlib** (Ray) | Distributed | RL at scale, multi-agent |
+| **CleanRL** | Educational | Simple and readable implementations |
+| **PettingZoo** | Multi-agent | Multi-agent environments |
 
-### Ejemplo Rápido
+### Quick Example
 
 ```python
 import gymnasium as gym
 from stable_baselines3 import PPO
 
-# Crear entorno
+# Create environment
 env = gym.make("CartPole-v1")
 
-# Entrenar agente
+# Train agent
 model = PPO("MlpPolicy", env, verbose=1)
 model.learn(total_timesteps=50_000)
 
-# Evaluar
+# Evaluate
 obs, _ = env.reset()
 for _ in range(1000):
     action, _ = model.predict(obs, deterministic=True)
@@ -175,45 +175,45 @@ for _ in range(1000):
         obs, _ = env.reset()
 ```
 
-### Dificultad: Alta
+### Difficulty: High
 
-RL es conceptualmente diferente al ML supervisado. Entrenar agentes es inestable, los hiperparámetros son sensibles, y la reward engineering (disenar la función de recompensa) es un arte. Debugging es difícil porque los errores se manifiestan como "el agente no aprende" sin mensaje de error claro.
+RL is conceptually different from supervised ML. Training agents is unstable, hyperparameters are sensitive, and reward engineering (designing the reward function) is an art. Debugging is hard because errors manifest as "the agent doesn't learn" without a clear error message.
 
-> **Nota importante:** Muy pocos proyectos de consultoría necesitan RL. La mayoría de problemas se resuelven mejor con optimización clásica o ML supervisado. RL brilla cuando el espacio de decisiones es enorme y las acciones tienen consecuencias a largo plazo.
+> **Important note:** Very few consulting projects need RL. Most problems are better solved with classical optimization or supervised ML. RL shines when the decision space is huge and actions have long-term consequences.
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Libro:** "Reinforcement Learning: An Introduction" (Sutton & Barto) - gratis online
-- **Curso:** David Silver's RL Course (UCL/DeepMind) en YouTube
-- **Curso:** Hugging Face Deep RL Course
-- **Práctica:** Gymnasium environments, luego entornos custom
+- **Book:** "Reinforcement Learning: An Introduction" (Sutton & Barto) - free online
+- **Course:** David Silver's RL Course (UCL/DeepMind) on YouTube
+- **Course:** Hugging Face Deep RL Course
+- **Practice:** Gymnasium environments, then custom environments
 
 ---
 
-## 3. Generative AI (más allá de LLMs)
+## 3. Generative AI (beyond LLMs)
 
 ### GANs (Generative Adversarial Networks)
 
-Dos redes compiten: un generador crea datos falsos, un discriminador intenta distinguirlos de los reales. Con el tiempo, el generador produce datos indistinguibles de los reales.
+Two networks compete: a generator creates fake data, a discriminator tries to distinguish it from real data. Over time, the generator produces data indistinguishable from real data.
 
 ```
-Ruido aleatorio → [Generador] → Imagen falsa ──┐
-                                                ├─→ [Discriminador] → Real/Falso
-                              Imagen real ──────┘
+Random noise → [Generator] → Fake image ──┐
+                                          ├─→ [Discriminator] → Real/Fake
+                            Real image ───┘
 ```
 
-**Casos de uso:**
-- Data augmentation (generar datos sintéticos para entrenar otros modelos)
-- Generación de imágenes (caras, productos, arte)
-- Super-resolución de imágenes
-- Inpainting (rellenar partes faltantes de imágenes)
+**Use cases:**
+- Data augmentation (generating synthetic data to train other models)
+- Image generation (faces, products, art)
+- Image super-resolution
+- Inpainting (filling in missing parts of images)
 
 ### Diffusion Models
 
-Los modelos que están detrás de Stable Diffusion, DALL-E, Midjourney. Aprenden a generar imágenes eliminando ruido gradualmente.
+The models behind Stable Diffusion, DALL-E, Midjourney. They learn to generate images by gradually removing noise.
 
 ```python
-# Stable Diffusion con diffusers (Hugging Face)
+# Stable Diffusion with diffusers (Hugging Face)
 from diffusers import StableDiffusionPipeline
 import torch
 
@@ -232,35 +232,35 @@ image = pipe(
 image.save("generated_office.png")
 ```
 
-**Casos de uso:**
-- Generación de contenido visual (marketing, e-commerce)
-- Prototipado rápido de diseños
-- Personalización de imágenes a escala
+**Use cases:**
+- Visual content generation (marketing, e-commerce)
+- Rapid design prototyping
+- Image personalization at scale
 
 ### Variational Autoencoders (VAEs)
 
-Modelo generativo que aprende una representación latente comprimida de los datos. Permite generar nuevas muestras y hacer interpolación entre ejemplos.
+A generative model that learns a compressed latent representation of the data. It allows generating new samples and interpolating between examples.
 
-**Casos de uso:**
-- Detección de anomalías (reconstrucción mala = anomalía)
-- Generación de datos tabulares sintéticos
-- Compresión de datos
+**Use cases:**
+- Anomaly detection (poor reconstruction = anomaly)
+- Synthetic tabular data generation
+- Data compression
 
-### Cuándo necesitarás Gen AI (no-LLM)
+### When You'll Need Gen AI (non-LLM)
 
-| Caso | Herramienta | Dificultad |
+| Case | Tool | Difficulty |
 |------|-------------|-----------|
-| Generar imágenes desde texto | Stable Diffusion, DALL-E API | Baja (API) / Alta (fine-tune) |
-| Data augmentation (imágenes) | GANs, Diffusion | Media |
-| Datos tabulares sintéticos | CTGAN, SDV | Media |
-| Detección de anomalías | VAE | Media |
-| Super-resolución | ESRGAN, Real-ESRGAN | Baja (pre-entrenado) |
+| Generate images from text | Stable Diffusion, DALL-E API | Low (API) / High (fine-tune) |
+| Data augmentation (images) | GANs, Diffusion | Medium |
+| Synthetic tabular data | CTGAN, SDV | Medium |
+| Anomaly detection | VAE | Medium |
+| Super-resolution | ESRGAN, Real-ESRGAN | Low (pre-trained) |
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Curso:** Hugging Face Diffusion Models Course
-- **Libro:** "Generative Deep Learning" (David Foster) - O'Reilly
-- **Práctica:** Fine-tune Stable Diffusion con DreamBooth, generar datos con CTGAN
+- **Course:** Hugging Face Diffusion Models Course
+- **Book:** "Generative Deep Learning" (David Foster) - O'Reilly
+- **Practice:** Fine-tune Stable Diffusion with DreamBooth, generate data with CTGAN
 
 ---
 
@@ -268,49 +268,49 @@ Modelo generativo que aprende una representación latente comprimida de los dato
 
 ### Speech-to-Text (STT)
 
-**Whisper (OpenAI)** ha democratizado el STT. Es open-source, multilingual (99 idiomas), y funciona sorprendentemente bien incluso en audio con ruido.
+**Whisper (OpenAI)** has democratized STT. It is open-source, multilingual (99 languages), and works surprisingly well even with noisy audio.
 
 ```python
 import whisper
 
-# Cargar modelo (tiny, base, small, medium, large)
+# Load model (tiny, base, small, medium, large)
 model = whisper.load_model("medium")
 
-# Transcribir
+# Transcribe
 result = model.transcribe(
     "audio.mp3",
-    language="es",     # Idioma (opcional, auto-detecta)
-    task="transcribe",  # o "translate" para traducir a inglés
+    language="es",     # Language (optional, auto-detects)
+    task="transcribe",  # or "translate" to translate to English
 )
 
 print(result["text"])
 
-# Con timestamps por segmento
+# With timestamps per segment
 for segment in result["segments"]:
     print(f"[{segment['start']:.1f}s - {segment['end']:.1f}s] {segment['text']}")
 ```
 
-Alternativas hosted: Google Speech-to-Text, AWS Transcribe, Azure Speech.
+Hosted alternatives: Google Speech-to-Text, AWS Transcribe, Azure Speech.
 
 ### Text-to-Speech (TTS)
 
-| Herramienta | Calidad | Latencia | Open Source | Multilingue |
+| Tool | Quality | Latency | Open Source | Multilingual |
 |-------------|---------|----------|-------------|-------------|
-| **Bark** (Suno) | Alta | Lenta | Si | Si |
-| **XTTS** (Coqui) | Muy alta | Media | Si | Si |
-| **ElevenLabs** | Excelente | Baja | No (API) | Si |
-| **Google TTS** | Buena | Baja | No (API) | Si |
-| **Edge TTS** | Buena | Baja | Gratis (API) | Si |
+| **Bark** (Suno) | High | Slow | Yes | Yes |
+| **XTTS** (Coqui) | Very high | Medium | Yes | Yes |
+| **ElevenLabs** | Excellent | Low | No (API) | Yes |
+| **Google TTS** | Good | Low | No (API) | Yes |
+| **Edge TTS** | Good | Low | Free (API) | Yes |
 
 ```python
-# XTTS - Clonación de voz con 6 segundos de referencia
+# XTTS - Voice cloning with 6 seconds of reference
 from TTS.api import TTS
 
 tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2")
 
 tts.tts_to_file(
     text="Hola, esto es una prueba de síntesis de voz.",
-    speaker_wav="referencia_voz.wav",  # 6s de audio de referencia
+    speaker_wav="referencia_voz.wav",  # 6s of reference audio
     language="es",
     file_path="output.wav",
 )
@@ -318,7 +318,7 @@ tts.tts_to_file(
 
 ### Audio Classification
 
-Clasificar audio en categorías: música vs habla, emociones, tipos de sonido, detección de eventos.
+Classify audio into categories: music vs speech, emotions, sound types, event detection.
 
 ```python
 from transformers import pipeline
@@ -332,43 +332,43 @@ result = classifier("audio.wav")
 # [{"label": "Speech", "score": 0.95}, {"label": "Music", "score": 0.03}, ...]
 ```
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-- **Call centers:** Transcripción de llamadas, análisis de sentimiento en audio
-- **Accesibilidad:** STT para personas con discapacidad auditiva, TTS para visual
-- **Contenido:** Podcasts a texto, subtitulado automático
-- **Salud:** Análisis de voz para diagnóstico (investigación)
-- **Legal:** Transcripción de audiencias, deposiciones
+- **Call centers:** Call transcription, audio sentiment analysis
+- **Accessibility:** STT for hearing-impaired users, TTS for visually impaired users
+- **Content:** Podcasts to text, automatic subtitling
+- **Healthcare:** Voice analysis for diagnosis (research)
+- **Legal:** Hearing and deposition transcription
 
-### Dificultad: Baja-Media
+### Difficulty: Low-Medium
 
-Whisper para STT es extremadamente fácil de usar. TTS requiere más trabajo si necesitas calidad alta y clonación de voz. Audio classification con modelos pre-entrenados es accesible.
+Whisper for STT is extremely easy to use. TTS requires more work if you need high quality and voice cloning. Audio classification with pre-trained models is accessible.
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Documentación:** Whisper GitHub, Coqui TTS docs
-- **Curso:** Hugging Face Audio Course
-- **Práctica:** Transcribir reuniones con Whisper, construir un pipeline de análisis de llamadas
+- **Documentation:** Whisper GitHub, Coqui TTS docs
+- **Course:** Hugging Face Audio Course
+- **Practice:** Transcribe meetings with Whisper, build a call analysis pipeline
 
 ---
 
 ## 5. Multimodal AI
 
-### Qué es
+### What It Is
 
-Modelos que procesan y combinan múltiples tipos de datos (modalidades): texto + imagen, texto + audio, imagen + datos tabulares, etc.
+Models that process and combine multiple data types (modalities): text + image, text + audio, image + tabular data, etc.
 
-### Modelos Clave
+### Key Models
 
-| Modelo | Modalidades | Qué Hace | Acceso |
+| Model | Modalities | What It Does | Access |
 |--------|------------|----------|--------|
-| **CLIP** (OpenAI) | Texto + Imagen | Embeddings compartidos, búsqueda por similitud | Open source |
-| **LLaVA** | Texto + Imagen | Comprensión visual, responder preguntas sobre imágenes | Open source |
-| **GPT-4o** | Texto + Imagen + Audio | Comprensión multimodal completa | API |
-| **Gemini** | Texto + Imagen + Audio + Video | Comprensión multimodal | API |
-| **ImageBind** (Meta) | 6 modalidades | Embeddings unificados | Open source |
+| **CLIP** (OpenAI) | Text + Image | Shared embeddings, similarity search | Open source |
+| **LLaVA** | Text + Image | Visual understanding, answering questions about images | Open source |
+| **GPT-4o** | Text + Image + Audio | Full multimodal understanding | API |
+| **Gemini** | Text + Image + Audio + Video | Multimodal understanding | API |
+| **ImageBind** (Meta) | 6 modalities | Unified embeddings | Open source |
 
-### Ejemplo: CLIP para Búsqueda de Imágenes por Texto
+### Example: CLIP for Text-Based Image Search
 
 ```python
 from transformers import CLIPProcessor, CLIPModel
@@ -378,7 +378,7 @@ import torch
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-# Buscar imágenes con texto
+# Search images with text
 images = [Image.open(f"img_{i}.jpg") for i in range(100)]
 text_query = "un gato durmiendo en un sofá"
 
@@ -392,75 +392,75 @@ inputs = processor(
 outputs = model(**inputs)
 similarities = outputs.logits_per_text.softmax(dim=-1)
 
-# Top 5 imágenes más relevantes
+# Top 5 most relevant images
 top5 = similarities[0].topk(5)
 for score, idx in zip(top5.values, top5.indices):
-    print(f"Imagen {idx}: {score:.3f}")
+    print(f"Image {idx}: {score:.3f}")
 ```
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-- **E-commerce:** Búsqueda visual (subir foto, encontrar productos similares)
-- **E-commerce:** Clasificación producto = imagen + título + descripción + precio
-- **Medical AI:** Combinar imagen médica + historial clínico + datos lab
-- **Real estate:** Valoración = fotos + descripción + datos numéricos
-- **Content moderation:** Imagen + texto del post para detectar contenido inapropiado
+- **E-commerce:** Visual search (upload photo, find similar products)
+- **E-commerce:** Product classification = image + title + description + price
+- **Medical AI:** Combining medical images + clinical history + lab data
+- **Real estate:** Valuation = photos + description + numerical data
+- **Content moderation:** Image + post text to detect inappropriate content
 
-### Dificultad: Media-Alta
+### Difficulty: Medium-High
 
-Usar modelos pre-entrenados (CLIP, GPT-4o) es fácil via API. Fine-tuning multimodal y entrenar modelos propios es significativamente más complejo por la alineación entre modalidades.
+Using pre-trained models (CLIP, GPT-4o) is easy via API. Multimodal fine-tuning and training custom models is significantly more complex due to cross-modal alignment.
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Documentación:** Hugging Face Transformers (sección multimodal)
+- **Documentation:** Hugging Face Transformers (multimodal section)
 - **Papers:** CLIP, LLaVA, Flamingo
-- **Práctica:** Construir un buscador de imágenes con CLIP, usar GPT-4o Vision para clasificación
+- **Practice:** Build an image search engine with CLIP, use GPT-4o Vision for classification
 
 ---
 
 ## 6. Graph Neural Networks
 
-### Qué es
+### What It Is
 
-ML sobre datos que tienen estructura de grafo: nodos conectados por aristas. Los GNNs aprenden representaciones considerando la estructura de conexiones, no solo las features de cada nodo.
+ML on data with graph structure: nodes connected by edges. GNNs learn representations by considering the connection structure, not just each node's features.
 
 ```
-Datos tabulares:  Cada fila es independiente
-Datos de grafo:   Cada nodo depende de sus vecinos
+Tabular data:  Each row is independent
+Graph data:    Each node depends on its neighbors
 
-Ejemplo - Red social:
-  Usuario A ─── amigo de ─── Usuario B
+Example - Social network:
+  User A ─── friends with ─── User B
       │                          │
-  amigo de                   amigo de
+  friends with               friends with
       │                          │
-  Usuario C ─── amigo de ─── Usuario D
+  User C ─── friends with ─── User D
 
-  Pregunta: ¿A y D se harán amigos? (link prediction)
-  Pregunta: ¿C es un bot? (node classification)
+  Question: Will A and D become friends? (link prediction)
+  Question: Is C a bot? (node classification)
 ```
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-| Industria | Caso de Uso | Tipo de Grafo |
+| Industry | Use Case | Graph Type |
 |-----------|-------------|---------------|
-| **Redes sociales** | Recomendación de amigos, detección de bots | Red de usuarios |
-| **Finanzas** | Detección de fraude, red de transacciones | Red de cuentas/transacciones |
-| **Farmacéutica** | Descubrimiento de fármacos, interacción molecular | Grafos moleculares |
-| **Retail** | Sistemas de recomendación (user-item graph) | Grafo bipartito |
-| **Infraestructura** | Optimización de redes, detección de fallos | Grafos de red |
-| **Knowledge graphs** | Búsqueda semántica, razonamiento | Grafos de conocimiento |
+| **Social networks** | Friend recommendation, bot detection | User network |
+| **Finance** | Fraud detection, transaction network | Account/transaction network |
+| **Pharmaceuticals** | Drug discovery, molecular interaction | Molecular graphs |
+| **Retail** | Recommendation systems (user-item graph) | Bipartite graph |
+| **Infrastructure** | Network optimization, fault detection | Network graphs |
+| **Knowledge graphs** | Semantic search, reasoning | Knowledge graphs |
 
-### Stack Tecnológico
+### Technology Stack
 
-| Herramienta | Para Qué | Facilidad |
+| Tool | Purpose | Ease of Use |
 |-------------|----------|-----------|
-| **PyTorch Geometric (PyG)** | Framework principal de GNN | Media |
-| **DGL (Deep Graph Library)** | Alternativa a PyG, más flexible | Media |
-| **NetworkX** | Análisis de grafos (no ML) | Baja |
-| **Neo4j** + **GDS** | Base de datos de grafos + ML nativo | Media |
-| **Stellargraph** | GNN simplificado (Keras-like) | Baja |
+| **PyTorch Geometric (PyG)** | Main GNN framework | Medium |
+| **DGL (Deep Graph Library)** | Alternative to PyG, more flexible | Medium |
+| **NetworkX** | Graph analysis (not ML) | Low |
+| **Neo4j** + **GDS** | Graph database + native ML | Medium |
+| **Stellargraph** | Simplified GNN (Keras-like) | Low |
 
-### Ejemplo: Node Classification con PyG
+### Example: Node Classification with PyG
 
 ```python
 import torch
@@ -499,287 +499,287 @@ for epoch in range(200):
     optimizer.step()
 ```
 
-### Dificultad: Media-Alta
+### Difficulty: Medium-High
 
-Conceptualmente diferente al ML tradicional. Requiere entender teoría de grafos y message passing. Los datasets y evaluaciones tienen sus propias peculiaridades (transductive vs inductive, train/val/test splits en grafos). El tooling (PyG, DGL) es maduro pero con curva de aprendizaje.
+Conceptually different from traditional ML. Requires understanding graph theory and message passing. Datasets and evaluations have their own quirks (transductive vs inductive, train/val/test splits on graphs). The tooling (PyG, DGL) is mature but has a learning curve.
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Curso:** Stanford CS224W (Machine Learning with Graphs) en YouTube
-- **Libro:** "Graph Representation Learning" (Hamilton) - gratis online
+- **Course:** Stanford CS224W (Machine Learning with Graphs) on YouTube
+- **Book:** "Graph Representation Learning" (Hamilton) - free online
 - **Tutorial:** PyTorch Geometric tutorials
-- **Práctica:** Clasificación en Cora/Citeseer, luego detección de fraude
+- **Practice:** Classification on Cora/Citeseer, then fraud detection
 
 ---
 
 ## 7. Federated Learning
 
-### Qué es
+### What It Is
 
-Técnica para entrenar modelos ML de forma colaborativa sin compartir los datos entre participantes. Cada participante entrena un modelo local con sus datos, y solo comparte los gradientes o pesos del modelo (no los datos en sí).
+A technique for collaboratively training ML models without sharing data between participants. Each participant trains a local model with their data, and only shares gradients or model weights (not the data itself).
 
 ```
-Participante A (datos sensibles) → Entrena modelo local → Envía pesos ──┐
-Participante B (datos sensibles) → Entrena modelo local → Envía pesos ──┤
-Participante C (datos sensibles) → Entrena modelo local → Envía pesos ──┤
-                                                                         │
-                     ┌───────────────────────────────────────────────────┘
+Participant A (sensitive data) → Trains local model → Sends weights ──┐
+Participant B (sensitive data) → Trains local model → Sends weights ──┤
+Participant C (sensitive data) → Trains local model → Sends weights ──┤
+                                                                       │
+                     ┌─────────────────────────────────────────────────┘
                      ▼
-            [Servidor central]
-            Agrega pesos (FedAvg)
-            Envía modelo global
+            [Central server]
+            Aggregates weights (FedAvg)
+            Sends global model
                      │
-                     ├──→ Participante A (actualiza modelo local)
-                     ├──→ Participante B (actualiza modelo local)
-                     └──→ Participante C (actualiza modelo local)
+                     ├──→ Participant A (updates local model)
+                     ├──→ Participant B (updates local model)
+                     └──→ Participant C (updates local model)
 ```
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-- **Healthcare:** Hospitales que no pueden compartir datos de pacientes (HIPAA, GDPR)
-- **Finanzas:** Bancos colaborando en detección de fraude sin compartir transacciones
-- **Telecomunicaciones:** Modelos en dispositivos de usuarios (on-device)
-- **Manufactura:** Fábricas con datos propietarios colaborando en calidad
+- **Healthcare:** Hospitals that cannot share patient data (HIPAA, GDPR)
+- **Finance:** Banks collaborating on fraud detection without sharing transactions
+- **Telecommunications:** Models on user devices (on-device)
+- **Manufacturing:** Factories with proprietary data collaborating on quality
 
-### Stack Tecnológico
+### Technology Stack
 
-| Herramienta | Tipo | Mejor Para |
+| Tool | Type | Best For |
 |-------------|------|-----------|
-| **Flower** | Framework | General purpose, flexible, producción |
-| **PySyft** (OpenMined) | Framework + privacidad | Privacidad diferencial, computación segura |
-| **TensorFlow Federated** | Framework | Integración con TensorFlow |
+| **Flower** | Framework | General purpose, flexible, production |
+| **PySyft** (OpenMined) | Framework + privacy | Differential privacy, secure computation |
+| **TensorFlow Federated** | Framework | TensorFlow integration |
 | **NVIDIA FLARE** | Enterprise | Healthcare, enterprise |
 
-### Dificultad: Alta
+### Difficulty: High
 
-No solo es la implementación técnica (que frameworks como Flower simplifican bastante), sino los retos inherentes:
-- Datos no-IID (cada participante tiene distribución diferente)
-- Comunicación eficiente (comprimir actualizaciones)
-- Ataques y robustez (participantes maliciosos)
-- Coordinación organizacional entre participantes
+It is not just the technical implementation (which frameworks like Flower simplify considerably), but the inherent challenges:
+- Non-IID data (each participant has a different distribution)
+- Efficient communication (compressing updates)
+- Attacks and robustness (malicious participants)
+- Organizational coordination between participants
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Curso:** Flower Federated Learning tutorials
+- **Course:** Flower Federated Learning tutorials
 - **Paper:** "Communication-Efficient Learning of Deep Networks" (McMahan et al.)
-- **Práctica:** Tutorial de Flower con CIFAR-10 distribuido
+- **Practice:** Flower tutorial with distributed CIFAR-10
 
 ---
 
 ## 8. Edge AI / TinyML
 
-### Qué es
+### What It Is
 
-Desplegar modelos ML en dispositivos edge: móviles, IoT, microcontroladores, cámaras, sensores. El modelo se ejecuta directamente en el dispositivo, sin necesidad de enviar datos a la nube.
+Deploying ML models on edge devices: mobile phones, IoT, microcontrollers, cameras, sensors. The model runs directly on the device, without needing to send data to the cloud.
 
 ```
-Cloud AI:     Dispositivo → [Internet] → Servidor (inference) → [Internet] → Resultado
-Edge AI:      Dispositivo → [Modelo local] → Resultado (inmediato, sin internet)
+Cloud AI:     Device → [Internet] → Server (inference) → [Internet] → Result
+Edge AI:      Device → [Local model] → Result (immediate, no internet)
 ```
 
-### Ventajas de Edge AI
+### Edge AI Advantages
 
-| Ventaja | Por qué |
+| Advantage | Why |
 |---------|---------|
-| **Latencia** | Sin viaje a la nube, respuesta inmediata |
-| **Privacidad** | Los datos nunca salen del dispositivo |
-| **Coste** | Sin coste de cloud inference |
-| **Offline** | Funciona sin internet |
-| **Ancho de banda** | No necesita enviar datos pesados (video, audio) |
+| **Latency** | No round trip to the cloud, immediate response |
+| **Privacy** | Data never leaves the device |
+| **Cost** | No cloud inference cost |
+| **Offline** | Works without internet |
+| **Bandwidth** | No need to send heavy data (video, audio) |
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-- **Manufactura:** Inspección visual en línea de producción (cámaras con modelo local)
-- **Retail:** Cámaras inteligentes (conteo de personas, analytics)
-- **Automotive:** ADAS, detección de objetos en tiempo real
-- **Agriculture:** Drones con detección de plagas on-device
-- **Wearables:** Detección de caídas, monitorización de salud
+- **Manufacturing:** Visual inspection on production lines (cameras with local model)
+- **Retail:** Smart cameras (people counting, analytics)
+- **Automotive:** ADAS, real-time object detection
+- **Agriculture:** Drones with on-device pest detection
+- **Wearables:** Fall detection, health monitoring
 
-### Stack Tecnológico
+### Technology Stack
 
-| Herramienta | Target | Tamaño Modelo | Velocidad |
+| Tool | Target | Model Size | Speed |
 |-------------|--------|--------------|-----------|
-| **TensorFlow Lite** | Mobile, IoT | Muy pequeño | Rápida |
-| **ONNX Runtime Mobile** | Mobile, Edge | Pequeño | Rápida |
-| **OpenVINO** (Intel) | Intel hardware | Medio | Muy rápida |
-| **TensorRT** (NVIDIA) | NVIDIA GPUs/Jetson | Medio | Muy rápida |
-| **Core ML** (Apple) | iOS/macOS | Variable | Rápida |
-| **MediaPipe** (Google) | Mobile, web | Muy pequeño | Rápida |
-| **Apache TVM** | Cualquier hardware | Variable | Optimizada |
+| **TensorFlow Lite** | Mobile, IoT | Very small | Fast |
+| **ONNX Runtime Mobile** | Mobile, Edge | Small | Fast |
+| **OpenVINO** (Intel) | Intel hardware | Medium | Very fast |
+| **TensorRT** (NVIDIA) | NVIDIA GPUs/Jetson | Medium | Very fast |
+| **Core ML** (Apple) | iOS/macOS | Variable | Fast |
+| **MediaPipe** (Google) | Mobile, web | Very small | Fast |
+| **Apache TVM** | Any hardware | Variable | Optimized |
 
-### Ejemplo: Convertir a TensorFlow Lite
+### Example: Convert to TensorFlow Lite
 
 ```python
 import tensorflow as tf
 
-# Modelo entrenado
+# Trained model
 model = tf.keras.models.load_model("my_model.h5")
 
-# Convertir a TFLite
+# Convert to TFLite
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 
-# Optimizaciones
+# Optimizations
 converter.optimizations = [tf.lite.Optimize.DEFAULT]  # Quantization
 converter.target_spec.supported_types = [tf.float16]   # FP16
 
 tflite_model = converter.convert()
 
-# Guardar (mucho más pequeño que el original)
+# Save (much smaller than the original)
 with open("model.tflite", "wb") as f:
     f.write(tflite_model)
 
-print(f"Tamaño: {len(tflite_model) / 1024:.1f} KB")
+print(f"Size: {len(tflite_model) / 1024:.1f} KB")
 ```
 
-### Dificultad: Media-Alta
+### Difficulty: Medium-High
 
-El modelo en sí puede ser fácil de convertir. Los retos son:
-- Optimizar para el hardware específico (cada dispositivo es diferente)
-- Mantener accuracy aceptable con quantization agresiva
-- Integrar con firmware/apps del dispositivo
-- Actualizar modelos en dispositivos desplegados (OTA updates)
-- Testing en hardware real (emuladores no siempre son fieles)
+The model itself can be easy to convert. The challenges are:
+- Optimizing for specific hardware (every device is different)
+- Maintaining acceptable accuracy with aggressive quantization
+- Integrating with device firmware/apps
+- Updating models on deployed devices (OTA updates)
+- Testing on real hardware (emulators are not always faithful)
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Libro:** "TinyML" (Pete Warden & Daniel Situnayake) - O'Reilly
-- **Curso:** Harvard CS249r - TinyML and Efficient Deep Learning
-- **Documentación:** TensorFlow Lite, ONNX Runtime, OpenVINO
-- **Hardware para aprender:** Raspberry Pi, NVIDIA Jetson Nano, Arduino Nano 33 BLE
+- **Book:** "TinyML" (Pete Warden & Daniel Situnayake) - O'Reilly
+- **Course:** Harvard CS249r - TinyML and Efficient Deep Learning
+- **Documentation:** TensorFlow Lite, ONNX Runtime, OpenVINO
+- **Hardware for learning:** Raspberry Pi, NVIDIA Jetson Nano, Arduino Nano 33 BLE
 
 ---
 
 ## 9. AutoML
 
-### Qué es
+### What It Is
 
-Automatización del pipeline de ML: selección de features, selección de modelo, tuning de hiperparámetros, y en algunos casos, feature engineering automático. El objetivo es obtener un buen modelo con mínimo esfuerzo humano.
+Automation of the ML pipeline: feature selection, model selection, hyperparameter tuning, and in some cases, automatic feature engineering. The goal is to get a good model with minimal human effort.
 
 ```
 AutoML:
-  Datos → [Probar 50+ combinaciones de modelos y parámetros] → Mejor modelo
+  Data → [Try 50+ combinations of models and parameters] → Best model
 
-  Lo que automatiza:
-  - Preprocesamiento de datos
-  - Selección de features
-  - Selección de algoritmo
-  - Tuning de hiperparámetros
-  - Ensamblado de modelos
+  What it automates:
+  - Data preprocessing
+  - Feature selection
+  - Algorithm selection
+  - Hyperparameter tuning
+  - Model ensembling
 ```
 
-### Cuándo lo necesitarás
+### When You'll Need It
 
-- **Prototipado rápido:** Obtener un baseline fuerte en horas, no semanas
-- **Clientes sin equipo ML:** Entregar modelos sin necesitar data scientists senior
-- **Benchmarking:** Comparar tu modelo manual contra AutoML como baseline
-- **Tabular data:** AutoML brilla especialmente en datos tabulares
+- **Rapid prototyping:** Get a strong baseline in hours, not weeks
+- **Clients without ML team:** Deliver models without needing senior data scientists
+- **Benchmarking:** Compare your manual model against AutoML as a baseline
+- **Tabular data:** AutoML especially shines with tabular data
 
-### Herramientas
+### Tools
 
-| Herramienta | Open Source | Tipo | Mejor Para | Facilidad |
+| Tool | Open Source | Type | Best For | Ease of Use |
 |-------------|-----------|------|-----------|-----------|
-| **AutoGluon** (Amazon) | Si | Framework | Tabular, texto, imagen, multimodal | Muy fácil |
-| **H2O AutoML** | Si | Framework | Datos tabulares, enterprise | Fácil |
-| **FLAML** (Microsoft) | Si | Framework | Rápido, bajo recurso | Fácil |
-| **Auto-sklearn** | Si | Wrapper sklearn | Datos tabulares | Fácil |
-| **TPOT** | Si | Genetic programming | Pipelines sklearn | Fácil |
-| **Google Cloud AutoML** | No | Managed | Vision, NLP, tabular | Muy fácil |
-| **Azure AutoML** | No | Managed | Integrado con Azure ML | Fácil |
+| **AutoGluon** (Amazon) | Yes | Framework | Tabular, text, image, multimodal | Very easy |
+| **H2O AutoML** | Yes | Framework | Tabular data, enterprise | Easy |
+| **FLAML** (Microsoft) | Yes | Framework | Fast, low resource | Easy |
+| **Auto-sklearn** | Yes | Wrapper sklearn | Tabular data | Easy |
+| **TPOT** | Yes | Genetic programming | sklearn pipelines | Easy |
+| **Google Cloud AutoML** | No | Managed | Vision, NLP, tabular | Very easy |
+| **Azure AutoML** | No | Managed | Integrated with Azure ML | Easy |
 
-### Ejemplo: AutoGluon
+### Example: AutoGluon
 
 ```python
 from autogluon.tabular import TabularPredictor
 import pandas as pd
 
-# Cargar datos
+# Load data
 train_data = pd.read_csv("train.csv")
 test_data = pd.read_csv("test.csv")
 
-# Entrenar (AutoGluon decide todo: modelos, features, tuning)
+# Train (AutoGluon decides everything: models, features, tuning)
 predictor = TabularPredictor(
-    label="target",           # Columna a predecir
+    label="target",           # Column to predict
     eval_metric="f1_weighted",
     path="autogluon_models",
 ).fit(
     train_data,
-    time_limit=3600,          # 1 hora máximo
-    presets="best_quality",   # o "medium_quality" para más rápido
+    time_limit=3600,          # 1 hour maximum
+    presets="best_quality",   # or "medium_quality" for faster
 )
 
-# Evaluar
+# Evaluate
 results = predictor.evaluate(test_data)
 print(results)
 
-# Leaderboard de modelos
+# Model leaderboard
 leaderboard = predictor.leaderboard(test_data)
 print(leaderboard)
 
-# Predecir
+# Predict
 predictions = predictor.predict(test_data)
 ```
 
-### Dificultad: Baja
+### Difficulty: Low
 
-AutoML es fácil de usar por diseño. El reto está en saber cuándo confiar en sus resultados y cuándo necesitas control manual. También en evitar overfitting (AutoML puede sobreajustar si no tienes un test set bien separado).
+AutoML is easy to use by design. The challenge lies in knowing when to trust its results and when you need manual control. Also in avoiding overfitting (AutoML can overfit if you don't have a properly separated test set).
 
-> **Consejo para consultoría:** Usa AutoML como primer baseline. Si el cliente necesita más, mejora manualmente. Muchas veces el modelo de AutoML ya es suficientemente bueno, especialmente para datos tabulares.
+> **Consulting tip:** Use AutoML as your first baseline. If the client needs more, improve manually. Many times the AutoML model is already good enough, especially for tabular data.
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Documentación:** AutoGluon docs (excelentes), H2O docs
-- **Práctica:** Kaggle competitions con AutoGluon como baseline
-- **Artículos:** Papers de AutoGluon, Auto-sklearn
+- **Documentation:** AutoGluon docs (excellent), H2O docs
+- **Practice:** Kaggle competitions with AutoGluon as baseline
+- **Articles:** AutoGluon, Auto-sklearn papers
 
 ---
 
 ## 10. Responsible AI / Fairness
 
-### Qué es
+### What It Is
 
-Conjunto de prácticas para asegurar que los modelos ML son justos, transparentes, explicables y no discriminan. Incluye detección de sesgos, fairness metrics, explainability, y cumplimiento regulatorio.
+A set of practices to ensure that ML models are fair, transparent, explainable, and non-discriminatory. Includes bias detection, fairness metrics, explainability, and regulatory compliance.
 
-### Cuándo lo necesitarás (cada vez más obligatorio)
+### When You'll Need It (increasingly mandatory)
 
-| Regulación | Dónde | Impacto |
+| Regulation | Where | Impact |
 |------------|-------|---------|
-| **EU AI Act** | Europa | Clasificación de riesgo, auditorías obligatorias para "high risk" |
-| **NYC Local Law 144** | Nueva York | Auditoría de bias en herramientas de hiring |
-| **GDPR Art. 22** | Europa | Derecho a explicación en decisiones automatizadas |
-| **ECOA / Fair Lending** | EEUU | No discriminación en crédito |
-| **Sector-specific** | Global | Healthcare, seguros, justicia penal |
+| **EU AI Act** | Europe | Risk classification, mandatory audits for "high risk" |
+| **NYC Local Law 144** | New York | Bias audit in hiring tools |
+| **GDPR Art. 22** | Europe | Right to explanation in automated decisions |
+| **ECOA / Fair Lending** | USA | Non-discrimination in credit |
+| **Sector-specific** | Global | Healthcare, insurance, criminal justice |
 
-**Sectores donde es crítico:**
-- **Hiring / RRHH:** Screening de CVs, scoring de candidatos
-- **Finanzas:** Scoring crediticio, aprobación de préstamos
-- **Healthcare:** Diagnóstico, triaje, asignación de recursos
-- **Justicia:** Risk assessment, predicción de reincidencia
-- **Seguros:** Pricing, evaluación de riesgo
+**Sectors where it's critical:**
+- **Hiring / HR:** CV screening, candidate scoring
+- **Finance:** Credit scoring, loan approval
+- **Healthcare:** Diagnosis, triage, resource allocation
+- **Justice:** Risk assessment, recidivism prediction
+- **Insurance:** Pricing, risk evaluation
 
-### Stack Tecnológico
+### Technology Stack
 
-| Herramienta | Qué Hace | Autor |
+| Tool | What It Does | Author |
 |-------------|----------|-------|
-| **Fairlearn** | Métricas de fairness, algoritmos de mitigación | Microsoft |
-| **AI Fairness 360 (AIF360)** | 70+ métricas de fairness, mitigación | IBM |
-| **SHAP** | Explainability (por qué el modelo predijo X) | Lundberg |
-| **LIME** | Explicaciones locales interpretables | Ribeiro |
-| **Aequitas** | Auditoría de bias | U. Chicago |
-| **InterpretML** | Modelos interpretables (EBM) | Microsoft |
-| **What-If Tool** | Exploración interactiva de fairness | Google |
+| **Fairlearn** | Fairness metrics, mitigation algorithms | Microsoft |
+| **AI Fairness 360 (AIF360)** | 70+ fairness metrics, mitigation | IBM |
+| **SHAP** | Explainability (why the model predicted X) | Lundberg |
+| **LIME** | Local interpretable explanations | Ribeiro |
+| **Aequitas** | Bias audit | U. Chicago |
+| **InterpretML** | Interpretable models (EBM) | Microsoft |
+| **What-If Tool** | Interactive fairness exploration | Google |
 
-### Ejemplo: Detección de Bias con Fairlearn
+### Example: Bias Detection with Fairlearn
 
 ```python
 from fairlearn.metrics import MetricFrame, demographic_parity_difference
 from sklearn.metrics import accuracy_score, recall_score
 
-# Supón que tienes predicciones y un atributo sensible (género, raza, etc.)
-y_true = [...]        # Labels reales
-y_pred = [...]        # Predicciones del modelo
-sensitive = [...]      # Atributo sensible (e.g., "male", "female")
+# Suppose you have predictions and a sensitive attribute (gender, race, etc.)
+y_true = [...]        # Actual labels
+y_pred = [...]        # Model predictions
+sensitive = [...]      # Sensitive attribute (e.g., "male", "female")
 
-# Métricas por grupo
+# Metrics by group
 metric_frame = MetricFrame(
     metrics={
         "accuracy": accuracy_score,
@@ -790,36 +790,36 @@ metric_frame = MetricFrame(
     sensitive_features=sensitive,
 )
 
-print("Métricas por grupo:")
+print("Metrics by group:")
 print(metric_frame.by_group)
 
-print("\nDiferencia entre grupos:")
+print("\nDifference between groups:")
 print(metric_frame.difference())
 
-# Demographic parity: ¿la tasa de predicción positiva es igual entre grupos?
+# Demographic parity: is the positive prediction rate equal across groups?
 dpd = demographic_parity_difference(y_true, y_pred, sensitive_features=sensitive)
 print(f"\nDemographic Parity Difference: {dpd:.4f}")
-# Si es cercano a 0, el modelo trata a los grupos de forma similar
-# Si es lejano de 0, hay sesgo potencial
+# If close to 0, the model treats groups similarly
+# If far from 0, there is potential bias
 ```
 
-### Ejemplo: Explicabilidad con SHAP
+### Example: Explainability with SHAP
 
 ```python
 import shap
 
-# Modelo entrenado
+# Trained model
 model = trained_xgboost_model
 X_test = test_features
 
-# Calcular SHAP values
+# Compute SHAP values
 explainer = shap.TreeExplainer(model)
 shap_values = explainer.shap_values(X_test)
 
-# Gráfico global: qué features son más importantes
+# Global plot: which features are most important
 shap.summary_plot(shap_values, X_test)
 
-# Explicación local: por qué esta predicción específica
+# Local explanation: why this specific prediction
 shap.waterfall_plot(shap.Explanation(
     values=shap_values[0],
     base_values=explainer.expected_value,
@@ -828,86 +828,86 @@ shap.waterfall_plot(shap.Explanation(
 ))
 ```
 
-### Dificultad: Media
+### Difficulty: Medium
 
-Las herramientas son accesibles. La dificultad real es entender qué tipo de fairness buscar (hay múltiples definiciones que pueden ser mutuamente excluyentes) y navegar los requisitos legales específicos de cada jurisdicción y sector.
+The tools are accessible. The real difficulty is understanding what type of fairness to pursue (there are multiple definitions that can be mutually exclusive) and navigating the specific legal requirements of each jurisdiction and sector.
 
-### Recursos Recomendados
+### Recommended Resources
 
-- **Libro:** "Fairness and Machine Learning" (Barocas, Hardt, Narayanan) - gratis online
-- **Curso:** Google Responsible AI Practices
-- **Documentación:** Fairlearn docs, AIF360 docs
-- **Regulación:** EU AI Act text, NIST AI Risk Management Framework
+- **Book:** "Fairness and Machine Learning" (Barocas, Hardt, Narayanan) - free online
+- **Course:** Google Responsible AI Practices
+- **Documentation:** Fairlearn docs, AIF360 docs
+- **Regulation:** EU AI Act text, NIST AI Risk Management Framework
 
 ---
 
-## Prioridad Sugerida para Consultoría
+## Suggested Priority for Consulting
 
-No todos los temas tienen la misma demanda. Esta es una priorización basada en lo que los clientes piden más frecuentemente:
+Not all topics have the same demand. This is a prioritization based on what clients ask for most frequently:
 
-### Prioridad Alta (aprenderlo pronto)
+### High Priority (learn it soon)
 
-| # | Tema | Por Qué | Demanda |
+| # | Topic | Why | Demand |
 |---|------|---------|---------|
-| 1 | **Time Series Forecasting** | Casi todos los clientes con datos históricos lo piden. Retail, finanzas, manufactura, energía. Prophet permite entregar resultados rápido. | Muy alta |
-| 2 | **Audio/Speech** | Whisper hace que transcripción sea trivial. Call centers, accesibilidad, contenido. ROI inmediato. | Alta |
-| 3 | **AutoML** | Acelera prototipado drásticamente. AutoGluon genera baselines competitivos en horas. Perfecto para primeras reuniones con cliente. | Alta |
+| 1 | **Time Series Forecasting** | Almost every client with historical data asks for it. Retail, finance, manufacturing, energy. Prophet allows delivering results quickly. | Very high |
+| 2 | **Audio/Speech** | Whisper makes transcription trivial. Call centers, accessibility, content. Immediate ROI. | High |
+| 3 | **AutoML** | Dramatically accelerates prototyping. AutoGluon generates competitive baselines in hours. Perfect for first meetings with a client. | High |
 
-### Prioridad Media (aprender cuando surja un proyecto)
+### Medium Priority (learn when a project comes up)
 
-| # | Tema | Por Qué | Demanda |
+| # | Topic | Why | Demand |
 |---|------|---------|---------|
-| 4 | **Edge AI** | Clientes de manufactura y retail lo piden cada vez más. Requiere hardware específico. | Media-Alta |
-| 5 | **Responsible AI** | La regulación (EU AI Act) lo está convirtiendo en obligatorio. Diferenciador competitivo como consultor. | Media (creciendo) |
-| 6 | **Multimodal AI** | E-commerce y medical AI son los drivers principales. GPT-4o lo simplifica vía API. | Media |
+| 4 | **Edge AI** | Manufacturing and retail clients are increasingly asking for it. Requires specific hardware. | Medium-High |
+| 5 | **Responsible AI** | Regulation (EU AI Act) is making it mandatory. Competitive differentiator as a consultant. | Medium (growing) |
+| 6 | **Multimodal AI** | E-commerce and medical AI are the main drivers. GPT-4o simplifies it via API. | Medium |
 
-### Prioridad Baja (aprender si lo necesitas)
+### Low Priority (learn if you need it)
 
-| # | Tema | Por Qué | Demanda |
+| # | Topic | Why | Demand |
 |---|------|---------|---------|
-| 7 | **Gen AI (no-LLM)** | Casos específicos (data augmentation, contenido visual). Stable Diffusion vía API cubre la mayoría de necesidades. | Baja-Media |
-| 8 | **Graph Neural Networks** | Nicho pero poderoso. Fraud detection y recomendación son los casos más comunes. | Baja |
-| 9 | **Federated Learning** | Muy pocos proyectos lo necesitan. Solo cuando la regulación impide compartir datos y hay múltiples participantes. | Baja |
-| 10 | **Reinforcement Learning** | Casi nunca en consultoría. Problemas de optimización suelen resolverse mejor con métodos clásicos. | Muy baja |
+| 7 | **Gen AI (non-LLM)** | Specific cases (data augmentation, visual content). Stable Diffusion via API covers most needs. | Low-Medium |
+| 8 | **Graph Neural Networks** | Niche but powerful. Fraud detection and recommendation are the most common cases. | Low |
+| 9 | **Federated Learning** | Very few projects need it. Only when regulation prevents sharing data and there are multiple participants. | Low |
+| 10 | **Reinforcement Learning** | Almost never in consulting. Optimization problems are usually better solved with classical methods. | Very low |
 
-### Diagrama de Priorización
+### Prioritization Diagram
 
 ```
-Impacto en consultoría
+Impact on consulting
         ▲
-  Alto  │  Time Series ★       Audio/Speech ★
+  High  │  Time Series ★       Audio/Speech ★
         │                          AutoML ★
         │
-  Medio │  Edge AI              Responsible AI
+  Med   │  Edge AI              Responsible AI
         │                       Multimodal AI
         │
-  Bajo  │  Gen AI (no-LLM)     Graph NN
+  Low   │  Gen AI (non-LLM)     Graph NN
         │  Federated Learning
         │  Reinforcement Learning
         └──────────────────────────────────────────▶
-              Baja              Media              Alta
-                        Facilidad de aprender
+              Low               Medium             High
+                        Ease of learning
 
-★ = Aprender primero
+★ = Learn first
 ```
 
 ---
 
-## Resumen Rápido
+## Quick Summary
 
-| Tema | Dificultad | Demanda Consultoría | Tiempo para ser Productivo |
+| Topic | Difficulty | Consulting Demand | Time to Become Productive |
 |------|-----------|--------------------|-----------------------------|
-| Time Series | Media | Muy alta | 2-4 semanas |
-| Reinforcement Learning | Alta | Muy baja | 2-3 meses |
-| Gen AI (no-LLM) | Media | Baja-Media | 2-4 semanas |
-| Audio/Speech | Baja-Media | Alta | 1-2 semanas |
-| Multimodal AI | Media-Alta | Media | 3-4 semanas |
-| Graph Neural Networks | Media-Alta | Baja | 1-2 meses |
-| Federated Learning | Alta | Baja | 1-2 meses |
-| Edge AI / TinyML | Media-Alta | Media-Alta | 1-2 meses |
-| AutoML | Baja | Alta | 1 semana |
-| Responsible AI | Media | Media (creciendo) | 2-3 semanas |
+| Time Series | Medium | Very high | 2-4 weeks |
+| Reinforcement Learning | High | Very low | 2-3 months |
+| Gen AI (non-LLM) | Medium | Low-Medium | 2-4 weeks |
+| Audio/Speech | Low-Medium | High | 1-2 weeks |
+| Multimodal AI | Medium-High | Medium | 3-4 weeks |
+| Graph Neural Networks | Medium-High | Low | 1-2 months |
+| Federated Learning | High | Low | 1-2 months |
+| Edge AI / TinyML | Medium-High | Medium-High | 1-2 months |
+| AutoML | Low | High | 1 week |
+| Responsible AI | Medium | Medium (growing) | 2-3 weeks |
 
 ---
 
-> **Resumen para llevar:** No intentes aprender todo a la vez. Con lo que cubre este repositorio (ML clásico, deep learning, NLP, LLMs, RAG, Computer Vision, deployment, MLOps) ya puedes abordar la mayoría de proyectos de consultoría AI. Expande hacia Time Series, Audio, y AutoML primero. El resto, apréndelo cuando un proyecto lo requiera. La amplitud viene con los proyectos, no con los cursos.
+> **Key takeaway:** Don't try to learn everything at once. With what this repository covers (classical ML, deep learning, NLP, LLMs, RAG, Computer Vision, deployment, MLOps) you can already tackle the majority of AI consulting projects. Expand into Time Series, Audio, and AutoML first. The rest, learn it when a project requires it. Breadth comes with projects, not courses.
