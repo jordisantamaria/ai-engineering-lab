@@ -1,27 +1,27 @@
-# Prediccion de abandono de clientes (Churn)
+# Customer Churn Prediction
 
-## Problema de negocio
+## Business Problem
 
-La retencion de clientes es uno de los pilares mas criticos de cualquier negocio:
+Customer retention is one of the most critical pillars of any business:
 
-- **Coste de adquisicion vs. retencion**: captar un nuevo cliente cuesta entre 5x y 25x mas que retener uno existente.
-- **Impacto en ingresos**: una reduccion del 5% en la tasa de churn puede incrementar los beneficios entre un 25% y un 95% (Harvard Business Review).
-- **Efecto cascada**: los clientes que se van generan boca a boca negativo y arrastran a otros.
-- **Reactividad**: la mayoria de empresas solo actuan cuando el cliente ya se ha ido, cuando el coste de recuperacion es maximo.
+- **Acquisition vs. retention cost**: acquiring a new customer costs between 5x and 25x more than retaining an existing one.
+- **Revenue impact**: a 5% reduction in churn rate can increase profits by 25% to 95% (Harvard Business Review).
+- **Cascade effect**: customers who leave generate negative word of mouth and drag others along.
+- **Reactivity**: most companies only act when the customer has already left, when the recovery cost is at its maximum.
 
-El problema no es saber *cuantos* clientes se van, sino identificar *cuales* estan en riesgo **antes** de que tomen la decision.
+The problem is not knowing *how many* customers leave, but identifying *which ones* are at risk **before** they make the decision.
 
-## Solucion propuesta
+## Proposed Solution
 
-Modelo predictivo de machine learning que analiza el comportamiento historico de los clientes para asignar una probabilidad de churn a cada uno, permitiendo acciones de retencion proactivas y focalizadas.
+Predictive machine learning model that analyzes customers' historical behavior to assign a churn probability to each one, enabling proactive and focused retention actions.
 
-### Enfoque tecnico
+### Technical Approach
 
 ```
-Datos historicos del cliente
+Customer historical data
         |
         v
-  EDA (Analisis Exploratorio)
+  EDA (Exploratory Data Analysis)
         |
         v
   Feature Engineering
@@ -29,52 +29,52 @@ Datos historicos del cliente
    contract_value, engagement_score, ...)
         |
         v
-  Optimizacion de hiperparametros (Optuna)
+  Hyperparameter optimization (Optuna)
         |
         v
   XGBoost / LightGBM (ensemble)
         |
         v
-  SHAP: interpretabilidad
-  ("por que este cliente esta en riesgo?")
+  SHAP: interpretability
+  ("why is this customer at risk?")
         |
         v
-  API de prediccion + Dashboard
+  Prediction API + Dashboard
 ```
 
 ### Dataset
 
-- **Telco Customer Churn**: dataset de referencia de Kaggle ([enlace](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)).
-- 7.043 clientes con 21 variables (demograficas, servicios contratados, facturacion, tenure).
-- Target: columna `Churn` (Yes/No).
+- **Telco Customer Churn**: reference dataset from Kaggle ([link](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)).
+- 7,043 customers with 21 variables (demographics, contracted services, billing, tenure).
+- Target: `Churn` column (Yes/No).
 
-## Resultados esperados
+## Expected Results
 
-| Metrica | Valor |
+| Metric | Value |
 |---------|-------|
 | AUC-ROC | >0.85 |
-| Precision (clase Churn) | >0.75 |
-| Recall (clase Churn) | >0.80 |
+| Precision (Churn class) | >0.75 |
+| Recall (Churn class) | >0.80 |
 | F1-Score | >0.77 |
 
-Ademas, el modelo proporciona:
-- **Top 5 factores de riesgo** para cada cliente (via SHAP).
-- **Segmentacion de riesgo**: alto, medio, bajo.
-- **Insights accionables**: que palancas mover para reducir el riesgo de cada segmento.
+Additionally, the model provides:
+- **Top 5 risk factors** for each customer (via SHAP).
+- **Risk segmentation**: high, medium, low.
+- **Actionable insights**: which levers to pull to reduce risk for each segment.
 
-## Tecnologias
+## Technologies
 
-- **XGBoost / LightGBM**: modelos gradient boosting de alto rendimiento
-- **SHAP**: interpretabilidad y explicabilidad del modelo
-- **Optuna**: optimizacion bayesiana de hiperparametros
-- **scikit-learn**: preprocesamiento y metricas
-- **pandas / numpy**: manipulacion de datos
-- **matplotlib / seaborn**: visualizacion
-- **FastAPI**: API de prediccion en tiempo real
+- **XGBoost / LightGBM**: high-performance gradient boosting models
+- **SHAP**: model interpretability and explainability
+- **Optuna**: Bayesian hyperparameter optimization
+- **scikit-learn**: preprocessing and metrics
+- **pandas / numpy**: data manipulation
+- **matplotlib / seaborn**: visualization
+- **FastAPI**: real-time prediction API
 
-## Como ejecutar
+## How to Run
 
-### 1. Instalacion
+### 1. Installation
 
 ```bash
 cd portfolio/03-churn-prediction
@@ -83,11 +83,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Descargar el dataset
+### 2. Download the Dataset
 
-Descargar el dataset de [Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) y colocarlo en `data/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
+Download the dataset from [Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) and place it in `data/WA_Fn-UseC_-Telco-Customer-Churn.csv`.
 
-### 3. Entrenar el modelo
+### 3. Train the Model
 
 ```bash
 python src/train.py \
@@ -96,20 +96,20 @@ python src/train.py \
     --n_trials 50
 ```
 
-Esto generara:
-- `models/churn_model.joblib` - modelo entrenado
-- `models/roc_curve.png` - curva ROC
-- `models/pr_curve.png` - curva Precision-Recall
-- `models/shap_summary.png` - resumen SHAP de importancia de features
-- `models/classification_report.txt` - reporte de clasificacion
+This will generate:
+- `models/churn_model.joblib` - trained model
+- `models/roc_curve.png` - ROC curve
+- `models/pr_curve.png` - Precision-Recall curve
+- `models/shap_summary.png` - SHAP feature importance summary
+- `models/classification_report.txt` - classification report
 
-### 4. Lanzar la API
+### 4. Launch the API
 
 ```bash
 uvicorn src.api:app --host 0.0.0.0 --port 8002
 ```
 
-### 5. Predecir churn de un cliente
+### 5. Predict Customer Churn
 
 ```bash
 curl -X POST "http://localhost:8002/predict" \
@@ -127,11 +127,11 @@ curl -X POST "http://localhost:8002/predict" \
     }'
 ```
 
-Respuesta:
+Response:
 ```json
 {
     "churn_probability": 0.82,
-    "risk_level": "alto",
+    "risk_level": "high",
     "top_risk_factors": [
         {"feature": "contract_Month-to-month", "impact": 0.23},
         {"feature": "tenure", "impact": -0.18},
@@ -140,36 +140,36 @@ Respuesta:
 }
 ```
 
-## Como presentarlo: pitch para cliente
+## How to Present It: Client Pitch
 
-### Propuesta de valor
+### Value Proposition
 
-> "Con este modelo pueden focalizar sus campanas de retencion en el 20% de clientes con mas riesgo, sabiendo exactamente *por que* cada cliente esta en riesgo y *que* acciones tomar para retenerlo."
+> "With this model you can focus your retention campaigns on the 20% of customers with the highest risk, knowing exactly *why* each customer is at risk and *what* actions to take to retain them."
 
-### ROI estimado
+### Estimated ROI
 
-**Escenario**: empresa de telecomunicaciones con 50.000 clientes, ticket medio 60 EUR/mes, tasa de churn actual 2% mensual.
+**Scenario**: telecommunications company with 50,000 customers, average ticket 60 EUR/month, current churn rate 2% monthly.
 
-| Concepto | Antes | Despues |
+| Item | Before | After |
 |----------|-------|---------|
-| Clientes perdidos/mes | 1.000 | 700 (-30%) |
-| Ingreso perdido/mes | 60.000 EUR | 42.000 EUR |
-| Coste campana retencion | 0 EUR | 5.000 EUR (focalizada) |
-| **Ahorro neto mensual** | - | **13.000 EUR** |
+| Customers lost/month | 1,000 | 700 (-30%) |
+| Revenue lost/month | 60,000 EUR | 42,000 EUR |
+| Retention campaign cost | 0 EUR | 5,000 EUR (targeted) |
+| **Net monthly savings** | - | **13,000 EUR** |
 
-**Ahorro anual estimado: ~156.000 EUR**, solo en ingresos recuperados por retencion. Sin contar el ahorro en coste de adquisicion de nuevos clientes.
+**Estimated annual savings: ~156,000 EUR**, in recovered revenue from retention alone. Not counting savings in new customer acquisition costs.
 
-### Puntos clave para la presentacion
+### Key Points for the Presentation
 
-1. **Demo personalizada**: si el cliente proporciona datos anonimizados, entrenar el modelo con sus datos reales y mostrar resultados en la reunion.
-2. **Interpretabilidad**: SHAP permite explicar cada prediccion en lenguaje de negocio ("este cliente tiene riesgo alto porque lleva solo 3 meses, tiene contrato mensual y no tiene soporte tecnico").
-3. **Accionabilidad**: el modelo no solo dice *quien* se va, sino *por que*, lo que permite disenar intervenciones especificas.
-4. **Integracion CRM**: las predicciones se pueden integrar directamente en Salesforce, HubSpot o cualquier CRM via API.
-5. **Mejora continua**: el modelo se reentrena periodicamente con datos nuevos para mantener su precision.
+1. **Personalized demo**: if the client provides anonymized data, train the model with their real data and show results at the meeting.
+2. **Interpretability**: SHAP allows explaining each prediction in business language ("this customer is high risk because they have only been with us for 3 months, have a monthly contract, and have no tech support").
+3. **Actionability**: the model not only tells *who* is leaving, but *why*, enabling the design of specific interventions.
+4. **CRM integration**: predictions can be integrated directly into Salesforce, HubSpot, or any CRM via API.
+5. **Continuous improvement**: the model is retrained periodically with new data to maintain its accuracy.
 
-### Preguntas frecuentes del cliente
+### Frequently Asked Client Questions
 
-- **"Nuestros datos son diferentes"** - El enfoque es agnnostico al sector. Se adapta a cualquier negocio con datos de clientes historicos.
-- **"Cuantos datos necesitamos?"** - Un minimo de 5.000 clientes historicos con al menos 6 meses de datos. Cuantos mas, mejor.
-- **"Es una caja negra?"** - No. SHAP proporciona explicaciones completas de cada prediccion. Cumple con requisitos de explicabilidad regulatoria.
-- **"Cada cuanto hay que reentrenar?"** - Recomendamos reentrenamiento mensual o trimestral, segun la velocidad de cambio del negocio.
+- **"Our data is different"** - The approach is sector-agnostic. It adapts to any business with historical customer data.
+- **"How much data do we need?"** - A minimum of 5,000 historical customers with at least 6 months of data. The more, the better.
+- **"Is it a black box?"** - No. SHAP provides complete explanations for each prediction. It complies with regulatory explainability requirements.
+- **"How often does it need retraining?"** - We recommend monthly or quarterly retraining, depending on how fast the business changes.

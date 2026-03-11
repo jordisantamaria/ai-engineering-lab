@@ -1,29 +1,29 @@
-# Motor de recomendaciones de productos
+# Product Recommendation Engine
 
-## Problema de negocio
+## Business Problem
 
-Las recomendaciones de productos son uno de los motores mas potentes de crecimiento en e-commerce y retail:
+Product recommendations are one of the most powerful growth drivers in e-commerce and retail:
 
-- **Conversion**: los usuarios que interactuan con recomendaciones tienen una tasa de conversion 2-5x mayor.
-- **Ticket medio**: las recomendaciones tipo "tambien te puede interesar" y "comprados juntos" incrementan el valor medio del pedido en un 10-30%.
-- **Engagement**: las recomendaciones personalizadas aumentan el tiempo de permanencia en la plataforma y la frecuencia de visita.
-- **Descubrimiento**: el 35% de las ventas de Amazon provienen de su motor de recomendaciones (McKinsey).
+- **Conversion**: users who interact with recommendations have a 2-5x higher conversion rate.
+- **Average ticket**: recommendations like "you might also like" and "frequently bought together" increase the average order value by 10-30%.
+- **Engagement**: personalized recommendations increase time spent on the platform and visit frequency.
+- **Discovery**: 35% of Amazon's sales come from its recommendation engine (McKinsey).
 
-Sin un sistema de recomendaciones, se muestra el mismo catalogo a todos los usuarios, perdiendo oportunidades de venta cruzada y personalizacion.
+Without a recommendation system, the same catalog is shown to all users, missing opportunities for cross-selling and personalization.
 
-## Solucion propuesta
+## Proposed Solution
 
-Sistema de recomendacion hibrido que combina dos enfoques complementarios:
+Hybrid recommendation system that combines two complementary approaches:
 
-1. **Content-Based Filtering**: recomienda productos similares basandose en las descripciones y atributos del producto (usa embeddings semanticos).
-2. **Collaborative Filtering**: recomienda productos basandose en el comportamiento de usuarios similares (ALS - Alternating Least Squares).
-3. **Enfoque hibrido**: combina ambos con ponderacion ajustable para obtener las mejores recomendaciones, incluyendo manejo de cold start.
+1. **Content-Based Filtering**: recommends similar products based on product descriptions and attributes (uses semantic embeddings).
+2. **Collaborative Filtering**: recommends products based on the behavior of similar users (ALS - Alternating Least Squares).
+3. **Hybrid approach**: combines both with adjustable weighting to obtain the best recommendations, including cold start handling.
 
-### Arquitectura
+### Architecture
 
 ```
                     +---------------------------+
-                    |    API de Recomendaciones  |
+                    |    Recommendation API      |
                     +---------------------------+
                        /                    \
                       v                      v
@@ -31,9 +31,9 @@ Sistema de recomendacion hibrido que combina dos enfoques complementarios:
     | Content-Based      |      | Collaborative          |
     | (SentenceTransf.)  |      | (ALS / Implicit)       |
     +--------------------+      +------------------------+
-    | - Embeddings prod.  |      | - Matriz user-item    |
-    | - Cosine similarity |      | - Factorizacion       |
-    | - Productos nuevos  |      | - Usuarios similares  |
+    | - Product embeddings|      | - User-item matrix    |
+    | - Cosine similarity |      | - Factorization       |
+    | - New products      |      | - Similar users       |
     +--------------------+      +------------------------+
                       \                      /
                        v                    v
@@ -43,32 +43,32 @@ Sistema de recomendacion hibrido que combina dos enfoques complementarios:
                     +---------------------------+
                               |
                               v
-                    Recomendaciones finales
-                    (con cold start handling)
+                    Final recommendations
+                    (with cold start handling)
 ```
 
-## Resultados esperados
+## Expected Results
 
-| Metrica | Valor |
+| Metric | Value |
 |---------|-------|
 | Precision@10 | >0.15 |
 | Recall@10 | >0.10 |
 | NDCG@10 | >0.20 |
-| Cobertura del catalogo | >60% |
-| Tiempo de respuesta | <200ms |
+| Catalog coverage | >60% |
+| Response time | <200ms |
 
-## Tecnologias
+## Technologies
 
-- **sentence-transformers**: embeddings semanticos de descripciones de productos
-- **implicit**: biblioteca ALS para collaborative filtering
-- **scikit-learn**: metricas de similitud y evaluacion
-- **scipy**: matrices sparse para interacciones usuario-producto
-- **FastAPI**: API REST de alto rendimiento
-- **pandas / numpy**: manipulacion de datos
+- **sentence-transformers**: semantic embeddings of product descriptions
+- **implicit**: ALS library for collaborative filtering
+- **scikit-learn**: similarity metrics and evaluation
+- **scipy**: sparse matrices for user-product interactions
+- **FastAPI**: high-performance REST API
+- **pandas / numpy**: data manipulation
 
-## Como ejecutar
+## How to Run
 
-### 1. Instalacion
+### 1. Installation
 
 ```bash
 cd portfolio/04-recommendation-engine
@@ -77,62 +77,62 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Preparar datos
+### 2. Prepare Data
 
-El sistema espera dos archivos CSV:
+The system expects two CSV files:
 
-- `data/products.csv`: columnas `product_id`, `name`, `description`, `category`, `price`
-- `data/interactions.csv`: columnas `user_id`, `product_id`, `rating` (o `purchase_count`)
+- `data/products.csv`: columns `product_id`, `name`, `description`, `category`, `price`
+- `data/interactions.csv`: columns `user_id`, `product_id`, `rating` (or `purchase_count`)
 
-### 3. Lanzar la API
+### 3. Launch the API
 
 ```bash
 uvicorn src.api:app --host 0.0.0.0 --port 8003
 ```
 
-### 4. Obtener recomendaciones
+### 4. Get Recommendations
 
 ```bash
-# Recomendaciones para un usuario
+# Recommendations for a user
 curl -X POST "http://localhost:8003/recommend" \
     -H "Content-Type: application/json" \
     -d '{"user_id": "user_123", "n": 10}'
 
-# Productos similares
+# Similar products
 curl -X POST "http://localhost:8003/similar" \
     -H "Content-Type: application/json" \
     -d '{"product_id": "prod_456", "n": 5}'
 ```
 
-## Como presentarlo: pitch para cliente
+## How to Present It: Client Pitch
 
-### Propuesta de valor
+### Value Proposition
 
-> "Las empresas con recomendaciones personalizadas ven un incremento del 10-30% en revenue. Nuestro sistema hibrido funciona incluso con usuarios nuevos (cold start) y productos recien anadidos, adaptandose en tiempo real al comportamiento de sus clientes."
+> "Companies with personalized recommendations see a 10-30% increase in revenue. Our hybrid system works even with new users (cold start) and newly added products, adapting in real time to your customers' behavior."
 
-### ROI estimado
+### Estimated ROI
 
-**Escenario**: e-commerce con 100.000 usuarios activos/mes, ticket medio 45 EUR, tasa de conversion actual 2.5%.
+**Scenario**: e-commerce with 100,000 active users/month, average ticket 45 EUR, current conversion rate 2.5%.
 
-| Concepto | Antes | Despues |
+| Item | Before | After |
 |----------|-------|---------|
-| Tasa de conversion | 2.5% | 3.5% (+40%) |
-| Ticket medio | 45 EUR | 52 EUR (+15%) |
-| Pedidos/mes | 2.500 | 3.500 |
-| Revenue mensual | 112.500 EUR | 182.000 EUR |
+| Conversion rate | 2.5% | 3.5% (+40%) |
+| Average ticket | 45 EUR | 52 EUR (+15%) |
+| Orders/month | 2,500 | 3,500 |
+| Monthly revenue | 112,500 EUR | 182,000 EUR |
 
-**Incremento estimado: ~69.500 EUR/mes** en revenue adicional gracias a las recomendaciones.
+**Estimated increase: ~69,500 EUR/month** in additional revenue thanks to recommendations.
 
-### Puntos clave para la presentacion
+### Key Points for the Presentation
 
-1. **Demo interactiva**: cargar el catalogo del cliente y mostrar recomendaciones en vivo.
-2. **A/B testing**: el sistema se puede evaluar con A/B test antes de implementacion completa.
-3. **Cold start resuelto**: nuevos usuarios reciben recomendaciones desde el primer momento (content-based), que mejoran a medida que interactuan (collaborative).
-4. **Tiempo real**: las recomendaciones se sirven en <200ms, compatibles con cualquier frontend.
-5. **Privacidad**: los datos de usuario no salen de la infraestructura del cliente.
+1. **Interactive demo**: load the client's catalog and show live recommendations.
+2. **A/B testing**: the system can be evaluated with A/B tests before full implementation.
+3. **Cold start solved**: new users receive recommendations from day one (content-based), which improve as they interact (collaborative).
+4. **Real time**: recommendations are served in <200ms, compatible with any frontend.
+5. **Privacy**: user data never leaves the client's infrastructure.
 
-### Preguntas frecuentes del cliente
+### Frequently Asked Client Questions
 
-- **"Tenemos pocos datos de usuarios"** - Empezamos con content-based (solo necesita catalogo de productos) y transicionamos a hibrido cuando hay suficientes interacciones.
-- **"Ya tenemos recomendaciones basicas (mas vendidos)"** - Las recomendaciones personalizadas superan sistematicamente a las populares en engagement y conversion.
-- **"Como medimos el impacto?"** - A/B test controlado: grupo A con recomendaciones, grupo B sin ellas. Medimos conversion, ticket medio y engagement.
+- **"We have little user data"** - We start with content-based (only needs the product catalog) and transition to hybrid when there are enough interactions.
+- **"We already have basic recommendations (best sellers)"** - Personalized recommendations systematically outperform popular ones in engagement and conversion.
+- **"How do we measure the impact?"** - Controlled A/B test: group A with recommendations, group B without. We measure conversion, average ticket, and engagement.

@@ -1,58 +1,58 @@
 # AI Engineering Lab
 
-## Contexto
-Repositorio de aprendizaje de AI/ML para consultoría IT. El objetivo es poder desarrollar y entregar proyectos de AI puro (no solo LLMs) a clientes de diferentes industrias.
+## Context
+AI/ML learning repository for IT consulting. The goal is to be able to develop and deliver pure AI projects (not just LLMs) to clients across different industries.
 
-## Stack principal
-- **Lenguaje**: Python 3.10+
+## Main Stack
+- **Language**: Python 3.10+
 - **Deep Learning**: PyTorch
-- **ML clásico**: scikit-learn
+- **Classical ML**: scikit-learn
 - **Gradient Boosting**: XGBoost, LightGBM
 - **NLP**: HuggingFace Transformers, Sentence-Transformers
 - **CV**: torchvision, ultralytics (YOLO), albumentations
 - **Deployment**: FastAPI, Docker, ONNX Runtime
 - **MLOps**: MLflow, Optuna
-- **Documentación**: Español
-- **Código**: Python con comments en inglés
+- **Documentation**: English
+- **Code**: Python with comments in English
 
-## Estructura
+## Structure
 ```
-docs/       → Teoría (00-environment a 09-whats-next)
-notebooks/  → Jupyter notebooks interactivos (01-10)
-portfolio/  → 5 proyectos completos para demos a clientes
+docs/       → Theory (00-environment to 09-whats-next)
+notebooks/  → Interactive Jupyter notebooks (01-10)
+portfolio/  → 5 complete projects for client demos
 ```
 
-## Convenciones de código Python
-- Type hints siempre en funciones públicas
-- Docstrings en clases y funciones principales
-- Imports organizados: stdlib → third-party → local
-- Usar pathlib para paths, no os.path
-- Logging con logging module, no print() en producción
-- Seeds para reproducibilidad (torch.manual_seed, np.random.seed)
-- Device detection: CUDA → MPS → CPU (en ese orden)
+## Python Code Conventions
+- Type hints always on public functions
+- Docstrings on classes and main functions
+- Imports organized: stdlib → third-party → local
+- Use pathlib for paths, not os.path
+- Logging with logging module, not print() in production
+- Seeds for reproducibility (torch.manual_seed, np.random.seed)
+- Device detection: CUDA → MPS → CPU (in that order)
 
-## Convenciones de notebooks
-- Markdown cells en español
-- Code cells con comments en inglés
-- Cada notebook es autocontenido (imports propios)
-- Visualizaciones con matplotlib/seaborn
-- Al final de cada notebook: resumen y ejercicios
+## Notebook Conventions
+- Markdown cells in English
+- Code cells with comments in English
+- Each notebook is self-contained (own imports)
+- Visualizations with matplotlib/seaborn
+- At the end of each notebook: summary and exercises
 
-## Convenciones de proyectos portfolio
-- Cada proyecto tiene: README.md, src/, requirements.txt, Dockerfile
-- README incluye: problema de negocio, solución, resultados, pitch para cliente, ROI estimado
-- API siempre con FastAPI + Pydantic + health check
-- Modelos servidos con lifespan (cargar al inicio, no por request)
+## Portfolio Project Conventions
+- Each project has: README.md, src/, requirements.txt, Dockerfile
+- README includes: business problem, solution, results, client pitch, estimated ROI
+- API always with FastAPI + Pydantic + health check
+- Models served with lifespan (load at startup, not per request)
 
-## Patrones de diseño ML
-- Siempre empezar con un baseline simple antes de modelos complejos
-- Transfer learning antes de entrenar de cero
-- SHAP para interpretabilidad en proyectos tabular (el cliente pregunta "por qué")
-- Optuna para hyperparameter tuning
-- Pipeline de sklearn para preprocesamiento reproducible
-- Early stopping en deep learning
-- Data augmentation antes de buscar más datos
+## ML Design Patterns
+- Always start with a simple baseline before complex models
+- Transfer learning before training from scratch
+- SHAP for interpretability in tabular projects (the client asks "why")
+- Optuna for hyperparameter tuning
+- sklearn Pipeline for reproducible preprocessing
+- Early stopping in deep learning
+- Data augmentation before looking for more data
 
-## Relación con otros repos
-- `llm-playbook`: para cuando la solución es un LLM (prompting, RAG, agentes)
-- `aws-solutions-architect-lab`: para desplegar modelos en AWS
+## Relationship with Other Repos
+- `llm-playbook`: for when the solution is an LLM (prompting, RAG, agents)
+- `aws-solutions-architect-lab`: for deploying models on AWS

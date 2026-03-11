@@ -1,85 +1,85 @@
-# Entorno de Desarrollo para AI/ML
+# Development Environment for AI/ML
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [Setup de Python](#setup-de-python)
-- [Gestion de Dependencias](#gestion-de-dependencias)
+- [Python Setup](#python-setup)
+- [Dependency Management](#dependency-management)
 - [Jupyter Lab](#jupyter-lab)
-- [GPU Setup Local](#gpu-setup-local)
-- [GPU en la Nube](#gpu-en-la-nube)
-- [Docker para AI](#docker-para-ai)
-- [Estructura de Proyecto ML](#estructura-de-proyecto-ml)
-- [IDEs y Herramientas](#ides-y-herramientas)
-- [Tips de Productividad](#tips-de-productividad)
+- [Local GPU Setup](#local-gpu-setup)
+- [Cloud GPU](#cloud-gpu)
+- [Docker for AI](#docker-for-ai)
+- [ML Project Structure](#ml-project-structure)
+- [IDEs and Tools](#ides-and-tools)
+- [Productivity Tips](#productivity-tips)
 
 ---
 
-## Setup de Python
+## Python Setup
 
-### Gestion de versiones con pyenv
+### Version management with pyenv
 
-pyenv te permite tener multiples versiones de Python instaladas sin que interfieran entre si.
+pyenv lets you have multiple Python versions installed without them interfering with each other.
 
 ```bash
-# Instalar pyenv
+# Install pyenv
 curl https://pyenv.run | bash
 
-# Agregar a ~/.bashrc o ~/.zshrc
+# Add to ~/.bashrc or ~/.zshrc
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 
-# Instalar una version de Python
+# Install a Python version
 pyenv install 3.11.7
 pyenv install 3.12.3
 
-# Establecer version global
+# Set global version
 pyenv global 3.11.7
 
-# Establecer version local (por proyecto)
-cd mi-proyecto/
-pyenv local 3.12.3  # Crea .python-version
+# Set local version (per project)
+cd my-project/
+pyenv local 3.12.3  # Creates .python-version
 ```
 
-### Entornos virtuales: venv vs conda
+### Virtual environments: venv vs conda
 
-| Caracteristica | venv | conda |
+| Feature | venv | conda |
 |---|---|---|
-| Viene con Python | Si | No (instalar aparte) |
-| Solo Python | Si | No (R, Julia, etc.) |
-| Velocidad | Rapido | Mas lento |
-| Gestion de paquetes | pip | conda / pip |
-| Binarios precompilados | Solo PyPI wheels | Si (propio canal) |
-| Reproducibilidad | requirements.txt | environment.yml |
-| **Recomendacion** | **Proyectos simples/produccion** | **Ciencia de datos pesada** |
+| Comes with Python | Yes | No (install separately) |
+| Python only | Yes | No (R, Julia, etc.) |
+| Speed | Fast | Slower |
+| Package management | pip | conda / pip |
+| Precompiled binaries | PyPI wheels only | Yes (own channel) |
+| Reproducibility | requirements.txt | environment.yml |
+| **Recommendation** | **Simple projects/production** | **Heavy data science** |
 
-**Recomendacion: usar venv por simplicidad.** conda es util cuando necesitas paquetes con dependencias C complejas (como GDAL, cartopy), pero para la mayoria de proyectos de AI/ML, venv + pip es suficiente.
+**Recommendation: use venv for simplicity.** conda is useful when you need packages with complex C dependencies (like GDAL, cartopy), but for most AI/ML projects, venv + pip is sufficient.
 
 ```bash
-# Crear entorno virtual con venv (RECOMENDADO)
+# Create virtual environment with venv (RECOMMENDED)
 python -m venv .venv
 
-# Activar
+# Activate
 source .venv/bin/activate     # Linux/Mac
 .venv\Scripts\activate        # Windows
 
-# Desactivar
+# Deactivate
 deactivate
 ```
 
 ```bash
-# Alternativa con conda
-conda create -n mi-proyecto python=3.11
-conda activate mi-proyecto
+# Alternative with conda
+conda create -n my-project python=3.11
+conda activate my-project
 conda deactivate
 ```
 
-> **Punto clave:** Siempre usa un entorno virtual por proyecto. Nunca instales paquetes en el Python del sistema.
+> **Key point:** Always use a virtual environment per project. Never install packages in the system Python.
 
 ---
 
-## Gestion de Dependencias
+## Dependency Management
 
-### requirements.txt basico
+### Basic requirements.txt
 
 ```txt
 # requirements.txt
@@ -92,39 +92,39 @@ matplotlib==3.8.3
 jupyter==1.0.0
 ```
 
-### Flujo recomendado con pip-compile
+### Recommended workflow with pip-compile
 
-pip-compile (parte de pip-tools) genera un requirements.txt con versiones exactas y todas las subdependencias. Esto garantiza reproducibilidad total.
+pip-compile (part of pip-tools) generates a requirements.txt with exact versions and all sub-dependencies. This guarantees total reproducibility.
 
 ```bash
-# Instalar pip-tools
+# Install pip-tools
 pip install pip-tools
 
-# Crear requirements.in (lo que TU necesitas)
+# Create requirements.in (what YOU need)
 # requirements.in
 torch
 transformers
 pandas
 scikit-learn
 
-# Generar requirements.txt con versiones pinneadas
+# Generate requirements.txt with pinned versions
 pip-compile requirements.in -o requirements.txt
 
-# Instalar desde el lock file
+# Install from the lock file
 pip-sync requirements.txt
 
-# Actualizar dependencias
+# Update dependencies
 pip-compile --upgrade requirements.in
 ```
 
-### Separar dependencias por entorno
+### Separate dependencies by environment
 
 ```
 requirements/
-├── base.txt          # Dependencias core
+├── base.txt          # Core dependencies
 ├── dev.txt           # Testing, linting (-r base.txt)
-├── gpu.txt           # PyTorch con CUDA (-r base.txt)
-└── notebook.txt      # Jupyter + visualizacion (-r base.txt)
+├── gpu.txt           # PyTorch with CUDA (-r base.txt)
+└── notebook.txt      # Jupyter + visualization (-r base.txt)
 ```
 
 ```txt
@@ -140,139 +140,139 @@ mypy==1.8.0
 
 ## Jupyter Lab
 
-### Instalacion y configuracion
+### Installation and configuration
 
 ```bash
 pip install jupyterlab
 
-# Iniciar
+# Start
 jupyter lab --port 8888
 
-# Con un entorno virtual especifico
-python -m ipykernel install --user --name mi-proyecto --display-name "Mi Proyecto"
+# With a specific virtual environment
+python -m ipykernel install --user --name my-project --display-name "My Project"
 ```
 
-### Extensiones utiles
+### Useful extensions
 
-| Extension | Proposito | Instalacion |
+| Extension | Purpose | Installation |
 |---|---|---|
-| jupyterlab-git | Git integrado | `pip install jupyterlab-git` |
-| jupyterlab-code-formatter | Auto-format con black | `pip install jupyterlab-code-formatter` |
-| jupyterlab-lsp | Autocompletado inteligente | `pip install jupyterlab-lsp python-lsp-server` |
-| ipywidgets | Widgets interactivos | `pip install ipywidgets` |
-| nbstripout | Limpiar outputs antes de commit | `pip install nbstripout && nbstripout --install` |
+| jupyterlab-git | Integrated Git | `pip install jupyterlab-git` |
+| jupyterlab-code-formatter | Auto-format with black | `pip install jupyterlab-code-formatter` |
+| jupyterlab-lsp | Intelligent autocompletion | `pip install jupyterlab-lsp python-lsp-server` |
+| ipywidgets | Interactive widgets | `pip install ipywidgets` |
+| nbstripout | Clean outputs before commit | `pip install nbstripout && nbstripout --install` |
 
-### Configuracion recomendada
+### Recommended configuration
 
 ```python
-# Al inicio de cada notebook
+# At the beginning of each notebook
 %load_ext autoreload
-%autoreload 2  # Recarga modulos automaticamente al cambiar
+%autoreload 2  # Automatically reloads modules when changed
 
-# Para graficas inline
+# For inline plots
 %matplotlib inline
 
-# Para ver todas las columnas de un DataFrame
+# To see all columns of a DataFrame
 import pandas as pd
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', 100)
 pd.set_option('display.max_colwidth', 50)
 ```
 
-> **Punto clave:** Usa notebooks para exploracion y experimentacion. Mueve codigo estable a modulos `.py` en `src/`.
+> **Key point:** Use notebooks for exploration and experimentation. Move stable code to `.py` modules in `src/`.
 
 ---
 
-## GPU Setup Local
+## Local GPU Setup
 
 ### NVIDIA (Linux/Windows)
 
-Las GPUs NVIDIA son el estandar en AI/ML. Necesitas tres componentes:
+NVIDIA GPUs are the standard in AI/ML. You need three components:
 
 ```
-Driver NVIDIA  -->  CUDA Toolkit  -->  cuDNN  -->  PyTorch con CUDA
+NVIDIA Driver  -->  CUDA Toolkit  -->  cuDNN  -->  PyTorch with CUDA
 ```
 
-#### Paso 1: Instalar driver NVIDIA
+#### Step 1: Install NVIDIA driver
 
 ```bash
 # Ubuntu
 sudo apt update
 sudo apt install nvidia-driver-545
 
-# Verificar
+# Verify
 nvidia-smi
-# Deberia mostrar tu GPU, driver version, y CUDA version soportada
+# Should show your GPU, driver version, and supported CUDA version
 ```
 
-#### Paso 2: Instalar CUDA Toolkit
+#### Step 2: Install CUDA Toolkit
 
 ```bash
-# Opcion A: Instalacion del sistema (para Docker, C++ custom kernels)
-# Descargar de https://developer.nvidia.com/cuda-downloads
+# Option A: System installation (for Docker, C++ custom kernels)
+# Download from https://developer.nvidia.com/cuda-downloads
 
-# Opcion B: Via conda (mas simple, aislado)
+# Option B: Via conda (simpler, isolated)
 conda install cuda-toolkit -c nvidia
 
-# Opcion C: PyTorch ya incluye su propia CUDA (la mas simple)
-# Solo necesitas el driver NVIDIA instalado
+# Option C: PyTorch already includes its own CUDA (the simplest)
+# You only need the NVIDIA driver installed
 ```
 
-#### Paso 3: Instalar PyTorch con CUDA
+#### Step 3: Install PyTorch with CUDA
 
 ```bash
-# PyTorch con CUDA 12.1 (verificar version actual en pytorch.org)
+# PyTorch with CUDA 12.1 (check current version at pytorch.org)
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
-#### Verificacion
+#### Verification
 
 ```python
 import torch
 
 print(f"PyTorch version: {torch.__version__}")
-print(f"CUDA disponible: {torch.cuda.is_available()}")
+print(f"CUDA available: {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
 print(f"GPU: {torch.cuda.get_device_name(0)}")
-print(f"Memoria GPU: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
+print(f"GPU memory: {torch.cuda.get_device_properties(0).total_mem / 1e9:.1f} GB")
 
-# Test rapido
+# Quick test
 x = torch.randn(1000, 1000).cuda()
 y = torch.randn(1000, 1000).cuda()
-z = x @ y  # Multiplicacion de matrices en GPU
-print(f"Resultado en: {z.device}")
+z = x @ y  # Matrix multiplication on GPU
+print(f"Result on: {z.device}")
 ```
 
 ### Apple Silicon (M1/M2/M3/M4)
 
-Apple Silicon usa el backend MPS (Metal Performance Shaders) en PyTorch. No es tan rapido como NVIDIA CUDA pero es mucho mejor que CPU.
+Apple Silicon uses the MPS (Metal Performance Shaders) backend in PyTorch. It's not as fast as NVIDIA CUDA but much better than CPU.
 
 ```bash
-# Instalar PyTorch (viene con soporte MPS por defecto)
+# Install PyTorch (comes with MPS support by default)
 pip install torch torchvision torchaudio
 ```
 
 ```python
 import torch
 
-# Verificar MPS
-print(f"MPS disponible: {torch.backends.mps.is_available()}")
+# Verify MPS
+print(f"MPS available: {torch.backends.mps.is_available()}")
 print(f"MPS built: {torch.backends.mps.is_built()}")
 
-# Usar MPS
+# Use MPS
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
 x = torch.randn(1000, 1000, device=device)
 y = torch.randn(1000, 1000, device=device)
 z = x @ y
-print(f"Resultado en: {z.device}")
+print(f"Result on: {z.device}")
 ```
 
-#### Patron universal para seleccionar device
+#### Universal pattern for device selection
 
 ```python
 def get_device():
-    """Selecciona el mejor device disponible."""
+    """Select the best available device."""
     if torch.cuda.is_available():
         return torch.device("cuda")
     elif torch.backends.mps.is_available():
@@ -281,62 +281,62 @@ def get_device():
         return torch.device("cpu")
 
 device = get_device()
-print(f"Usando: {device}")
+print(f"Using: {device}")
 ```
 
-> **Punto clave para Apple Silicon:**
-> - Funciona bien para modelos medianos y fine-tuning
-> - Algunos operadores no estan soportados en MPS (fallback a CPU automatico)
-> - La memoria unificada es una ventaja: la GPU puede usar toda la RAM
-> - No esperes rendimiento de una A100, pero es suficiente para desarrollo
+> **Key point for Apple Silicon:**
+> - Works well for medium-sized models and fine-tuning
+> - Some operators are not supported on MPS (automatic CPU fallback)
+> - Unified memory is an advantage: the GPU can use all the RAM
+> - Don't expect A100 performance, but it's enough for development
 
 ---
 
-## GPU en la Nube
+## Cloud GPU
 
-### Cuando usar GPU en la nube
+### When to use cloud GPU
 
-- Tu GPU local no tiene suficiente VRAM (modelos grandes)
-- Necesitas multiples GPUs
-- Training que tarda muchas horas (dejarlo corriendo)
-- No tienes GPU NVIDIA (solo Apple Silicon)
+- Your local GPU doesn't have enough VRAM (large models)
+- You need multiple GPUs
+- Training that takes many hours (leave it running)
+- You don't have an NVIDIA GPU (only Apple Silicon)
 
-### Tabla comparativa de proveedores
+### Provider comparison table
 
-| Proveedor | GPU | Coste/hora (USD) | VRAM | Facilidad | Mejor para |
+| Provider | GPU | Cost/hour (USD) | VRAM | Ease of use | Best for |
 |---|---|---|---|---|---|
-| **Google Colab** (gratis) | T4 | Gratis (limitado) | 15 GB | Muy facil | Experimentar, aprender |
-| **Google Colab Pro** | A100, V100 | ~10/mes | 40-80 GB | Muy facil | Proyectos medianos |
-| **AWS SageMaker** | Varias | 1.50-40+ | 16-80 GB | Media | Produccion, equipos |
-| **Lambda Labs** | A100, H100 | 1.10-3.50 | 40-80 GB | Facil | Training intensivo |
-| **Vast.ai** | Varias | 0.20-2.00 | 8-80 GB | Media | Presupuesto ajustado |
-| **RunPod** | Varias | 0.40-3.50 | 16-80 GB | Facil | Balance coste/facilidad |
-| **Modal** | A100, H100 | 0.80-4.00 | 40-80 GB | Facil (serverless) | Jobs puntuales |
+| **Google Colab** (free) | T4 | Free (limited) | 15 GB | Very easy | Experimenting, learning |
+| **Google Colab Pro** | A100, V100 | ~10/month | 40-80 GB | Very easy | Medium projects |
+| **AWS SageMaker** | Various | 1.50-40+ | 16-80 GB | Medium | Production, teams |
+| **Lambda Labs** | A100, H100 | 1.10-3.50 | 40-80 GB | Easy | Intensive training |
+| **Vast.ai** | Various | 0.20-2.00 | 8-80 GB | Medium | Tight budget |
+| **RunPod** | Various | 0.40-3.50 | 16-80 GB | Easy | Cost/ease balance |
+| **Modal** | A100, H100 | 0.80-4.00 | 40-80 GB | Easy (serverless) | One-off jobs |
 
-### Google Colab: conectar a tu repositorio
+### Google Colab: connect to your repository
 
 ```python
-# En una celda de Colab
+# In a Colab cell
 from google.colab import drive
 drive.mount('/content/drive')
 
-# Clonar tu repo
-!git clone https://github.com/tu-usuario/tu-proyecto.git
-%cd tu-proyecto
+# Clone your repo
+!git clone https://github.com/your-user/your-project.git
+%cd your-project
 
-# Instalar dependencias
+# Install dependencies
 !pip install -r requirements.txt
 
-# Verificar GPU
+# Verify GPU
 import torch
 print(torch.cuda.is_available())
 print(torch.cuda.get_device_name(0))
 ```
 
-### AWS SageMaker (setup rapido)
+### AWS SageMaker (quick setup)
 
 ```python
-# Desde un notebook de SageMaker
+# From a SageMaker notebook
 import sagemaker
 from sagemaker.pytorch import PyTorch
 
@@ -345,7 +345,7 @@ estimator = PyTorch(
     source_dir='src/',
     role=sagemaker.get_execution_role(),
     instance_count=1,
-    instance_type='ml.g5.xlarge',  # GPU A10G, ~1.50/hora
+    instance_type='ml.g5.xlarge',  # A10G GPU, ~1.50/hour
     framework_version='2.2.0',
     py_version='py311',
     hyperparameters={
@@ -355,45 +355,45 @@ estimator = PyTorch(
     }
 )
 
-estimator.fit({'training': 's3://mi-bucket/datos/'})
+estimator.fit({'training': 's3://my-bucket/data/'})
 ```
 
-### Lambda Labs / RunPod (acceso SSH)
+### Lambda Labs / RunPod (SSH access)
 
 ```bash
-# Conectar por SSH
-ssh ubuntu@<ip-del-servidor>
+# Connect via SSH
+ssh ubuntu@<server-ip>
 
-# Clonar repo y empezar a trabajar
-git clone https://github.com/tu-usuario/tu-proyecto.git
-cd tu-proyecto
+# Clone repo and start working
+git clone https://github.com/your-user/your-project.git
+cd your-project
 pip install -r requirements.txt
 python train.py
 ```
 
-> **Punto clave:** Empieza con Colab gratis. Cuando necesites mas, usa RunPod o Vast.ai para balance coste/facilidad. SageMaker para produccion empresarial.
+> **Key point:** Start with free Colab. When you need more, use RunPod or Vast.ai for cost/ease balance. SageMaker for enterprise production.
 
 ---
 
-## Docker para AI
+## Docker for AI
 
-### Por que Docker para ML
+### Why Docker for ML
 
-- **Reproducibilidad:** El mismo entorno en tu maquina, en CI/CD, y en produccion
-- **GPU:** NVIDIA Container Toolkit permite usar GPUs dentro de Docker
-- **Dependencias:** CUDA, cuDNN, y librerias del sistema empaquetadas
+- **Reproducibility:** The same environment on your machine, in CI/CD, and in production
+- **GPU:** NVIDIA Container Toolkit allows using GPUs inside Docker
+- **Dependencies:** CUDA, cuDNN, and system libraries packaged together
 
-### Dockerfile base para proyectos ML
+### Base Dockerfile for ML projects
 
 ```dockerfile
 # Dockerfile
-# Base image con CUDA + Python
+# Base image with CUDA + Python
 FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 
-# Evitar prompts interactivos
+# Avoid interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar Python y herramientas del sistema
+# Install Python and system tools
 RUN apt-get update && apt-get install -y \
     python3.11 \
     python3.11-venv \
@@ -402,28 +402,28 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Crear alias
+# Create alias
 RUN ln -sf /usr/bin/python3.11 /usr/bin/python
 
-# Directorio de trabajo
+# Working directory
 WORKDIR /app
 
-# Copiar e instalar dependencias primero (cache de Docker)
+# Copy and install dependencies first (Docker cache)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar codigo fuente
+# Copy source code
 COPY src/ ./src/
 COPY configs/ ./configs/
 
-# Puerto para API o Jupyter
+# Port for API or Jupyter
 EXPOSE 8000
 
-# Comando por defecto
+# Default command
 CMD ["python", "src/train.py"]
 ```
 
-### Docker Compose para desarrollo
+### Docker Compose for development
 
 ```yaml
 # docker-compose.yml
@@ -433,8 +433,8 @@ services:
   ml-dev:
     build: .
     volumes:
-      - ./src:/app/src          # Hot reload del codigo
-      - ./data:/app/data        # Datos locales
+      - ./src:/app/src          # Hot reload of code
+      - ./data:/app/data        # Local data
       - ./notebooks:/app/notebooks
       - ./models:/app/models
     ports:
@@ -464,7 +464,7 @@ services:
 ### NVIDIA Container Toolkit
 
 ```bash
-# Instalar (Ubuntu)
+# Install (Ubuntu)
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
 curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
@@ -475,11 +475,11 @@ sudo apt-get install -y nvidia-container-toolkit
 sudo nvidia-ctk runtime configure --runtime=docker
 sudo systemctl restart docker
 
-# Verificar GPU en Docker
+# Verify GPU in Docker
 docker run --rm --gpus all nvidia/cuda:12.1.1-base-ubuntu22.04 nvidia-smi
 ```
 
-### Dockerfile para CPU (Apple Silicon / sin GPU)
+### Dockerfile for CPU (Apple Silicon / no GPU)
 
 ```dockerfile
 FROM python:3.11-slim
@@ -498,67 +498,67 @@ CMD ["python", "src/train.py"]
 
 ---
 
-## Estructura de Proyecto ML
+## ML Project Structure
 
 ```
 project/
-├── data/               # Datos - NO commitear (usar .gitignore)
-│   ├── raw/            # Datos originales, inmutables
-│   ├── processed/      # Datos limpios, listos para modelo
-│   └── external/       # Datos de fuentes externas
-├── notebooks/          # Jupyter notebooks para exploracion
+├── data/               # Data - DO NOT commit (use .gitignore)
+│   ├── raw/            # Original data, immutable
+│   ├── processed/      # Clean data, ready for model
+│   └── external/       # Data from external sources
+├── notebooks/          # Jupyter notebooks for exploration
 │   ├── 01-eda.ipynb
 │   ├── 02-feature-eng.ipynb
 │   └── 03-modeling.ipynb
-├── src/                # Codigo de produccion
+├── src/                # Production code
 │   ├── __init__.py
-│   ├── data/           # Carga y procesamiento de datos
+│   ├── data/           # Data loading and processing
 │   │   ├── __init__.py
 │   │   ├── dataset.py
 │   │   └── preprocessing.py
-│   ├── models/         # Definiciones de modelos
+│   ├── models/         # Model definitions
 │   │   ├── __init__.py
 │   │   └── model.py
-│   ├── training/       # Logica de entrenamiento
+│   ├── training/       # Training logic
 │   │   ├── __init__.py
 │   │   └── trainer.py
-│   ├── evaluation/     # Metricas y evaluacion
+│   ├── evaluation/     # Metrics and evaluation
 │   │   ├── __init__.py
 │   │   └── metrics.py
 │   └── utils.py
-├── models/             # Modelos entrenados - NO commitear
+├── models/             # Trained models - DO NOT commit
 │   └── .gitkeep
-├── configs/            # Configuracion e hiperparametros
+├── configs/            # Configuration and hyperparameters
 │   ├── train_config.yaml
 │   └── model_config.yaml
 ├── tests/              # Tests
 │   ├── test_data.py
 │   ├── test_model.py
 │   └── test_training.py
-├── logs/               # Logs de entrenamiento
-├── scripts/            # Scripts de utilidad
+├── logs/               # Training logs
+├── scripts/            # Utility scripts
 │   ├── train.sh
 │   └── evaluate.sh
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
-├── Makefile            # Comandos frecuentes
-├── pyproject.toml      # Configuracion del proyecto
-├── requirements.txt    # Dependencias pinneadas
+├── Makefile            # Frequent commands
+├── pyproject.toml      # Project configuration
+├── requirements.txt    # Pinned dependencies
 └── README.md
 ```
 
-### .gitignore para proyectos ML
+### .gitignore for ML projects
 
 ```gitignore
-# Datos
+# Data
 data/
 *.csv
 *.parquet
 *.h5
 *.hdf5
 
-# Modelos
+# Models
 models/
 *.pt
 *.pth
@@ -566,7 +566,7 @@ models/
 *.bin
 *.safetensors
 
-# Entornos
+# Environments
 .venv/
 __pycache__/
 *.pyc
@@ -587,7 +587,7 @@ mlruns/
 .DS_Store
 ```
 
-### Makefile para comandos frecuentes
+### Makefile for frequent commands
 
 ```makefile
 .PHONY: setup train test clean
@@ -617,23 +617,23 @@ clean:
 
 ---
 
-## IDEs y Herramientas
+## IDEs and Tools
 
-### VSCode: extensiones esenciales
+### VSCode: essential extensions
 
-| Extension | Proposito |
+| Extension | Purpose |
 |---|---|
-| **Python** (Microsoft) | Soporte basico de Python |
-| **Pylance** | IntelliSense avanzado, type checking |
-| **Jupyter** | Notebooks dentro de VSCode |
-| **GitHub Copilot** | AI autocompletado (muy util para boilerplate) |
-| **Ruff** | Linting ultrarapido |
-| **Remote - SSH** | Desarrollar en servidores remotos |
-| **Dev Containers** | Desarrollar dentro de Docker |
-| **GitLens** | Historial de Git avanzado |
-| **YAML** | Para configs de hiperparametros |
+| **Python** (Microsoft) | Basic Python support |
+| **Pylance** | Advanced IntelliSense, type checking |
+| **Jupyter** | Notebooks inside VSCode |
+| **GitHub Copilot** | AI autocompletion (very useful for boilerplate) |
+| **Ruff** | Ultra-fast linting |
+| **Remote - SSH** | Develop on remote servers |
+| **Dev Containers** | Develop inside Docker |
+| **GitLens** | Advanced Git history |
+| **YAML** | For hyperparameter configs |
 
-### Settings recomendados (VSCode)
+### Recommended settings (VSCode)
 
 ```json
 {
@@ -651,83 +651,83 @@ clean:
 
 ---
 
-## Tips de Productividad
+## Productivity Tips
 
-### tmux / screen para training largos
+### tmux / screen for long training runs
 
-Cuando entrenas en un servidor remoto, si se corta la conexion SSH, pierdes el proceso. tmux lo evita.
+When training on a remote server, if the SSH connection drops, you lose the process. tmux prevents this.
 
 ```bash
-# Instalar tmux
+# Install tmux
 sudo apt install tmux
 
-# Crear sesion
+# Create session
 tmux new -s training
 
-# Dentro de tmux: ejecutar tu training
+# Inside tmux: run your training
 python train.py --epochs 100
 
-# Desconectar de tmux (sin matar el proceso)
-# Ctrl+B, luego D
+# Detach from tmux (without killing the process)
+# Ctrl+B, then D
 
-# Reconectar a la sesion
+# Reattach to the session
 tmux attach -t training
 
-# Listar sesiones
+# List sessions
 tmux ls
 
-# Comandos utiles dentro de tmux:
-# Ctrl+B, %    -> Split vertical
-# Ctrl+B, "    -> Split horizontal
-# Ctrl+B, arrow -> Mover entre paneles
+# Useful commands inside tmux:
+# Ctrl+B, %    -> Vertical split
+# Ctrl+B, "    -> Horizontal split
+# Ctrl+B, arrow -> Move between panes
 ```
 
-### Monitorizar GPU
+### Monitor GPU
 
 ```bash
-# Ver uso de GPU en tiempo real (se actualiza cada 1 segundo)
+# See GPU usage in real time (updates every 1 second)
 watch -n 1 nvidia-smi
 
-# Alternativa mas bonita
+# Nicer alternative
 pip install gpustat
 gpustat --watch
 
-# Monitorizar desde Python
+# Monitor from Python
 import torch
-print(f"Memoria asignada: {torch.cuda.memory_allocated()/1e9:.2f} GB")
-print(f"Memoria reservada: {torch.cuda.memory_reserved()/1e9:.2f} GB")
+print(f"Memory allocated: {torch.cuda.memory_allocated()/1e9:.2f} GB")
+print(f"Memory reserved: {torch.cuda.memory_reserved()/1e9:.2f} GB")
 ```
 
-### Otros tips
+### Other tips
 
 ```bash
-# Ejecutar en background con nohup (alternativa simple a tmux)
+# Run in background with nohup (simple alternative to tmux)
 nohup python train.py > training.log 2>&1 &
 
-# Ver el log en tiempo real
+# View log in real time
 tail -f training.log
 
-# Notificacion cuando termina el training (Mac)
-python train.py && osascript -e 'display notification "Training terminado" with title "ML"'
+# Notification when training finishes (Mac)
+python train.py && osascript -e 'display notification "Training finished" with title "ML"'
 
-# Notificacion cuando termina el training (Linux)
-python train.py && notify-send "Training terminado"
+# Notification when training finishes (Linux)
+python train.py && notify-send "Training finished"
 
-# Medir tiempo de ejecucion
+# Measure execution time
 time python train.py
 ```
 
-### Checklist antes de empezar un proyecto
+### Checklist before starting a project
 
-- [ ] Crear repositorio Git
-- [ ] Configurar .gitignore para ML
-- [ ] Crear entorno virtual
-- [ ] Instalar dependencias base
-- [ ] Verificar GPU (si aplica)
-- [ ] Crear estructura de carpetas
-- [ ] Configurar IDE
-- [ ] Primer notebook de EDA
+- [ ] Create Git repository
+- [ ] Configure .gitignore for ML
+- [ ] Create virtual environment
+- [ ] Install base dependencies
+- [ ] Verify GPU (if applicable)
+- [ ] Create folder structure
+- [ ] Configure IDE
+- [ ] First EDA notebook
 
 ---
 
-> **Resumen:** El entorno de desarrollo es la base de todo. Invierte tiempo en configurarlo bien al principio y te ahorrara horas de dolores de cabeza despues. Usa venv para entornos, pip-compile para dependencias, y Docker cuando necesites reproducibilidad total.
+> **Summary:** The development environment is the foundation of everything. Invest time in setting it up well at the beginning and it will save you hours of headaches later. Use venv for environments, pip-compile for dependencies, and Docker when you need total reproducibility.

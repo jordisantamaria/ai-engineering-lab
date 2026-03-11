@@ -1,224 +1,224 @@
-# Python para AI/ML
+# Python for AI/ML
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [NumPy Esencial](#numpy-esencial)
-- [Pandas Esencial](#pandas-esencial)
-- [Matplotlib y Seaborn](#matplotlib-y-seaborn)
-- [Tips de Rendimiento](#tips-de-rendimiento)
+- [NumPy Essentials](#numpy-essentials)
+- [Pandas Essentials](#pandas-essentials)
+- [Matplotlib and Seaborn](#matplotlib-and-seaborn)
+- [Performance Tips](#performance-tips)
 
 ---
 
-## NumPy Esencial
+## NumPy Essentials
 
-NumPy es la base de todo el ecosistema de AI/ML en Python. Cada libreria (Pandas, scikit-learn, PyTorch) usa NumPy internamente o comparte su interfaz.
+NumPy is the foundation of the entire AI/ML ecosystem in Python. Every library (Pandas, scikit-learn, PyTorch) uses NumPy internally or shares its interface.
 
-### Arrays, shapes y dtypes
+### Arrays, shapes and dtypes
 
 ```python
 import numpy as np
 
-# Crear arrays
+# Create arrays
 a = np.array([1, 2, 3])                    # 1D - vector
 b = np.array([[1, 2], [3, 4]])             # 2D - matrix
 c = np.zeros((3, 4, 5))                    # 3D - tensor
 
-# Shape: la "forma" del array
-print(a.shape)   # (3,)       - vector de 3 elementos
-print(b.shape)   # (2, 2)     - matrix 2x2
-print(c.shape)   # (3, 4, 5)  - tensor 3D
+# Shape: the "form" of the array
+print(a.shape)   # (3,)       - vector of 3 elements
+print(b.shape)   # (2, 2)     - 2x2 matrix
+print(c.shape)   # (3, 4, 5)  - 3D tensor
 
-# Entender shapes es CRITICO en deep learning
-# Ejemplo: batch de imagenes
-imagenes = np.random.randn(32, 3, 224, 224)
-# 32 imagenes, 3 canales (RGB), 224x224 pixeles
-# Convencion PyTorch: (batch, channels, height, width)
+# Understanding shapes is CRITICAL in deep learning
+# Example: batch of images
+images = np.random.randn(32, 3, 224, 224)
+# 32 images, 3 channels (RGB), 224x224 pixels
+# PyTorch convention: (batch, channels, height, width)
 ```
 
-#### dtypes importantes para ML
+#### Important dtypes for ML
 
-| dtype | Bytes | Rango | Uso |
+| dtype | Bytes | Range | Usage |
 |---|---|---|---|
-| `float32` | 4 | ~7 digitos decimales | **Default en ML/DL** |
-| `float16` | 2 | ~3 digitos decimales | Mixed precision training |
-| `float64` | 8 | ~15 digitos decimales | Calculo cientifico |
-| `int64` | 8 | -2^63 a 2^63-1 | Labels, indices |
-| `int8` | 1 | -128 a 127 | Cuantizacion de modelos |
-| `bool` | 1 | True/False | Mascaras |
+| `float32` | 4 | ~7 decimal digits | **Default in ML/DL** |
+| `float16` | 2 | ~3 decimal digits | Mixed precision training |
+| `float64` | 8 | ~15 decimal digits | Scientific computing |
+| `int64` | 8 | -2^63 to 2^63-1 | Labels, indices |
+| `int8` | 1 | -128 to 127 | Model quantization |
+| `bool` | 1 | True/False | Masks |
 
 ```python
-# Controlar dtype (importante para memoria)
+# Control dtype (important for memory)
 x = np.array([1.0, 2.0, 3.0], dtype=np.float32)  # 12 bytes
-y = np.array([1.0, 2.0, 3.0], dtype=np.float64)  # 24 bytes (doble)
+y = np.array([1.0, 2.0, 3.0], dtype=np.float64)  # 24 bytes (double)
 
-# Convertir
-x_16 = x.astype(np.float16)  # Reduce memoria a la mitad
+# Convert
+x_16 = x.astype(np.float16)  # Reduces memory by half
 ```
 
 ### Broadcasting
 
-Broadcasting es la regla que NumPy usa para operar arrays de diferentes shapes. Es fundamental entenderlo porque PyTorch usa las mismas reglas.
+Broadcasting is the rule NumPy uses to operate on arrays of different shapes. It is fundamental to understand because PyTorch uses the same rules.
 
-**Regla:** NumPy compara shapes de derecha a izquierda. Las dimensiones son compatibles si son iguales o si una de ellas es 1.
-
-```
-Forma A:     (4, 3)
-Forma B:        (3,)    ->  se expande a (1, 3) -> luego a (4, 3)
-Resultado:   (4, 3)     OK
-
-Forma A:     (4, 3)
-Forma B:     (4, 1)     ->  se expande a (4, 3)
-Resultado:   (4, 3)     OK
-
-Forma A:     (4, 3)
-Forma B:     (4, 2)     ->  ERROR: 3 != 2 y ninguno es 1
-```
-
-#### Visualizacion de broadcasting
+**Rule:** NumPy compares shapes from right to left. Dimensions are compatible if they are equal or if one of them is 1.
 
 ```
-Ejemplo: sumar un vector a cada fila de una matriz
+Shape A:     (4, 3)
+Shape B:        (3,)    ->  expands to (1, 3) -> then to (4, 3)
+Result:      (4, 3)     OK
+
+Shape A:     (4, 3)
+Shape B:     (4, 1)     ->  expands to (4, 3)
+Result:      (4, 3)     OK
+
+Shape A:     (4, 3)
+Shape B:     (4, 2)     ->  ERROR: 3 != 2 and neither is 1
+```
+
+#### Broadcasting visualization
+
+```
+Example: add a vector to each row of a matrix
 
 Matrix (3, 4):              Vector (4,):
-┌─────────────────┐         ┌─────────────────┐
-│  1   2   3   4  │    +    │ 10  20  30  40  │
-│  5   6   7   8  │         └─────────────────┘
-│  9  10  11  12  │              │
-└─────────────────┘              │ broadcast (copiar a cada fila)
-                                 ▼
-                            ┌─────────────────┐
-         +                  │ 10  20  30  40  │
-                            │ 10  20  30  40  │
-                            │ 10  20  30  40  │
-                            └─────────────────┘
++-----------------+         +-----------------+
+|  1   2   3   4  |    +    | 10  20  30  40  |
+|  5   6   7   8  |         +-----------------+
+|  9  10  11  12  |              |
++-----------------+              | broadcast (copy to each row)
+                                 v
+                            +-----------------+
+         +                  | 10  20  30  40  |
+                            | 10  20  30  40  |
+                            | 10  20  30  40  |
+                            +-----------------+
 
-Resultado (3, 4):
-┌─────────────────┐
-│ 11  22  33  44  │
-│ 15  26  37  48  │
-│ 19  30  41  52  │
-└─────────────────┘
+Result (3, 4):
++-----------------+
+| 11  22  33  44  |
+| 15  26  37  48  |
+| 19  30  41  52  |
++-----------------+
 ```
 
 ```python
-# Codigo
+# Code
 matrix = np.array([[1,2,3,4], [5,6,7,8], [9,10,11,12]])
 vector = np.array([10, 20, 30, 40])
 
-resultado = matrix + vector  # Broadcasting automatico
+result = matrix + vector  # Automatic broadcasting
 ```
 
-#### Uso comun en ML: normalizar features
+#### Common use in ML: normalize features
 
 ```
-Features (1000, 5):         Media (5,):
-┌─────────────────┐         ┌─────────────────┐
-│ x1  x2  x3 ... │    -    │ m1  m2  m3 ...  │  <- media por columna
-│ ...             │         └─────────────────┘
-│ ...             │
-└─────────────────┘
+Features (1000, 5):         Mean (5,):
++-----------------+         +-----------------+
+| x1  x2  x3 ... |    -    | m1  m2  m3 ...  |  <- mean per column
+| ...             |         +-----------------+
+| ...             |
++-----------------+
 
-Cada columna se le resta su propia media.
+Each column has its own mean subtracted.
 ```
 
 ```python
-# Normalizar features (media 0, desviacion 1)
-X = np.random.randn(1000, 5)  # 1000 muestras, 5 features
+# Normalize features (mean 0, standard deviation 1)
+X = np.random.randn(1000, 5)  # 1000 samples, 5 features
 mean = X.mean(axis=0)          # Shape: (5,)
 std = X.std(axis=0)            # Shape: (5,)
 
 X_normalized = (X - mean) / std  # Broadcasting: (1000,5) - (5,) / (5,)
 ```
 
-### Operaciones vectorizadas vs loops
+### Vectorized operations vs loops
 
 ```python
 import time
 
 n = 1_000_000
 
-# MAL: loop de Python (LENTO)
+# BAD: Python loop (SLOW)
 a = list(range(n))
 b = list(range(n))
 
 start = time.time()
 c = [a[i] + b[i] for i in range(n)]
-print(f"Loop Python: {time.time() - start:.4f}s")
+print(f"Python loop: {time.time() - start:.4f}s")
 
-# BIEN: vectorizado con NumPy (RAPIDO)
+# GOOD: vectorized with NumPy (FAST)
 a_np = np.arange(n)
 b_np = np.arange(n)
 
 start = time.time()
 c_np = a_np + b_np
-print(f"NumPy vectorizado: {time.time() - start:.4f}s")
+print(f"NumPy vectorized: {time.time() - start:.4f}s")
 
-# Resultado tipico:
-# Loop Python:       0.1500s
-# NumPy vectorizado:  0.0015s  (100x mas rapido)
+# Typical result:
+# Python loop:        0.1500s
+# NumPy vectorized:   0.0015s  (100x faster)
 ```
 
-> **Punto clave:** Nunca uses loops de Python para operar sobre arrays. Siempre usa operaciones vectorizadas de NumPy. La diferencia puede ser de 100x o mas.
+> **Key point:** Never use Python loops to operate on arrays. Always use NumPy vectorized operations. The difference can be 100x or more.
 
-### Slicing, indexing y reshaping
+### Slicing, indexing and reshaping
 
 ```python
-# Slicing (igual que listas de Python, pero multidimensional)
+# Slicing (same as Python lists, but multidimensional)
 matrix = np.arange(20).reshape(4, 5)
 # array([[ 0,  1,  2,  3,  4],
 #        [ 5,  6,  7,  8,  9],
 #        [10, 11, 12, 13, 14],
 #        [15, 16, 17, 18, 19]])
 
-matrix[0, :]      # Primera fila: [0, 1, 2, 3, 4]
-matrix[:, 0]      # Primera columna: [0, 5, 10, 15]
-matrix[1:3, 2:4]  # Submatriz: [[7, 8], [12, 13]]
-matrix[:, -1]     # Ultima columna: [4, 9, 14, 19]
+matrix[0, :]      # First row: [0, 1, 2, 3, 4]
+matrix[:, 0]      # First column: [0, 5, 10, 15]
+matrix[1:3, 2:4]  # Submatrix: [[7, 8], [12, 13]]
+matrix[:, -1]     # Last column: [4, 9, 14, 19]
 
-# Boolean indexing (MUY util para filtrar datos)
-valores = np.array([1, -2, 3, -4, 5])
-mask = valores > 0
-positivos = valores[mask]  # [1, 3, 5]
+# Boolean indexing (VERY useful for filtering data)
+values = np.array([1, -2, 3, -4, 5])
+mask = values > 0
+positives = values[mask]  # [1, 3, 5]
 
 # Fancy indexing
 indices = np.array([0, 3, 4])
-valores[indices]  # [1, -4, 5]
+values[indices]  # [1, -4, 5]
 ```
 
 #### Reshaping
 
 ```python
-# reshape: cambiar la forma sin cambiar los datos
+# reshape: change the shape without changing the data
 a = np.arange(12)          # Shape: (12,)
 b = a.reshape(3, 4)        # Shape: (3, 4)
 c = a.reshape(2, 2, 3)    # Shape: (2, 2, 3)
-d = a.reshape(-1, 4)       # Shape: (3, 4) - NumPy calcula el -1
+d = a.reshape(-1, 4)       # Shape: (3, 4) - NumPy calculates the -1
 
-# Operaciones de forma comunes en DL
-x = np.random.randn(32, 784)     # Batch de 32 imagenes aplanadas
-x_img = x.reshape(32, 1, 28, 28)  # Restaurar a imagenes 28x28
+# Common shape operations in DL
+x = np.random.randn(32, 784)     # Batch of 32 flattened images
+x_img = x.reshape(32, 1, 28, 28)  # Restore to 28x28 images
 
-# flatten: aplanar a 1D
+# flatten: flatten to 1D
 x_flat = x_img.reshape(32, -1)    # (32, 784)
-# o equivalentemente
-x_flat = x_img.flatten()           # (25088,) - todo aplanado
+# or equivalently
+x_flat = x_img.flatten()           # (25088,) - everything flattened
 
-# squeeze / unsqueeze (expandir/reducir dimensiones de tamano 1)
+# squeeze / unsqueeze (expand/reduce dimensions of size 1)
 a = np.array([[1, 2, 3]])   # Shape: (1, 3)
 a.squeeze()                  # Shape: (3,)
 
 b = np.array([1, 2, 3])     # Shape: (3,)
-b[np.newaxis, :]             # Shape: (1, 3)  - agregar dimension de batch
-b[:, np.newaxis]             # Shape: (3, 1)  - agregar dimension de feature
+b[np.newaxis, :]             # Shape: (1, 3)  - add batch dimension
+b[:, np.newaxis]             # Shape: (3, 1)  - add feature dimension
 ```
 
-### Algebra lineal
+### Linear algebra
 
-No necesitas demostrar teoremas, pero si necesitas intuicion de estas operaciones porque aparecen constantemente en ML y DL.
+You don't need to prove theorems, but you do need intuition about these operations because they appear constantly in ML and DL.
 
-#### Dot product (producto punto)
+#### Dot product
 
-Mide la "similitud" entre dos vectores. Base de las attention scores, embeddings, etc.
+Measures the "similarity" between two vectors. The basis of attention scores, embeddings, etc.
 
 ```
 a = [1, 2, 3]
@@ -226,10 +226,10 @@ b = [4, 5, 6]
 
 dot(a, b) = 1*4 + 2*5 + 3*6 = 32
 
-Intuicion: si dos vectores apuntan en la misma direccion,
-su dot product es grande y positivo.
-Si son perpendiculares, es 0.
-Si apuntan en direcciones opuestas, es grande y negativo.
+Intuition: if two vectors point in the same direction,
+their dot product is large and positive.
+If they are perpendicular, it is 0.
+If they point in opposite directions, it is large and negative.
 ```
 
 ```python
@@ -238,9 +238,9 @@ b = np.array([4, 5, 6])
 print(np.dot(a, b))  # 32
 ```
 
-#### Multiplicacion de matrices
+#### Matrix multiplication
 
-Es simplemente muchos dot products organizados. La base de las redes neuronales: `output = input @ weights`.
+It is simply many dot products organized together. The basis of neural networks: `output = input @ weights`.
 
 ```
 A (2, 3) @ B (3, 2) = C (2, 2)
@@ -250,189 +250,189 @@ A:              B:              C:
 [4, 5, 6]  @   [9, 10]    =    [4*7+5*9+6*11,  4*8+5*10+6*12]  =  [139, 154]
                 [11, 12]
 
-Regla: (m, n) @ (n, p) = (m, p)
-       Las dimensiones internas (n) deben coincidir.
+Rule: (m, n) @ (n, p) = (m, p)
+      The inner dimensions (n) must match.
 ```
 
 ```python
 A = np.array([[1,2,3], [4,5,6]])     # (2, 3)
 B = np.array([[7,8], [9,10], [11,12]])  # (3, 2)
 
-C = A @ B      # (2, 2)  - operador @ es matmul
-# equivalente: C = np.matmul(A, B)
-# equivalente: C = np.dot(A, B)     # Solo para 2D
+C = A @ B      # (2, 2)  - @ operator is matmul
+# equivalent: C = np.matmul(A, B)
+# equivalent: C = np.dot(A, B)     # Only for 2D
 ```
 
-#### Eigenvalues (autovalores)
+#### Eigenvalues
 
-Intuicion: los eigenvectors de una matriz son las "direcciones principales" a lo largo de las cuales la transformacion solo estira o comprime (no rota). El eigenvalue dice cuanto estira en esa direccion.
+Intuition: the eigenvectors of a matrix are the "principal directions" along which the transformation only stretches or compresses (does not rotate). The eigenvalue tells you how much it stretches in that direction.
 
-Uso en ML: PCA (Principal Component Analysis) usa eigenvalues para encontrar las direcciones de maxima varianza.
+Use in ML: PCA (Principal Component Analysis) uses eigenvalues to find the directions of maximum variance.
 
 ```python
-# Ejemplo: PCA manual
+# Example: manual PCA
 from numpy.linalg import eig
 
-# Datos 2D
+# 2D data
 X = np.random.randn(100, 2)
-X[:, 1] = X[:, 0] * 2 + np.random.randn(100) * 0.1  # Correlacion fuerte
+X[:, 1] = X[:, 0] * 2 + np.random.randn(100) * 0.1  # Strong correlation
 
-# Matriz de covarianza
+# Covariance matrix
 cov_matrix = np.cov(X.T)
 
-# Eigenvalues y eigenvectors
+# Eigenvalues and eigenvectors
 eigenvalues, eigenvectors = eig(cov_matrix)
 print(f"Eigenvalues: {eigenvalues}")
-# El eigenvalue mas grande indica la direccion de mayor varianza
-# Esa direccion es el primer componente principal
+# The largest eigenvalue indicates the direction of maximum variance
+# That direction is the first principal component
 ```
 
-### Random: seeds y distribuciones
+### Random: seeds and distributions
 
 ```python
-# SEED: para reproducibilidad
-np.random.seed(42)  # Forma antigua (global)
+# SEED: for reproducibility
+np.random.seed(42)  # Old way (global)
 
-# Forma moderna (recomendada): generador local
+# Modern way (recommended): local generator
 rng = np.random.default_rng(seed=42)
 
-# Distribuciones comunes en ML
-rng.uniform(0, 1, size=10)         # Uniforme [0, 1]
-rng.normal(0, 1, size=(3, 4))      # Normal (Gaussiana) - media 0, std 1
-rng.integers(0, 10, size=5)         # Enteros aleatorios [0, 10)
-rng.choice([1,2,3,4,5], size=3)    # Elegir del array
-rng.permutation(10)                 # Permutacion aleatoria de 0..9
+# Common distributions in ML
+rng.uniform(0, 1, size=10)         # Uniform [0, 1]
+rng.normal(0, 1, size=(3, 4))      # Normal (Gaussian) - mean 0, std 1
+rng.integers(0, 10, size=5)         # Random integers [0, 10)
+rng.choice([1,2,3,4,5], size=3)    # Choose from array
+rng.permutation(10)                 # Random permutation of 0..9
 rng.shuffle(my_array)               # Shuffle in-place
 
-# Reproducibilidad completa en un script
+# Full reproducibility in a script
 def set_seed(seed=42):
     np.random.seed(seed)
-    # Si usas PyTorch:
+    # If using PyTorch:
     # torch.manual_seed(seed)
     # torch.cuda.manual_seed_all(seed)
 ```
 
 ---
 
-## Pandas Esencial
+## Pandas Essentials
 
-Pandas es la herramienta principal para manipular datos tabulares. Todo proyecto de ML empieza con Pandas para EDA y feature engineering.
+Pandas is the primary tool for manipulating tabular data. Every ML project starts with Pandas for EDA and feature engineering.
 
-### DataFrame y Series
+### DataFrame and Series
 
 ```python
 import pandas as pd
 
-# Crear DataFrame
+# Create DataFrame
 df = pd.DataFrame({
-    'nombre': ['Ana', 'Bob', 'Carlos', 'Diana'],
-    'edad': [25, 30, 35, 28],
-    'salario': [50000, 60000, 70000, 55000],
-    'departamento': ['IT', 'HR', 'IT', 'Marketing']
+    'name': ['Ana', 'Bob', 'Carlos', 'Diana'],
+    'age': [25, 30, 35, 28],
+    'salary': [50000, 60000, 70000, 55000],
+    'department': ['IT', 'HR', 'IT', 'Marketing']
 })
 
-# Operaciones basicas
-df.shape          # (4, 4) - filas, columnas
-df.dtypes         # Tipo de cada columna
-df.info()         # Resumen completo
-df.describe()     # Estadisticas descriptivas
-df.head(3)        # Primeras 3 filas
-df.columns        # Nombres de columnas
-df.nunique()      # Valores unicos por columna
+# Basic operations
+df.shape          # (4, 4) - rows, columns
+df.dtypes         # Type of each column
+df.info()         # Full summary
+df.describe()     # Descriptive statistics
+df.head(3)        # First 3 rows
+df.columns        # Column names
+df.nunique()      # Unique values per column
 ```
 
-### Lectura de datos
+### Reading data
 
 ```python
-# CSV (el mas comun)
-df = pd.read_csv('datos.csv')
-df = pd.read_csv('datos.csv', sep=';', encoding='utf-8')
+# CSV (the most common)
+df = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv', sep=';', encoding='utf-8')
 
-# Parquet (RECOMENDADO para datasets grandes - mas rapido, mas pequeno)
-df = pd.read_parquet('datos.parquet')
-df.to_parquet('datos.parquet', index=False)
+# Parquet (RECOMMENDED for large datasets - faster, smaller)
+df = pd.read_parquet('data.parquet')
+df.to_parquet('data.parquet', index=False)
 
 # JSON
-df = pd.read_json('datos.json')
-df = pd.read_json('datos.json', lines=True)  # JSON Lines
+df = pd.read_json('data.json')
+df = pd.read_json('data.json', lines=True)  # JSON Lines
 
 # SQL
 import sqlite3
 conn = sqlite3.connect('database.db')
-df = pd.read_sql('SELECT * FROM tabla', conn)
+df = pd.read_sql('SELECT * FROM table', conn)
 
 # Excel
-df = pd.read_excel('datos.xlsx', sheet_name='Hoja1')
+df = pd.read_excel('data.xlsx', sheet_name='Sheet1')
 ```
 
-> **Punto clave:** Usa Parquet siempre que puedas. Es 5-10x mas rapido que CSV y ocupa menos espacio. Ademas, conserva los tipos de datos.
+> **Key point:** Use Parquet whenever you can. It is 5-10x faster than CSV and takes up less space. Additionally, it preserves data types.
 
-### Operaciones clave
+### Key operations
 
-#### Filtrado
+#### Filtering
 
 ```python
-# Filtrar filas
-df[df['edad'] > 30]
-df[df['departamento'] == 'IT']
-df[(df['edad'] > 25) & (df['salario'] > 55000)]  # AND
-df[df['departamento'].isin(['IT', 'HR'])]
+# Filter rows
+df[df['age'] > 30]
+df[df['department'] == 'IT']
+df[(df['age'] > 25) & (df['salary'] > 55000)]  # AND
+df[df['department'].isin(['IT', 'HR'])]
 ```
 
 #### GroupBy
 
 ```python
-# Agrupar y agregar
-df.groupby('departamento')['salario'].mean()
-df.groupby('departamento').agg({
-    'salario': ['mean', 'median', 'std'],
-    'edad': ['min', 'max']
+# Group and aggregate
+df.groupby('department')['salary'].mean()
+df.groupby('department').agg({
+    'salary': ['mean', 'median', 'std'],
+    'age': ['min', 'max']
 })
 
-# Ejemplo ML: metricas por categoria
-resultados = pd.DataFrame({
-    'modelo': ['RF', 'RF', 'XGB', 'XGB'],
+# ML example: metrics by category
+results = pd.DataFrame({
+    'model': ['RF', 'RF', 'XGB', 'XGB'],
     'fold': [1, 2, 1, 2],
     'accuracy': [0.85, 0.87, 0.90, 0.88]
 })
-resultados.groupby('modelo')['accuracy'].agg(['mean', 'std'])
+results.groupby('model')['accuracy'].agg(['mean', 'std'])
 ```
 
 #### Merge (JOIN)
 
 ```python
-# Equivalente a SQL JOIN
-clientes = pd.DataFrame({
+# Equivalent to SQL JOIN
+customers = pd.DataFrame({
     'id': [1, 2, 3],
-    'nombre': ['Ana', 'Bob', 'Carlos']
+    'name': ['Ana', 'Bob', 'Carlos']
 })
-pedidos = pd.DataFrame({
-    'cliente_id': [1, 1, 2, 4],
-    'producto': ['A', 'B', 'C', 'D'],
-    'monto': [100, 200, 150, 300]
+orders = pd.DataFrame({
+    'customer_id': [1, 1, 2, 4],
+    'product': ['A', 'B', 'C', 'D'],
+    'amount': [100, 200, 150, 300]
 })
 
-# Inner join (solo donde hay match)
-pd.merge(clientes, pedidos, left_on='id', right_on='cliente_id', how='inner')
+# Inner join (only where there is a match)
+pd.merge(customers, orders, left_on='id', right_on='customer_id', how='inner')
 
-# Left join (todos los clientes, aunque no tengan pedidos)
-pd.merge(clientes, pedidos, left_on='id', right_on='cliente_id', how='left')
+# Left join (all customers, even those without orders)
+pd.merge(customers, orders, left_on='id', right_on='customer_id', how='left')
 ```
 
 #### Pivot
 
 ```python
-# Pivot table (como tabla dinamica de Excel)
-ventas = pd.DataFrame({
-    'mes': ['Ene', 'Ene', 'Feb', 'Feb'],
-    'producto': ['A', 'B', 'A', 'B'],
-    'ventas': [100, 200, 150, 250]
+# Pivot table (like Excel pivot table)
+sales = pd.DataFrame({
+    'month': ['Jan', 'Jan', 'Feb', 'Feb'],
+    'product': ['A', 'B', 'A', 'B'],
+    'sales': [100, 200, 150, 250]
 })
 
-tabla = ventas.pivot_table(
-    values='ventas',
-    index='mes',
-    columns='producto',
+table = sales.pivot_table(
+    values='sales',
+    index='month',
+    columns='product',
     aggfunc='sum'
 )
 ```
@@ -440,186 +440,186 @@ tabla = ventas.pivot_table(
 #### Apply
 
 ```python
-# Aplicar funcion a cada fila/columna
-df['salario_anual'] = df['salario'].apply(lambda x: x * 12)
+# Apply function to each row/column
+df['annual_salary'] = df['salary'].apply(lambda x: x * 12)
 
-# Apply por fila (mas lento, evitar si se puede vectorizar)
-df['categoria'] = df.apply(
-    lambda row: 'senior' if row['edad'] > 30 else 'junior',
+# Apply per row (slower, avoid if you can vectorize)
+df['category'] = df.apply(
+    lambda row: 'senior' if row['age'] > 30 else 'junior',
     axis=1
 )
 
-# MEJOR: vectorizado
-df['categoria'] = np.where(df['edad'] > 30, 'senior', 'junior')
+# BETTER: vectorized
+df['category'] = np.where(df['age'] > 30, 'senior', 'junior')
 ```
 
-### Manejo de missing values
+### Handling missing values
 
 ```python
-# Detectar
-df.isnull().sum()              # Conteo de NaN por columna
-df.isnull().mean() * 100       # Porcentaje de NaN
+# Detect
+df.isnull().sum()              # Count of NaN per column
+df.isnull().mean() * 100       # Percentage of NaN
 
-# Estrategias de imputacion para ML
-# 1. Eliminar filas (solo si pocos NaN)
+# Imputation strategies for ML
+# 1. Drop rows (only if few NaN)
 df_clean = df.dropna()
 
-# 2. Eliminar columnas con muchos NaN (>50%)
+# 2. Drop columns with many NaN (>50%)
 threshold = 0.5
 cols_to_drop = df.columns[df.isnull().mean() > threshold]
 df = df.drop(columns=cols_to_drop)
 
-# 3. Rellenar con media/mediana (numericas)
-df['edad'] = df['edad'].fillna(df['edad'].median())
+# 3. Fill with mean/median (numeric)
+df['age'] = df['age'].fillna(df['age'].median())
 
-# 4. Rellenar con moda (categoricas)
-df['departamento'] = df['departamento'].fillna(df['departamento'].mode()[0])
+# 4. Fill with mode (categorical)
+df['department'] = df['department'].fillna(df['department'].mode()[0])
 
-# 5. Forward fill (series temporales)
-df['valor'] = df['valor'].ffill()
+# 5. Forward fill (time series)
+df['value'] = df['value'].ffill()
 
-# 6. Crear feature indicadora de missing (a veces el NaN es informativo)
-df['edad_missing'] = df['edad'].isnull().astype(int)
-df['edad'] = df['edad'].fillna(df['edad'].median())
+# 6. Create missing indicator feature (sometimes NaN is informative)
+df['age_missing'] = df['age'].isnull().astype(int)
+df['age'] = df['age'].fillna(df['age'].median())
 ```
 
-| Estrategia | Cuando usarla | Cuidado |
+| Strategy | When to use | Caution |
 |---|---|---|
-| Eliminar filas | Pocos NaN (<5%), datos abundantes | Pierde datos, posible sesgo |
-| Media/mediana | Numericas, distribucion normal/sesgada | No captura variabilidad |
-| Moda | Categoricas | Puede sesgar hacia valor mas comun |
-| Forward fill | Series temporales | No usar en datos no temporales |
-| Indicadora + imputar | Cuando el missing tiene significado | Duplica features |
-| Modelo (KNN, iterativo) | Muchos NaN con patrones | Mas complejo, riesgo de data leakage |
+| Drop rows | Few NaN (<5%), abundant data | Loses data, possible bias |
+| Mean/median | Numeric, normal/skewed distribution | Does not capture variability |
+| Mode | Categorical | May bias toward most common value |
+| Forward fill | Time series | Do not use on non-temporal data |
+| Indicator + impute | When missingness has meaning | Doubles features |
+| Model (KNN, iterative) | Many NaN with patterns | More complex, risk of data leakage |
 
-### Feature engineering basico con Pandas
+### Basic feature engineering with Pandas
 
 ```python
-# Crear nuevas features
-df['ratio_salario_edad'] = df['salario'] / df['edad']
-df['log_salario'] = np.log1p(df['salario'])  # log(1+x) para evitar log(0)
-df['salario_binned'] = pd.cut(df['salario'], bins=3, labels=['bajo', 'medio', 'alto'])
+# Create new features
+df['salary_age_ratio'] = df['salary'] / df['age']
+df['log_salary'] = np.log1p(df['salary'])  # log(1+x) to avoid log(0)
+df['salary_binned'] = pd.cut(df['salary'], bins=3, labels=['low', 'medium', 'high'])
 
-# Features temporales
-df['fecha'] = pd.to_datetime(df['fecha'])
-df['dia_semana'] = df['fecha'].dt.dayofweek
-df['mes'] = df['fecha'].dt.month
-df['es_fin_de_semana'] = df['dia_semana'].isin([5, 6]).astype(int)
-df['hora'] = df['fecha'].dt.hour
+# Temporal features
+df['date'] = pd.to_datetime(df['date'])
+df['day_of_week'] = df['date'].dt.dayofweek
+df['month'] = df['date'].dt.month
+df['is_weekend'] = df['day_of_week'].isin([5, 6]).astype(int)
+df['hour'] = df['date'].dt.hour
 
-# Encoding de categoricas
-df['departamento_encoded'] = df['departamento'].map({
+# Categorical encoding
+df['department_encoded'] = df['department'].map({
     'IT': 0, 'HR': 1, 'Marketing': 2
 })
 
 # One-hot encoding
-df_encoded = pd.get_dummies(df, columns=['departamento'], prefix='dept')
+df_encoded = pd.get_dummies(df, columns=['department'], prefix='dept')
 
-# Aggregation features (ejemplo: compras por cliente)
-df['total_compras_cliente'] = df.groupby('cliente_id')['monto'].transform('sum')
-df['media_compras_cliente'] = df.groupby('cliente_id')['monto'].transform('mean')
-df['num_compras_cliente'] = df.groupby('cliente_id')['monto'].transform('count')
+# Aggregation features (example: purchases per customer)
+df['total_customer_purchases'] = df.groupby('customer_id')['amount'].transform('sum')
+df['avg_customer_purchases'] = df.groupby('customer_id')['amount'].transform('mean')
+df['num_customer_purchases'] = df.groupby('customer_id')['amount'].transform('count')
 ```
 
 ---
 
-## Matplotlib y Seaborn
+## Matplotlib and Seaborn
 
-### Setup basico
+### Basic setup
 
 ```python
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Estilo general
+# General style
 sns.set_theme(style="whitegrid")
 plt.rcParams['figure.figsize'] = (10, 6)
 plt.rcParams['figure.dpi'] = 100
 ```
 
-### Plots esenciales para ML
+### Essential plots for ML
 
-#### Histograma: distribucion de features
+#### Histogram: feature distribution
 
 ```python
 fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-# Histograma simple
-axes[0].hist(df['edad'], bins=20, edgecolor='black', alpha=0.7)
-axes[0].set_title('Distribucion de Edad')
-axes[0].set_xlabel('Edad')
-axes[0].set_ylabel('Frecuencia')
+# Simple histogram
+axes[0].hist(df['age'], bins=20, edgecolor='black', alpha=0.7)
+axes[0].set_title('Age Distribution')
+axes[0].set_xlabel('Age')
+axes[0].set_ylabel('Frequency')
 
-# Con Seaborn (mas bonito)
-sns.histplot(data=df, x='salario', kde=True, ax=axes[1])
-axes[1].set_title('Distribucion de Salario')
+# With Seaborn (prettier)
+sns.histplot(data=df, x='salary', kde=True, ax=axes[1])
+axes[1].set_title('Salary Distribution')
 
-# Comparar distribuciones por clase
+# Compare distributions by class
 sns.histplot(data=df, x='feature', hue='target', kde=True, ax=axes[2])
-axes[2].set_title('Feature por Clase')
+axes[2].set_title('Feature by Class')
 
 plt.tight_layout()
-plt.savefig('distribuciones.png', dpi=150, bbox_inches='tight')
+plt.savefig('distributions.png', dpi=150, bbox_inches='tight')
 plt.show()
 ```
 
-#### Scatter plot: relacion entre features
+#### Scatter plot: relationship between features
 
 ```python
-# Scatter simple
+# Simple scatter
 plt.scatter(df['feature_1'], df['feature_2'], c=df['target'], cmap='RdBu', alpha=0.6)
-plt.colorbar(label='Clase')
+plt.colorbar(label='Class')
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
-plt.title('Relacion entre Features')
+plt.title('Relationship Between Features')
 plt.show()
 
-# Con Seaborn
+# With Seaborn
 sns.scatterplot(data=df, x='feature_1', y='feature_2', hue='target', palette='Set2')
 ```
 
-#### Heatmap de correlacion
+#### Correlation heatmap
 
 ```python
-# Correlacion entre features numericas
+# Correlation between numeric features
 correlation_matrix = df.select_dtypes(include=[np.number]).corr()
 
 plt.figure(figsize=(12, 8))
 sns.heatmap(
     correlation_matrix,
-    annot=True,        # Mostrar valores
-    fmt='.2f',         # Formato decimal
+    annot=True,        # Show values
+    fmt='.2f',         # Decimal format
     cmap='coolwarm',   # Colormap
-    center=0,          # Centrar en 0
+    center=0,          # Center at 0
     vmin=-1, vmax=1,
     square=True
 )
-plt.title('Matriz de Correlacion')
+plt.title('Correlation Matrix')
 plt.tight_layout()
 plt.show()
 ```
 
-#### Box plot: detectar outliers
+#### Box plot: detect outliers
 
 ```python
 fig, axes = plt.subplots(1, 2, figsize=(14, 6))
 
-# Box plot de una feature
-sns.boxplot(data=df, y='salario', ax=axes[0])
-axes[0].set_title('Distribucion de Salario')
+# Box plot of a single feature
+sns.boxplot(data=df, y='salary', ax=axes[0])
+axes[0].set_title('Salary Distribution')
 
-# Box plot por categoria
-sns.boxplot(data=df, x='departamento', y='salario', ax=axes[1])
-axes[1].set_title('Salario por Departamento')
+# Box plot by category
+sns.boxplot(data=df, x='department', y='salary', ax=axes[1])
+axes[1].set_title('Salary by Department')
 
 plt.tight_layout()
 plt.show()
 ```
 
-### Curvas de training
+### Training curves
 
 ```python
-# Simular datos de entrenamiento
+# Simulate training data
 history = {
     'train_loss': [0.9, 0.7, 0.5, 0.35, 0.25, 0.18, 0.12, 0.08],
     'val_loss': [0.95, 0.75, 0.6, 0.5, 0.48, 0.50, 0.55, 0.60],
@@ -634,10 +634,10 @@ axes[0].plot(history['train_loss'], label='Train Loss', marker='o')
 axes[0].plot(history['val_loss'], label='Val Loss', marker='s')
 axes[0].set_xlabel('Epoch')
 axes[0].set_ylabel('Loss')
-axes[0].set_title('Loss por Epoch')
+axes[0].set_title('Loss per Epoch')
 axes[0].legend()
 axes[0].grid(True)
-# Marcar donde empieza overfitting
+# Mark where overfitting starts
 axes[0].axvline(x=4, color='red', linestyle='--', alpha=0.5, label='Overfitting')
 
 # Accuracy
@@ -645,7 +645,7 @@ axes[1].plot(history['train_acc'], label='Train Accuracy', marker='o')
 axes[1].plot(history['val_acc'], label='Val Accuracy', marker='s')
 axes[1].set_xlabel('Epoch')
 axes[1].set_ylabel('Accuracy')
-axes[1].set_title('Accuracy por Epoch')
+axes[1].set_title('Accuracy per Epoch')
 axes[1].legend()
 axes[1].grid(True)
 
@@ -658,61 +658,61 @@ plt.show()
 ```python
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-# Datos de ejemplo
+# Example data
 y_true = [0, 1, 0, 1, 0, 1, 1, 0, 1, 0]
 y_pred = [0, 1, 0, 0, 0, 1, 1, 1, 1, 0]
 
 # Confusion matrix
 cm = confusion_matrix(y_true, y_pred)
 
-# Visualizacion
+# Visualization
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-# Con numeros absolutos
-disp1 = ConfusionMatrixDisplay(cm, display_labels=['Negativo', 'Positivo'])
+# With absolute numbers
+disp1 = ConfusionMatrixDisplay(cm, display_labels=['Negative', 'Positive'])
 disp1.plot(ax=axes[0], cmap='Blues')
 axes[0].set_title('Confusion Matrix (Counts)')
 
-# Normalizada (porcentajes)
+# Normalized (percentages)
 cm_norm = confusion_matrix(y_true, y_pred, normalize='true')
-disp2 = ConfusionMatrixDisplay(cm_norm, display_labels=['Negativo', 'Positivo'])
+disp2 = ConfusionMatrixDisplay(cm_norm, display_labels=['Negative', 'Positive'])
 disp2.plot(ax=axes[1], cmap='Blues', values_format='.2%')
-axes[1].set_title('Confusion Matrix (Normalizada)')
+axes[1].set_title('Confusion Matrix (Normalized)')
 
 plt.tight_layout()
 plt.show()
 ```
 
-### Subplots y customizacion
+### Subplots and customization
 
 ```python
-# Grid de plots complejo
+# Complex plot grid
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
-fig.suptitle('EDA Completo del Dataset', fontsize=16, y=1.02)
+fig.suptitle('Complete Dataset EDA', fontsize=16, y=1.02)
 
-# Iterar sobre features
+# Iterate over features
 features = ['feat_1', 'feat_2', 'feat_3', 'feat_4', 'feat_5', 'feat_6']
 for i, (ax, feat) in enumerate(zip(axes.flatten(), features)):
     sns.histplot(data=df, x=feat, hue='target', kde=True, ax=ax)
-    ax.set_title(f'Distribucion de {feat}')
+    ax.set_title(f'Distribution of {feat}')
 
 plt.tight_layout()
-plt.savefig('eda_completo.png', dpi=150, bbox_inches='tight')
+plt.savefig('complete_eda.png', dpi=150, bbox_inches='tight')
 plt.show()
 ```
 
 ```python
-# Customizacion profesional
+# Professional customization
 fig, ax = plt.subplots(figsize=(10, 6))
 
 # Plot
-ax.plot(x, y, color='#2196F3', linewidth=2, label='Modelo A')
-ax.fill_between(x, y-std, y+std, alpha=0.2, color='#2196F3')  # Banda de confianza
+ax.plot(x, y, color='#2196F3', linewidth=2, label='Model A')
+ax.fill_between(x, y-std, y+std, alpha=0.2, color='#2196F3')  # Confidence band
 
-# Customizar
+# Customize
 ax.set_xlabel('Epochs', fontsize=12)
 ax.set_ylabel('Loss', fontsize=12)
-ax.set_title('Comparacion de Modelos', fontsize=14, fontweight='bold')
+ax.set_title('Model Comparison', fontsize=14, fontweight='bold')
 ax.legend(fontsize=11, loc='upper right')
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
@@ -724,28 +724,28 @@ plt.show()
 
 ---
 
-## Tips de Rendimiento
+## Performance Tips
 
-### Jerarquia de velocidad en Pandas
+### Speed hierarchy in Pandas
 
 ```
-Vectorizado NumPy/Pandas  >>  .apply()  >>  itertuples()  >>  iterrows()
-      (mas rapido)                                            (mas lento)
+Vectorized NumPy/Pandas  >>  .apply()  >>  itertuples()  >>  iterrows()
+      (fastest)                                              (slowest)
 ```
 
 ```python
-# MEJOR: vectorizado (microsegundos)
-df['doble'] = df['valor'] * 2
+# BEST: vectorized (microseconds)
+df['double'] = df['value'] * 2
 
-# OK: apply (milisegundos)
-df['doble'] = df['valor'].apply(lambda x: x * 2)
+# OK: apply (milliseconds)
+df['double'] = df['value'].apply(lambda x: x * 2)
 
-# MAL: iterrows (segundos)
+# BAD: iterrows (seconds)
 for idx, row in df.iterrows():
-    df.at[idx, 'doble'] = row['valor'] * 2
+    df.at[idx, 'double'] = row['value'] * 2
 ```
 
-#### Benchmark real (1 millon de filas)
+#### Real benchmark (1 million rows)
 
 ```python
 import pandas as pd
@@ -755,10 +755,10 @@ import time
 n = 1_000_000
 df = pd.DataFrame({'a': np.random.randn(n), 'b': np.random.randn(n)})
 
-# Vectorizado: ~2ms
+# Vectorized: ~2ms
 start = time.time()
 df['c'] = df['a'] + df['b']
-print(f"Vectorizado: {time.time() - start:.4f}s")
+print(f"Vectorized: {time.time() - start:.4f}s")
 
 # Apply: ~500ms
 start = time.time()
@@ -771,30 +771,30 @@ for idx, row in df.iterrows():
     df.at[idx, 'c'] = row['a'] + row['b']
 print(f"Iterrows: {time.time() - start:.4f}s")
 
-# Resultado aproximado:
-# Vectorizado:  0.002s   (1x)
-# Apply:        0.500s   (250x mas lento)
-# Iterrows:    30.000s   (15000x mas lento)
+# Approximate result:
+# Vectorized:  0.002s   (1x)
+# Apply:       0.500s   (250x slower)
+# Iterrows:   30.000s   (15000x slower)
 ```
 
-### Tipos de datos eficientes
+### Efficient data types
 
 ```python
-# Antes de optimizar
+# Before optimizing
 df.info(memory_usage='deep')
 
-# Optimizar tipos numericos
-df['edad'] = df['edad'].astype('int8')         # -128 a 127
-df['codigo_postal'] = df['codigo_postal'].astype('int32')
-df['precio'] = df['precio'].astype('float32')   # Suficiente precision para ML
+# Optimize numeric types
+df['age'] = df['age'].astype('int8')         # -128 to 127
+df['zip_code'] = df['zip_code'].astype('int32')
+df['price'] = df['price'].astype('float32')   # Sufficient precision for ML
 
-# Optimizar categoricas
-df['pais'] = df['pais'].astype('category')  # Si pocos valores unicos
-df['genero'] = df['genero'].astype('category')
+# Optimize categorical
+df['country'] = df['country'].astype('category')  # If few unique values
+df['gender'] = df['gender'].astype('category')
 
-# Funcion de optimizacion automatica
+# Automatic dtype optimization function
 def optimize_dtypes(df):
-    """Reduce el uso de memoria optimizando dtypes."""
+    """Reduce memory usage by optimizing dtypes."""
     mem_before = df.memory_usage(deep=True).sum() / 1e6
 
     for col in df.select_dtypes(include=['int']).columns:
@@ -804,55 +804,55 @@ def optimize_dtypes(df):
         df[col] = pd.to_numeric(df[col], downcast='float')
 
     for col in df.select_dtypes(include=['object']).columns:
-        if df[col].nunique() / len(df) < 0.5:  # Menos de 50% valores unicos
+        if df[col].nunique() / len(df) < 0.5:  # Less than 50% unique values
             df[col] = df[col].astype('category')
 
     mem_after = df.memory_usage(deep=True).sum() / 1e6
-    print(f"Memoria: {mem_before:.1f} MB -> {mem_after:.1f} MB "
-          f"({(1 - mem_after/mem_before)*100:.0f}% reduccion)")
+    print(f"Memory: {mem_before:.1f} MB -> {mem_after:.1f} MB "
+          f"({(1 - mem_after/mem_before)*100:.0f}% reduction)")
     return df
 ```
 
 ### Polars vs Pandas
 
-| Caracteristica | Pandas | Polars |
+| Feature | Pandas | Polars |
 |---|---|---|
-| Velocidad | Base | 5-50x mas rapido |
-| Memoria | Alta | Eficiente |
-| Multithreading | No (GIL) | Si (Rust nativo) |
-| API | Familiar, flexible | Expresiva, funcional |
-| Lazy evaluation | No | Si |
-| Ecosistema | Enorme | Creciendo |
-| **Cuando usar** | **EDA, prototipado, equipos** | **Datasets grandes, pipelines** |
+| Speed | Baseline | 5-50x faster |
+| Memory | High | Efficient |
+| Multithreading | No (GIL) | Yes (native Rust) |
+| API | Familiar, flexible | Expressive, functional |
+| Lazy evaluation | No | Yes |
+| Ecosystem | Huge | Growing |
+| **When to use** | **EDA, prototyping, teams** | **Large datasets, pipelines** |
 
 ```python
 import polars as pl
 
-# Lectura (mas rapida que Pandas)
-df_pl = pl.read_csv('datos.csv')
-df_pl = pl.read_parquet('datos.parquet')
+# Reading (faster than Pandas)
+df_pl = pl.read_csv('data.csv')
+df_pl = pl.read_parquet('data.parquet')
 
-# API similar pero con lazy evaluation
+# Similar API but with lazy evaluation
 result = (
     df_pl.lazy()
-    .filter(pl.col('edad') > 30)
-    .group_by('departamento')
+    .filter(pl.col('age') > 30)
+    .group_by('department')
     .agg([
-        pl.col('salario').mean().alias('salario_medio'),
-        pl.col('salario').std().alias('salario_std'),
+        pl.col('salary').mean().alias('avg_salary'),
+        pl.col('salary').std().alias('salary_std'),
         pl.count().alias('n'),
     ])
-    .sort('salario_medio', descending=True)
-    .collect()  # Ejecuta todo de una vez, optimizado
+    .sort('avg_salary', descending=True)
+    .collect()  # Executes everything at once, optimized
 )
 
-# Convertir entre Pandas y Polars
+# Convert between Pandas and Polars
 df_pandas = df_pl.to_pandas()
 df_polars = pl.from_pandas(df_pandas)
 ```
 
-> **Punto clave:** Usa Pandas para EDA interactivo y datasets que caben en memoria. Considera Polars cuando Pandas se vuelve lento (millones de filas) o en pipelines de produccion. No necesitas reescribir todo; convierte entre ambos segun necesites.
+> **Key point:** Use Pandas for interactive EDA and datasets that fit in memory. Consider Polars when Pandas becomes slow (millions of rows) or in production pipelines. You don't need to rewrite everything; convert between both as needed.
 
 ---
 
-> **Resumen:** Dominar NumPy, Pandas, Matplotlib y Seaborn es la base para cualquier trabajo de AI/ML. Prioriza operaciones vectorizadas sobre loops, usa Parquet sobre CSV, y conoce los dtypes eficientes para trabajar con datasets grandes.
+> **Summary:** Mastering NumPy, Pandas, Matplotlib and Seaborn is the foundation for any AI/ML work. Prioritize vectorized operations over loops, use Parquet over CSV, and know efficient dtypes for working with large datasets.

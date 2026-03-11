@@ -1,58 +1,58 @@
 # NLP (Natural Language Processing)
 
-## NLP en la Era de los LLMs
+## NLP in the Era of LLMs
 
-Con la llegada de ChatGPT y los LLMs, el panorama de NLP ha cambiado drasticamente. Pero no todo se resuelve con un LLM.
+With the arrival of ChatGPT and LLMs, the NLP landscape has changed drastically. But not everything is solved with an LLM.
 
-### Que Sigue Siendo Relevante vs Que Cubren los LLMs
+### What Remains Relevant vs What LLMs Cover
 
-| Area | Sigue siendo relevante? | Por que |
+| Area | Still relevant? | Why |
 |---|---|---|
-| **Tokenizacion** | Si | Necesitas entender como los modelos procesan texto |
-| **Word Embeddings (Word2Vec, GloVe)** | Parcialmente | Reemplazados por embeddings contextuales, pero la intuicion es fundamental |
-| **Transformers** | Absolutamente | Es la base de TODO (BERT, GPT, T5, LLMs) |
-| **Fine-tuning BERT/RoBERTa** | Si | Para clasificacion con datos propios, mas barato que un LLM |
-| **NER con modelos pequenos** | Si | A veces no necesitas un LLM para extraer entidades |
-| **Sentence embeddings** | Si | Base de RAG y busqueda semantica |
-| **Preprocesamiento clasico** | Poco | Los LLMs manejan texto crudo, pero util para modelos pequenos |
-| **LLMs con prompting** | Si | Para generacion, resumen, QA general |
+| **Tokenization** | Yes | You need to understand how models process text |
+| **Word Embeddings (Word2Vec, GloVe)** | Partially | Replaced by contextual embeddings, but the intuition is fundamental |
+| **Transformers** | Absolutely | It's the foundation of EVERYTHING (BERT, GPT, T5, LLMs) |
+| **Fine-tuning BERT/RoBERTa** | Yes | For classification with your own data, cheaper than an LLM |
+| **NER with small models** | Yes | Sometimes you don't need an LLM to extract entities |
+| **Sentence embeddings** | Yes | Foundation of RAG and semantic search |
+| **Classic preprocessing** | Little | LLMs handle raw text, but useful for small models |
+| **LLMs with prompting** | Yes | For generation, summarization, general QA |
 
-> **Regla practica:** Si tienes datos etiquetados y necesitas clasificar miles de textos al dia, fine-tunea un modelo pequeno (BERT). Si necesitas flexibilidad y la tarea es compleja/cambiante, usa un LLM con prompting. Si el costo importa mucho, modelos pequenos siempre ganan.
+> **Practical rule:** If you have labeled data and need to classify thousands of texts per day, fine-tune a small model (BERT). If you need flexibility and the task is complex/changing, use an LLM with prompting. If cost matters a lot, small models always win.
 
 ---
 
-## Preprocesamiento de Texto
+## Text Preprocessing
 
-### Tokenizacion
+### Tokenization
 
-Tokenizar = dividir texto en unidades que el modelo puede procesar.
+Tokenize = split text into units that the model can process.
 
-**Tipos de Tokenizacion:**
+**Tokenization Types:**
 
 ```
-Texto original: "Los transformers revolucionaron el NLP"
+Original text: "Los transformers revolucionaron el NLP"
 
 Word-level:     ["Los", "transformers", "revolucionaron", "el", "NLP"]
-                Problema: vocabulario enorme, palabras desconocidas (OOV)
+                Problem: huge vocabulary, unknown words (OOV)
 
 Character-level: ["L","o","s"," ","t","r","a","n","s","f","o","r","m","e","r","s",...]
-                 Problema: secuencias muy largas, pierde significado
+                 Problem: very long sequences, loses meaning
 
 Subword (BPE):  ["Los", "transform", "##ers", "revolucion", "##aron", "el", "NLP"]
-                Lo mejor de ambos mundos: vocabulario manejable, sin OOV
+                Best of both worlds: manageable vocabulary, no OOV
 ```
 
-**Algoritmos de Subword Tokenization:**
+**Subword Tokenization Algorithms:**
 
-| Algoritmo | Usado por | Como funciona (intuicion) |
+| Algorithm | Used by | How it works (intuition) |
 |---|---|---|
-| **BPE** (Byte Pair Encoding) | GPT, RoBERTa | Empieza con caracteres, va juntando pares mas frecuentes |
-| **WordPiece** | BERT | Similar a BPE, pero usa likelihood en lugar de frecuencia |
-| **SentencePiece** | T5, mBERT, LLaMA | Trata el texto como bytes crudos, no necesita pre-tokenizar |
-| **Tiktoken** | GPT-3.5/4 | BPE optimizado de OpenAI |
+| **BPE** (Byte Pair Encoding) | GPT, RoBERTa | Starts with characters, merges most frequent pairs |
+| **WordPiece** | BERT | Similar to BPE, but uses likelihood instead of frequency |
+| **SentencePiece** | T5, mBERT, LLaMA | Treats text as raw bytes, doesn't need pre-tokenization |
+| **Tiktoken** | GPT-3.5/4 | OpenAI's optimized BPE |
 
 ```python
-# Tokenizacion con HuggingFace
+# Tokenization with HuggingFace
 from transformers import AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
@@ -62,188 +62,187 @@ print(tokens)
 # {'input_ids': [101, 2469, 19081, 2015, 13028, ...],
 #  'attention_mask': [1, 1, 1, 1, 1, ...]}
 
-# Ver los tokens
+# View the tokens
 print(tokenizer.tokenize("Los transformers revolucionaron el NLP"))
 # ['los', 'transform', '##ers', 'revolucion', '##aron', 'el', 'nl', '##p']
 ```
 
-### Limpieza de Texto
+### Text Cleaning
 
-| Tecnica | Descripcion | Cuando usarla |
+| Technique | Description | When to use |
 |---|---|---|
-| **Lowercasing** | Convertir a minusculas | Modelos clasicos. BERT uncased ya lo hace |
-| **Stopwords** | Eliminar palabras comunes (el, la, de) | TF-IDF, modelos clasicos. NO para Transformers |
-| **Stemming** | Reducir a raiz (corriendo -> corr) | Busqueda, modelos clasicos. Agresivo |
-| **Lemmatization** | Reducir a lema (corriendo -> correr) | Mejor que stemming, mas lento |
-| **Regex cleanup** | Eliminar URLs, emails, HTML, caracteres especiales | Casi siempre util |
+| **Lowercasing** | Convert to lowercase | Classic models. BERT uncased already does it |
+| **Stopwords** | Remove common words (the, a, of) | TF-IDF, classic models. NOT for Transformers |
+| **Stemming** | Reduce to root (running -> run) | Search, classic models. Aggressive |
+| **Lemmatization** | Reduce to lemma (running -> run) | Better than stemming, slower |
+| **Regex cleanup** | Remove URLs, emails, HTML, special characters | Almost always useful |
 
 ```python
 import re
 import spacy
 
-# Limpieza basica con regex
+# Basic cleaning with regex
 def clean_text(text):
     text = re.sub(r'http\S+', '', text)           # URLs
     text = re.sub(r'<.*?>', '', text)              # HTML tags
-    text = re.sub(r'[^\w\s]', '', text)            # Puntuacion
-    text = re.sub(r'\s+', ' ', text).strip()       # Espacios multiples
+    text = re.sub(r'[^\w\s]', '', text)            # Punctuation
+    text = re.sub(r'\s+', ' ', text).strip()       # Multiple spaces
     return text
 
-# Lemmatizacion con spaCy
-nlp = spacy.load("es_core_news_sm")  # Modelo en espanol
+# Lemmatization with spaCy
+nlp = spacy.load("es_core_news_sm")  # Spanish model
 doc = nlp("Los trabajadores estaban corriendo rapidamente")
 lemmas = [token.lemma_ for token in doc]
 # ['el', 'trabajador', 'estar', 'correr', 'rapidamente']
 ```
 
-### Cuando Preprocesar vs Cuando Dejar al Modelo
+### When to Preprocess vs When to Let the Model Handle It
 
 ```
-Modelo clasico (TF-IDF + Logistic Regression):
-  -> Preprocesar TODO: lowercase, stopwords, lemmatize, limpiar
+Classic model (TF-IDF + Logistic Regression):
+  -> Preprocess EVERYTHING: lowercase, stopwords, lemmatize, clean
 
-Modelo Transformer (BERT, RoBERTa):
-  -> Limpieza basica: URLs, HTML, caracteres rotos
-  -> NO quitar stopwords, NO lemmatizar
-  -> El tokenizer del modelo se encarga del resto
+Transformer model (BERT, RoBERTa):
+  -> Basic cleaning: URLs, HTML, broken characters
+  -> DO NOT remove stopwords, DO NOT lemmatize
+  -> The model's tokenizer handles the rest
 
 LLM (GPT-4, Claude):
-  -> Minima limpieza: solo formatear bien el prompt
-  -> El modelo maneja texto crudo perfectamente
+  -> Minimal cleaning: just format the prompt well
+  -> The model handles raw text perfectly
 ```
 
 ---
 
 ## Word Embeddings
 
-### El Problema de One-Hot Encoding
+### The One-Hot Encoding Problem
 
 ```
-Vocabulario: ["gato", "perro", "casa", "coche"] (4 palabras)
+Vocabulary: ["cat", "dog", "house", "car"] (4 words)
 
 One-hot encoding:
-gato  = [1, 0, 0, 0]
-perro = [0, 1, 0, 0]
-casa  = [0, 0, 1, 0]
-coche = [0, 0, 0, 1]
+cat   = [1, 0, 0, 0]
+dog   = [0, 1, 0, 0]
+house = [0, 0, 1, 0]
+car   = [0, 0, 0, 1]
 
-Problemas:
-1. Dimension = tamano del vocabulario (50,000+ palabras = vectores de 50,000)
-2. Todos los vectores son ortogonales (distancia identica)
-3. "gato" esta tan lejos de "perro" como de "coche"
-   -> No captura NINGUNA relacion semantica
+Problems:
+1. Dimension = vocabulary size (50,000+ words = 50,000 vectors)
+2. All vectors are orthogonal (identical distance)
+3. "cat" is as far from "dog" as from "car"
+   -> Captures NO semantic relationship
 ```
 
-### Word2Vec: La Revolucion
+### Word2Vec: The Revolution
 
-Idea central: **una palabra se define por las palabras que la rodean** (hipotesis distribucional).
+Central idea: **a word is defined by the words that surround it** (distributional hypothesis).
 
 ```
-"El gato se sento en la alfombra"
-"El perro se sento en el sofa"
+"The cat sat on the rug"
+"The dog sat on the sofa"
 
-"gato" y "perro" aparecen en contextos similares
--> Sus vectores deberian ser similares
+"cat" and "dog" appear in similar contexts
+-> Their vectors should be similar
 
-Word2Vec entrena una red neuronal simple para predecir:
-- CBOW: dadas las palabras del contexto, predecir la palabra central
-- Skip-gram: dada la palabra central, predecir las del contexto
+Word2Vec trains a simple neural network to predict:
+- CBOW: given context words, predict the central word
+- Skip-gram: given the central word, predict the context words
 
-Resultado: vectores densos de 100-300 dimensiones que capturan significado
+Result: dense vectors of 100-300 dimensions that capture meaning
 
-Ejemplo de relaciones aprendidas:
-  vector("rey") - vector("hombre") + vector("mujer") ≈ vector("reina")
-  vector("Madrid") - vector("Espana") + vector("Francia") ≈ vector("Paris")
+Example of learned relationships:
+  vector("king") - vector("man") + vector("woman") ≈ vector("queen")
+  vector("Madrid") - vector("Spain") + vector("France") ≈ vector("Paris")
 ```
 
 ### GloVe: Global Vectors
 
-Intuicion: en lugar de ventanas locales como Word2Vec, GloVe usa la **matriz global de co-ocurrencias** de todo el corpus. Si dos palabras aparecen juntas frecuentemente en el corpus, sus vectores seran cercanos.
+Intuition: instead of local windows like Word2Vec, GloVe uses the **global co-occurrence matrix** of the entire corpus. If two words appear together frequently in the corpus, their vectors will be close.
 
-Resultado similar a Word2Vec pero captura mejor relaciones globales.
+Similar result to Word2Vec but captures global relationships better.
 
-### Limitacion Critica
+### Critical Limitation
 
 ```
-"El banco del parque estaba mojado"     -> banco = asiento
-"Fui al banco a sacar dinero"           -> banco = institucion financiera
+"The bank of the park was wet"              -> bank = bench
+"I went to the bank to withdraw money"      -> bank = financial institution
 
-Word2Vec/GloVe: UN solo vector para "banco"
-No capturan el contexto -> misma representacion para significados diferentes
+Word2Vec/GloVe: ONE single vector for "bank"
+They don't capture context -> same representation for different meanings
 
-Solucion: Embeddings CONTEXTUALES (BERT, GPT)
-Cada aparicion de "banco" tiene un vector DIFERENTE segun su contexto.
+Solution: CONTEXTUAL embeddings (BERT, GPT)
+Each occurrence of "bank" has a DIFFERENT vector depending on its context.
 ```
 
 ---
 
-## Transformers: La Arquitectura Clave
+## Transformers: The Key Architecture
 
 ### Attention Mechanism
 
-La atencion es el mecanismo central que hace a los Transformers tan poderosos.
+Attention is the central mechanism that makes Transformers so powerful.
 
-**Intuicion con Analogia:**
+**Intuition with Analogy:**
 
 ```
-Imagina una base de datos:
+Imagine a database:
 
-Query (Q):  "Que busco?"       -> Lo que la palabra actual necesita saber
-Key (K):    "Que tengo?"       -> Lo que cada palabra ofrece
-Value (V):  "Que devuelvo?"    -> La informacion real que se pasa
+Query (Q):  "What am I looking for?"  -> What the current word needs to know
+Key (K):    "What do I have?"         -> What each word offers
+Value (V):  "What do I return?"       -> The actual information that gets passed
 
-Proceso:
-1. Cada palabra genera sus vectores Q, K, V (multiplicando por matrices aprendidas)
-2. Se calcula la "compatibilidad" entre el Query de una palabra y los Keys de todas
-3. Se normalizan los scores con softmax (suman 1)
-4. Se usa el score como peso para combinar los Values
+Process:
+1. Each word generates its Q, K, V vectors (by multiplying with learned matrices)
+2. The "compatibility" between one word's Query and all Keys is computed
+3. The scores are normalized with softmax (sum to 1)
+4. The score is used as a weight to combine the Values
 
-Matematicamente:
+Mathematically:
   Attention(Q, K, V) = softmax(Q * K^T / sqrt(d_k)) * V
 
-  donde d_k es la dimension de los Keys (para estabilidad numerica)
+  where d_k is the dimension of the Keys (for numerical stability)
 ```
 
-**Self-Attention Paso a Paso:**
+**Self-Attention Step by Step:**
 
 ```
-Frase: "El gato se sento en la alfombra"
+Sentence: "The cat sat on the rug"
 
-Para la palabra "sento":
-  Q_sento se compara con K de cada palabra:
+For the word "sat":
+  Q_sat is compared with K of each word:
 
-  "El"        -> score: 0.02  (poco relevante)
-  "gato"      -> score: 0.45  (quien se sento? el gato!)
-  "se"        -> score: 0.05
-  "sento"     -> score: 0.15  (atencion a si misma)
-  "en"        -> score: 0.08
-  "la"        -> score: 0.03
-  "alfombra"  -> score: 0.22  (donde se sento? en la alfombra!)
-                        -----
-                         1.00  (softmax: suman 1)
+  "The"    -> score: 0.02  (not very relevant)
+  "cat"    -> score: 0.45  (who sat? the cat!)
+  "sat"    -> score: 0.15  (attention to itself)
+  "on"     -> score: 0.08
+  "the"    -> score: 0.03
+  "rug"    -> score: 0.22  (where did it sit? on the rug!)
+                      -----
+                       1.00  (softmax: sum to 1)
 
-  La representacion de "sento" se construye ponderando
-  los Values de todas las palabras con estos scores.
-  -> "sento" ahora "sabe" que el gato se sento en la alfombra.
+  The representation of "sat" is built by weighting
+  the Values of all words with these scores.
+  -> "sat" now "knows" that the cat sat on the rug.
 ```
 
 ### Multi-Head Attention
 
-En lugar de una sola atencion, usar multiples "cabezas" en paralelo. Cada cabeza aprende a atender a diferentes aspectos:
+Instead of a single attention, use multiple "heads" in parallel. Each head learns to attend to different aspects:
 
 ```
-Cabeza 1: Atiende a relaciones sintacticas (sujeto-verbo)
-Cabeza 2: Atiende a relaciones semanticas (sinonimos)
-Cabeza 3: Atiende a posiciones cercanas
-Cabeza 4: Atiende a dependencias lejanas
+Head 1: Attends to syntactic relationships (subject-verb)
+Head 2: Attends to semantic relationships (synonyms)
+Head 3: Attends to nearby positions
+Head 4: Attends to long-range dependencies
 ...
 
-Multi-Head Attention = Concatenar(cabeza_1, cabeza_2, ..., cabeza_h) * W_o
+Multi-Head Attention = Concatenate(head_1, head_2, ..., head_h) * W_o
 
-Tipicamente: 8-16 cabezas en modelos base, 32-96 en modelos grandes
+Typically: 8-16 heads in base models, 32-96 in large models
 ```
 
-### Arquitectura Transformer
+### Transformer Architecture
 
 ```
                    ENCODER                              DECODER
@@ -264,7 +263,7 @@ Tipicamente: 8-16 cabezas en modelos base, 32-96 en modelos grandes
                      |                                      |
               .------+------.                        .------+------.
               |             |                        | Cross-Attn  |
-              | Feed Forward|                        | (al encoder)|
+              | Feed Forward|                        | (to encoder)|
               |  Network    |                        '------+------'
               |             |                        [Add & LayerNorm]
               '------+------'                        .------+------.
@@ -272,82 +271,82 @@ Tipicamente: 8-16 cabezas en modelos base, 32-96 en modelos grandes
               [Add & LayerNorm]                      '------+------'
                      |                               [Add & LayerNorm]
                      |                                      |
-              (repetir Nx)                           (repetir Nx)
+              (repeat Nx)                            (repeat Nx)
                      |                                      |
-              [Representaciones]                     [Linear + Softmax]
-              contextuales                           -> siguiente token
+              [Contextual                            [Linear + Softmax]
+              representations]                       -> next token
 ```
 
-**Tres Variantes Principales:**
+**Three Main Variants:**
 
-| Tipo | Modelo ejemplo | Que ve | Mejor para |
+| Type | Example Model | What it sees | Best for |
 |---|---|---|---|
-| **Encoder-only** | BERT, RoBERTa | Todas las palabras (bidireccional) | Clasificacion, NER, embeddings |
-| **Decoder-only** | GPT, LLaMA | Solo palabras anteriores (causal) | Generacion de texto |
-| **Encoder-Decoder** | T5, BART | Encoder bidireccional, decoder causal | Traduccion, resumen, text-to-text |
+| **Encoder-only** | BERT, RoBERTa | All words (bidirectional) | Classification, NER, embeddings |
+| **Decoder-only** | GPT, LLaMA | Only previous words (causal) | Text generation |
+| **Encoder-Decoder** | T5, BART | Encoder bidirectional, decoder causal | Translation, summarization, text-to-text |
 
 ### Positional Encoding
 
-Los Transformers procesan todas las palabras en paralelo (no secuencialmente como RNNs). Para que "sepan" el orden, se anaden positional encodings:
+Transformers process all words in parallel (not sequentially like RNNs). So they "know" the order, positional encodings are added:
 
 ```
-Embedding de "gato" en posicion 2:
+Embedding of "cat" at position 2:
 
-embedding_final = embedding_palabra("gato") + positional_encoding(posicion=2)
+final_embedding = word_embedding("cat") + positional_encoding(position=2)
 
-Original Transformer: funciones seno/coseno
-BERT: positional embeddings aprendidos
-RoPE (LLaMA, modelos modernos): rotary position embeddings
+Original Transformer: sine/cosine functions
+BERT: learned positional embeddings
+RoPE (LLaMA, modern models): rotary position embeddings
 ```
 
-### Por Que los Transformers Ganaron
+### Why Transformers Won
 
 ```
 RNNs/LSTMs (pre-2017):
-- Procesan secuencialmente: lento, no paralelizable
-- Dependencias lejanas se "olvidan" (vanishing gradients)
-- Training: O(n) secuencial
+- Process sequentially: slow, not parallelizable
+- Long-range dependencies are "forgotten" (vanishing gradients)
+- Training: O(n) sequential
 
 Transformers:
-- Procesan TODO en paralelo: GPU-friendly
-- Self-attention conecta cualquier par de palabras directamente
-- Training: O(1) paralelo para todas las posiciones
-- Escalan enormemente bien con mas datos y compute
+- Process EVERYTHING in parallel: GPU-friendly
+- Self-attention connects any pair of words directly
+- Training: O(1) parallel for all positions
+- Scale enormously well with more data and compute
 ```
 
 ---
 
-## Modelos Preentrenados Clave
+## Key Pretrained Models
 
-### Tabla Comparativa
+### Comparison Table
 
-| Modelo | Tipo | Parametros | Uso tipico | Notas |
+| Model | Type | Parameters | Typical Use | Notes |
 |---|---|---|---|---|
-| **BERT-base** | Encoder | 110M | Clasificacion, NER, QA | El pionero, bidireccional |
-| **RoBERTa** | Encoder | 125M | Igual que BERT, mejor rendimiento | BERT mejor entrenado |
-| **DistilBERT** | Encoder | 66M | Lo mismo, pero mas rapido | 97% de BERT, 60% tamano |
-| **DeBERTa-v3** | Encoder | 86-304M | SOTA en muchas tareas de entendimiento | El mejor encoder actual |
-| **GPT-2** | Decoder | 124M-1.5B | Generacion de texto | El abuelo de ChatGPT |
-| **T5-base** | Enc-Dec | 220M | Cualquier tarea como text-to-text | "Classify: ...", "Summarize: ..." |
-| **FLAN-T5** | Enc-Dec | 80M-11B | Text-to-text con instruction tuning | T5 + fine-tuning con instrucciones |
-| **Sentence-BERT** | Encoder | ~110M | Embeddings de frases, similitud | Optimizado para comparar textos |
-| **BGE / E5** | Encoder | ~110-335M | Embeddings de frases (SOTA) | Los mejores embeddings actuales |
+| **BERT-base** | Encoder | 110M | Classification, NER, QA | The pioneer, bidirectional |
+| **RoBERTa** | Encoder | 125M | Same as BERT, better performance | Better-trained BERT |
+| **DistilBERT** | Encoder | 66M | Same, but faster | 97% of BERT, 60% size |
+| **DeBERTa-v3** | Encoder | 86-304M | SOTA on many understanding tasks | Best current encoder |
+| **GPT-2** | Decoder | 124M-1.5B | Text generation | The grandfather of ChatGPT |
+| **T5-base** | Enc-Dec | 220M | Any task as text-to-text | "Classify: ...", "Summarize: ..." |
+| **FLAN-T5** | Enc-Dec | 80M-11B | Text-to-text with instruction tuning | T5 + fine-tuning with instructions |
+| **Sentence-BERT** | Encoder | ~110M | Sentence embeddings, similarity | Optimized for comparing texts |
+| **BGE / E5** | Encoder | ~110-335M | Sentence embeddings (SOTA) | Best current embeddings |
 
-> **Consejo practico:** Para clasificacion, empieza con DeBERTa-v3. Para embeddings, usa BGE o E5. Para generacion, usa un LLM (GPT-4, Claude) o fine-tunea un modelo open source.
+> **Practical advice:** For classification, start with DeBERTa-v3. For embeddings, use BGE or E5. For generation, use an LLM (GPT-4, Claude) or fine-tune an open source model.
 
 ---
 
 ## HuggingFace Ecosystem
 
-HuggingFace es el ecosistema central de NLP moderno. Tres componentes principales:
+HuggingFace is the central ecosystem of modern NLP. Three main components:
 
 ### transformers library
 
 ```python
-# Forma rapida: Pipeline (inference en 3 lineas)
+# Quick way: Pipeline (inference in 3 lines)
 from transformers import pipeline
 
-# Clasificacion de sentimiento
+# Sentiment classification
 classifier = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 result = classifier("Este producto es excelente, lo recomiendo mucho")
 # [{'label': '5 stars', 'score': 0.87}]
@@ -367,7 +366,7 @@ result = qa(question="Donde trabaja Carlos?",
 ```
 
 ```python
-# Forma completa: AutoModel + AutoTokenizer
+# Full approach: AutoModel + AutoTokenizer
 from transformers import AutoTokenizer, AutoModel
 import torch
 
@@ -375,7 +374,7 @@ model_name = "bert-base-uncased"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModel.from_pretrained(model_name)
 
-# Tokenizar
+# Tokenize
 inputs = tokenizer("Hello world", return_tensors="pt", padding=True, truncation=True)
 print(inputs.keys())  # dict_keys(['input_ids', 'token_type_ids', 'attention_mask'])
 
@@ -392,7 +391,7 @@ print(outputs.last_hidden_state.shape)  # torch.Size([1, 4, 768])
 ```python
 from datasets import load_dataset
 
-# Cargar dataset del Hub
+# Load dataset from the Hub
 dataset = load_dataset("imdb")
 print(dataset)
 # DatasetDict({
@@ -400,19 +399,19 @@ print(dataset)
 #     test: Dataset({features: ['text', 'label'], num_rows: 25000})
 # })
 
-# Procesar con map (eficiente, con cache)
+# Process with map (efficient, with cache)
 def tokenize_function(examples):
     return tokenizer(examples["text"], padding="max_length",
                      truncation=True, max_length=512)
 
 tokenized = dataset.map(tokenize_function, batched=True)
 
-# Cargar dataset local (CSV, JSON, Parquet)
-dataset = load_dataset("csv", data_files="mis_datos.csv")
-dataset = load_dataset("json", data_files="mis_datos.jsonl")
+# Load local dataset (CSV, JSON, Parquet)
+dataset = load_dataset("csv", data_files="my_data.csv")
+dataset = load_dataset("json", data_files="my_data.jsonl")
 ```
 
-### Trainer API vs Training Loop Manual
+### Trainer API vs Manual Training Loop
 
 ```python
 from transformers import (
@@ -424,13 +423,13 @@ from datasets import load_dataset
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 
-# Cargar modelo para clasificacion
+# Load model for classification
 model = AutoModelForSequenceClassification.from_pretrained(
     "bert-base-uncased",
     num_labels=2
 )
 
-# Definir metricas
+# Define metrics
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
@@ -439,7 +438,7 @@ def compute_metrics(eval_pred):
         "f1": f1_score(labels, predictions, average="weighted"),
     }
 
-# Configurar entrenamiento
+# Configure training
 training_args = TrainingArguments(
     output_dir="./results",
     num_train_epochs=3,
@@ -453,10 +452,10 @@ training_args = TrainingArguments(
     save_strategy="epoch",
     load_best_model_at_end=True,
     metric_for_best_model="f1",
-    fp16=True,  # Mixed precision (si tienes GPU compatible)
+    fp16=True,  # Mixed precision (if you have a compatible GPU)
 )
 
-# Crear Trainer y entrenar
+# Create Trainer and train
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -467,57 +466,57 @@ trainer = Trainer(
 
 trainer.train()
 
-# Evaluar
+# Evaluate
 results = trainer.evaluate()
 print(results)
 ```
 
 ---
 
-## Fine-Tuning de Modelos
+## Fine-Tuning Models
 
-### Cuando Fine-Tunear vs Usar un LLM con Prompting
+### When to Fine-Tune vs Use an LLM with Prompting
 
-| Factor | Fine-tuning modelo pequeno | LLM con prompting |
+| Factor | Fine-tuning small model | LLM with prompting |
 |---|---|---|
-| **Datos etiquetados** | Necesitas 500+ ejemplos | 0-10 ejemplos (few-shot) |
-| **Costo por prediccion** | Muy bajo (~0.001 USD/1K) | Alto (~0.01-0.10 USD/1K) |
-| **Latencia** | Rapido (~10-50ms) | Lento (~500-2000ms) |
-| **Personalizacion** | Alta (tu dominio) | Media (general) |
-| **Mantenimiento** | Necesitas infra de ML | Solo API |
-| **Volumen** | Miles-millones/dia | Cientos-miles/dia |
-| **Tarea nueva** | Necesitas re-entrenar | Cambias el prompt |
+| **Labeled data** | Need 500+ examples | 0-10 examples (few-shot) |
+| **Cost per prediction** | Very low (~0.001 USD/1K) | High (~0.01-0.10 USD/1K) |
+| **Latency** | Fast (~10-50ms) | Slow (~500-2000ms) |
+| **Customization** | High (your domain) | Medium (general) |
+| **Maintenance** | Need ML infra | Just API |
+| **Volume** | Thousands-millions/day | Hundreds-thousands/day |
+| **New task** | Need to retrain | Change the prompt |
 
-> **Regla de oro:** Si tienes datos etiquetados + alto volumen + latencia importa, fine-tunea. Si la tarea cambia frecuentemente o tienes poco dato, usa un LLM.
+> **Rule of thumb:** If you have labeled data + high volume + latency matters, fine-tune. If the task changes frequently or you have little data, use an LLM.
 
-### Fine-Tuning para Clasificacion
+### Fine-Tuning for Classification
 
 ```python
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-# 1. Cargar modelo preentrenado con head de clasificacion
+# 1. Load pretrained model with classification head
 model_name = "microsoft/deberta-v3-base"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSequenceClassification.from_pretrained(
     model_name,
-    num_labels=5,                     # Numero de clases
+    num_labels=5,                     # Number of classes
     problem_type="single_label_classification"
 )
 
-# 2. El modelo ya tiene:
-#    - Backbone preentrenado (DeBERTa)
-#    - Classification head nuevo (inicializado random)
+# 2. The model already has:
+#    - Pretrained backbone (DeBERTa)
+#    - New classification head (randomly initialized)
 
-# 3. Entrenar con Trainer API (ver seccion anterior)
-# El backbone se ajusta suavemente, el head aprende de cero
+# 3. Train with Trainer API (see previous section)
+# The backbone is gently adjusted, the head learns from scratch
 ```
 
-### Fine-Tuning para NER (Named Entity Recognition)
+### Fine-Tuning for NER (Named Entity Recognition)
 
 ```python
 from transformers import AutoModelForTokenClassification
 
-# Labels NER tipicos (formato BIO)
+# Typical NER labels (BIO format)
 label_list = ["O", "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC"]
 
 model = AutoModelForTokenClassification.from_pretrained(
@@ -525,8 +524,8 @@ model = AutoModelForTokenClassification.from_pretrained(
     num_labels=len(label_list)
 )
 
-# Tokenizacion especial para NER:
-# Si una palabra se divide en sub-tokens, alinear los labels
+# Special tokenization for NER:
+# If a word is split into sub-tokens, align the labels
 def tokenize_and_align_labels(examples):
     tokenized = tokenizer(examples["tokens"], truncation=True,
                           is_split_into_words=True)
@@ -538,11 +537,11 @@ def tokenize_and_align_labels(examples):
         previous_word_idx = None
         for word_idx in word_ids:
             if word_idx is None:
-                label_ids.append(-100)  # Ignorar tokens especiales
+                label_ids.append(-100)  # Ignore special tokens
             elif word_idx != previous_word_idx:
                 label_ids.append(label[word_idx])
             else:
-                label_ids.append(-100)  # Ignorar sub-tokens
+                label_ids.append(-100)  # Ignore sub-tokens
             previous_word_idx = word_idx
         labels.append(label_ids)
 
@@ -550,80 +549,80 @@ def tokenize_and_align_labels(examples):
     return tokenized
 ```
 
-### LoRA y PEFT: Fine-Tuning Eficiente
+### LoRA and PEFT: Efficient Fine-Tuning
 
-Para modelos grandes, fine-tunear TODOS los parametros es costoso. LoRA (Low-Rank Adaptation) congela el modelo original y entrena pequenas matrices adicionales.
+For large models, fine-tuning ALL parameters is expensive. LoRA (Low-Rank Adaptation) freezes the original model and trains small additional matrices.
 
 ```
-Modelo original:        LoRA:
-W (768 x 768)          W (768 x 768) [CONGELADO]
-= 589,824 params       + A (768 x 8) * B (8 x 768) [ENTRENABLES]
+Original model:         LoRA:
+W (768 x 768)          W (768 x 768) [FROZEN]
+= 589,824 params       + A (768 x 8) * B (8 x 768) [TRAINABLE]
                         = 589,824 + 12,288 params
-                        Solo entrenas ~2% de parametros!
+                        You only train ~2% of parameters!
 
-Intuicion: los cambios necesarios para adaptar el modelo
-a tu tarea se pueden representar con matrices de bajo rango.
+Intuition: the changes needed to adapt the model
+to your task can be represented with low-rank matrices.
 ```
 
 ```python
 from peft import LoraConfig, get_peft_model, TaskType
 
-# Configurar LoRA
+# Configure LoRA
 lora_config = LoraConfig(
     task_type=TaskType.SEQ_CLS,
-    r=8,                        # Rango de las matrices (8-64)
-    lora_alpha=32,              # Factor de escalado
+    r=8,                        # Rank of the matrices (8-64)
+    lora_alpha=32,              # Scaling factor
     lora_dropout=0.1,
-    target_modules=["query", "value"],  # Capas donde aplicar LoRA
+    target_modules=["query", "value"],  # Layers where to apply LoRA
 )
 
-# Aplicar LoRA al modelo
+# Apply LoRA to the model
 model = get_peft_model(model, lora_config)
 model.print_trainable_parameters()
 # trainable params: 294,912 || all params: 109,482,240 || trainable%: 0.27%
 
-# Entrenar normalmente con Trainer
-# Solo se actualizan los parametros LoRA
+# Train normally with Trainer
+# Only LoRA parameters are updated
 ```
 
 ---
 
-## Tareas NLP Comunes en Consultoria
+## Common NLP Tasks in Consulting
 
-### Tabla de Tareas y Recomendaciones
+### Task and Recommendation Table
 
-| Tarea | Descripcion | Modelo recomendado | Complejidad |
+| Task | Description | Recommended Model | Complexity |
 |---|---|---|---|
-| **Clasificacion de sentimiento** | Positivo/Negativo/Neutro | DeBERTa fine-tuned / LLM | Baja |
-| **Categorizacion de texto** | Asignar categoria (ticket, email) | DeBERTa / BERT fine-tuned | Baja-Media |
-| **Deteccion de spam** | Filtrar mensajes no deseados | DistilBERT fine-tuned | Baja |
-| **NER** | Extraer nombres, organizaciones, fechas | BERT-NER / spaCy | Media |
-| **Similitud semantica** | Comparar si dos textos dicen lo mismo | Sentence-BERT / BGE | Baja |
-| **Question Answering** | Responder preguntas sobre un contexto | DeBERTa / LLM + RAG | Media-Alta |
-| **Resumen** | Resumir documentos largos | T5 / BART / LLM | Media |
-| **Traduccion** | Traducir entre idiomas | mBART / LLM | Media |
-| **Extraccion de informacion** | Extraer campos de documentos | LLM con prompting | Media |
+| **Sentiment classification** | Positive/Negative/Neutral | DeBERTa fine-tuned / LLM | Low |
+| **Text categorization** | Assign category (ticket, email) | DeBERTa / BERT fine-tuned | Low-Medium |
+| **Spam detection** | Filter unwanted messages | DistilBERT fine-tuned | Low |
+| **NER** | Extract names, organizations, dates | BERT-NER / spaCy | Medium |
+| **Semantic similarity** | Compare if two texts say the same thing | Sentence-BERT / BGE | Low |
+| **Question Answering** | Answer questions about a context | DeBERTa / LLM + RAG | Medium-High |
+| **Summarization** | Summarize long documents | T5 / BART / LLM | Medium |
+| **Translation** | Translate between languages | mBART / LLM | Medium |
+| **Information extraction** | Extract fields from documents | LLM with prompting | Medium |
 
-### Clasificacion de Texto
+### Text Classification
 
-El caso mas comun en consultoria. Ejemplo: clasificar tickets de soporte.
+The most common case in consulting. Example: classify support tickets.
 
 ```python
 from transformers import pipeline
 
-# Opcion 1: Zero-shot con LLM (sin datos etiquetados)
+# Option 1: Zero-shot with LLM (no labeled data)
 classifier = pipeline("zero-shot-classification",
                       model="facebook/bart-large-mnli")
 
 text = "La factura no refleja el descuento acordado"
-labels = ["facturacion", "envio", "producto", "atencion"]
+labels = ["billing", "shipping", "product", "customer service"]
 
 result = classifier(text, labels)
-# {'labels': ['facturacion', 'atencion', 'producto', 'envio'],
+# {'labels': ['billing', 'customer service', 'product', 'shipping'],
 #  'scores': [0.82, 0.09, 0.05, 0.04]}
 
-# Opcion 2: Fine-tuning con datos (si tienes 500+ ejemplos etiquetados)
-# Usar Trainer API (ver seccion anterior)
+# Option 2: Fine-tuning with data (if you have 500+ labeled examples)
+# Use Trainer API (see previous section)
 ```
 
 ### NER (Named Entity Recognition)
@@ -631,7 +630,7 @@ result = classifier(text, labels)
 ```python
 import spacy
 
-# spaCy para NER rapido
+# spaCy for quick NER
 nlp = spacy.load("es_core_news_lg")
 doc = nlp("Apple lanzo el iPhone 15 en septiembre de 2023 en California")
 
@@ -643,7 +642,7 @@ for ent in doc.ents:
 # California           -> LOC
 ```
 
-### Similitud Semantica
+### Semantic Similarity
 
 ```python
 from sentence_transformers import SentenceTransformer, util
@@ -651,32 +650,32 @@ from sentence_transformers import SentenceTransformer, util
 model = SentenceTransformer("BAAI/bge-base-en-v1.5")
 
 sentences = [
-    "El gato esta en el tejado",
-    "Hay un felino sobre la casa",
-    "Python es un lenguaje de programacion",
+    "The cat is on the roof",
+    "There is a feline on top of the house",
+    "Python is a programming language",
 ]
 
 embeddings = model.encode(sentences)
 similarities = util.cos_sim(embeddings, embeddings)
 print(similarities)
-# tensor([[1.00, 0.82, 0.05],    gato-felino: alta similitud
-#         [0.82, 1.00, 0.04],    ambas vs python: baja
+# tensor([[1.00, 0.82, 0.05],    cat-feline: high similarity
+#         [0.82, 1.00, 0.04],    both vs python: low
 #         [0.05, 0.04, 1.00]])
 ```
 
 ---
 
-## Embeddings y Busqueda Semantica
+## Embeddings and Semantic Search
 
 ### Sentence Embeddings
 
-Los sentence embeddings convierten frases completas en vectores densos que capturan su significado.
+Sentence embeddings convert complete sentences into dense vectors that capture their meaning.
 
 ```
-"El cliente quiere devolver el producto"  ->  [0.12, -0.34, 0.87, ..., 0.23]  (768 dims)
-"Quiero hacer una devolucion"             ->  [0.11, -0.31, 0.85, ..., 0.25]  (768 dims)
+"The customer wants to return the product"   ->  [0.12, -0.34, 0.87, ..., 0.23]  (768 dims)
+"I want to make a return"                    ->  [0.11, -0.31, 0.85, ..., 0.25]  (768 dims)
 
-Cosine similarity entre estos dos: 0.89 (muy similares!)
+Cosine similarity between these two: 0.89 (very similar!)
 ```
 
 ### Vector Similarity
@@ -685,42 +684,42 @@ Cosine similarity entre estos dos: 0.89 (muy similares!)
 import numpy as np
 
 def cosine_similarity(a, b):
-    """Mide la similitud del angulo entre dos vectores. Rango: [-1, 1]"""
+    """Measures the angle similarity between two vectors. Range: [-1, 1]"""
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def dot_product(a, b):
-    """Producto punto. Mas rapido, pero depende de la magnitud."""
+    """Dot product. Faster, but depends on magnitude."""
     return np.dot(a, b)
 
-# Cosine similarity es la mas usada porque es invariante a la magnitud
-# Dot product es mas rapido y funciona bien si los embeddings estan normalizados
+# Cosine similarity is the most used because it's invariant to magnitude
+# Dot product is faster and works well if embeddings are normalized
 ```
 
 ### Vector Databases
 
-Para buscar entre millones de embeddings, necesitas una base de datos vectorial con busqueda aproximada (ANN).
+To search among millions of embeddings, you need a vector database with approximate search (ANN).
 
-| Base de datos | Tipo | Mejor para | Costo |
+| Database | Type | Best for | Cost |
 |---|---|---|---|
-| **FAISS** | Libreria (Meta) | Busqueda rapida en memoria | Gratis |
-| **ChromaDB** | Embebida / Servidor | Prototipos, proyectos pequenos | Gratis |
-| **Pinecone** | Cloud managed | Produccion, escalabilidad | Pago |
-| **Weaviate** | Self-hosted / Cloud | Busqueda hibrida (vector + keyword) | Gratis / Pago |
-| **Qdrant** | Self-hosted / Cloud | Alto rendimiento, filtros | Gratis / Pago |
-| **pgvector** | Extension PostgreSQL | Si ya usas PostgreSQL | Gratis |
+| **FAISS** | Library (Meta) | Fast in-memory search | Free |
+| **ChromaDB** | Embedded / Server | Prototypes, small projects | Free |
+| **Pinecone** | Cloud managed | Production, scalability | Paid |
+| **Weaviate** | Self-hosted / Cloud | Hybrid search (vector + keyword) | Free / Paid |
+| **Qdrant** | Self-hosted / Cloud | High performance, filters | Free / Paid |
+| **pgvector** | PostgreSQL extension | If you already use PostgreSQL | Free |
 
 ```python
-# Ejemplo con ChromaDB
+# Example with ChromaDB
 import chromadb
 from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("BAAI/bge-base-en-v1.5")
 client = chromadb.Client()
 
-collection = client.create_collection("documentos")
+collection = client.create_collection("documents")
 
-# Indexar documentos
-docs = ["Politica de devoluciones...", "Horario de atencion...", "Precios..."]
+# Index documents
+docs = ["Return policy...", "Business hours...", "Pricing..."]
 embeddings = model.encode(docs).tolist()
 
 collection.add(
@@ -729,126 +728,126 @@ collection.add(
     ids=["doc1", "doc2", "doc3"]
 )
 
-# Buscar
-query = "Como devuelvo un producto?"
+# Search
+query = "How do I return a product?"
 query_embedding = model.encode([query]).tolist()
 
 results = collection.query(query_embeddings=query_embedding, n_results=2)
 print(results["documents"])
-# [['Politica de devoluciones...']]
+# [['Return policy...']]
 ```
 
 ### RAG (Retrieval-Augmented Generation)
 
-Concepto basico: combinar busqueda semantica con un LLM.
+Basic concept: combine semantic search with an LLM.
 
 ```
-1. Usuario pregunta: "Cual es la politica de devoluciones?"
-2. Buscar en vector DB los documentos mas relevantes
-3. Pasar los documentos + pregunta al LLM como contexto
-4. El LLM genera una respuesta basada en los documentos
+1. User asks: "What is the return policy?"
+2. Search the vector DB for the most relevant documents
+3. Pass the documents + question to the LLM as context
+4. The LLM generates an answer based on the documents
 
-Ventajas:
-- El LLM tiene informacion actualizada (no solo su entrenamiento)
-- Respuestas basadas en TUS datos
-- Reduccion de alucinaciones
+Advantages:
+- The LLM has up-to-date information (not just its training)
+- Answers based on YOUR data
+- Reduction of hallucinations
 ```
 
-> **Nota:** RAG se cubre en mayor profundidad en el LLM Playbook (seccion de RAG).
+> **Note:** RAG is covered in greater depth in the LLM Playbook (RAG section).
 
 ---
 
-## Metricas NLP
+## NLP Metrics
 
-### Clasificacion
+### Classification
 
-Las metricas son las mismas de ML clasico:
+The metrics are the same as classic ML:
 
-| Metrica | Formula (intuicion) | Cuando usarla |
+| Metric | Formula (intuition) | When to use |
 |---|---|---|
-| **Accuracy** | Correctas / Total | Solo si clases balanceadas |
-| **Precision** | TP / (TP + FP) | Cuando los falsos positivos son costosos |
-| **Recall** | TP / (TP + FN) | Cuando los falsos negativos son costosos |
-| **F1** | Media armonica de Precision y Recall | Metrica balanceada, la mas usada |
-| **AUC-ROC** | Area bajo curva ROC | Comparar modelos, clasificacion binaria |
+| **Accuracy** | Correct / Total | Only if classes are balanced |
+| **Precision** | TP / (TP + FP) | When false positives are costly |
+| **Recall** | TP / (TP + FN) | When false negatives are costly |
+| **F1** | Harmonic mean of Precision and Recall | Balanced metric, most commonly used |
+| **AUC-ROC** | Area under ROC curve | Compare models, binary classification |
 
 ### NER: Entity-Level F1
 
 ```
-Para NER se evalua a nivel de ENTIDAD, no de token:
+For NER, evaluation is at the ENTITY level, not the token level:
 
-Texto:     "Carlos Garcia trabaja en Microsoft"
+Text:      "Carlos Garcia works at Microsoft"
 Gold:      [B-PER, I-PER, O, O, B-ORG]
 Predicted: [B-PER, I-PER, O, O, B-ORG]
 
-Entidades gold:      {"Carlos Garcia": PER, "Microsoft": ORG}
-Entidades predicted: {"Carlos Garcia": PER, "Microsoft": ORG}
+Gold entities:      {"Carlos Garcia": PER, "Microsoft": ORG}
+Predicted entities: {"Carlos Garcia": PER, "Microsoft": ORG}
 
-Entity-level F1: ambas entidades correctas -> F1 = 1.0
+Entity-level F1: both entities correct -> F1 = 1.0
 
-Cuidado: si predices "Carlos" como PER (sin "Garcia"),
-NO cuenta como match parcial. Es incorrecto.
+Beware: if you predict "Carlos" as PER (without "Garcia"),
+it does NOT count as a partial match. It's incorrect.
 ```
 
-### Metricas de Generacion de Texto
+### Text Generation Metrics
 
-| Metrica | Que mide | Uso |
+| Metric | What it measures | Use |
 |---|---|---|
-| **BLEU** | N-gram overlap con referencia | Traduccion (menos usado ahora) |
-| **ROUGE** | Recall de n-grams de la referencia | Resumen (ROUGE-L es el mas usado) |
-| **BERTScore** | Similitud semantica con embeddings | Mas robusto que BLEU/ROUGE |
-| **Human evaluation** | Juicio humano | El gold standard, pero caro |
+| **BLEU** | N-gram overlap with reference | Translation (less used now) |
+| **ROUGE** | Recall of n-grams from the reference | Summarization (ROUGE-L is the most used) |
+| **BERTScore** | Semantic similarity with embeddings | More robust than BLEU/ROUGE |
+| **Human evaluation** | Human judgment | The gold standard, but expensive |
 
-> **En la practica con LLMs:** las metricas automaticas (BLEU, ROUGE) son poco fiables para evaluar LLMs. Se usa mas evaluacion humana o LLM-as-a-judge (usar otro LLM para evaluar).
+> **In practice with LLMs:** automatic metrics (BLEU, ROUGE) are unreliable for evaluating LLMs. Human evaluation or LLM-as-a-judge (using another LLM to evaluate) is used more.
 
 ---
 
-## Arbol de Decision: NLP Clasico vs LLM vs Fine-Tuning
+## Decision Tree: Classic NLP vs LLM vs Fine-Tuning
 
 ```
-                     Tienes datos etiquetados?
+                     Do you have labeled data?
                     /                          \
-                  Si                            No
+                  Yes                           No
                   |                              |
-           Cuantos?                     La tarea es compleja?
+           How much?                     Is the task complex?
           /        \                    /                  \
-       <500       500+               Si                    No
+       <500       500+               Yes                   No
         |           |                 |                     |
-   LLM con      Volumen alto?    LLM con              Reglas /
-   few-shot     /         \      prompting             Regex
-     |        Si           No        |
+   LLM with      High volume?    LLM with              Rules /
+   few-shot     /         \      prompting              Regex
+     |        Yes          No        |
      |         |            |        |
-     |   Fine-tune     LLM con      |
-     |   modelo        prompting    |
-     |   pequeno           |        |
-     |      |              |        |
-     v      v              v        v
+     |   Fine-tune     LLM with     |
+     |   small         prompting    |
+     |   model              |       |
+     |      |               |       |
+     v      v               v       v
 
-   Evaluar: el fine-tuned es mejor que el LLM?
-   Si -> deploy modelo pequeno (mas barato, rapido)
-   No -> usar LLM (mas flexible)
+   Evaluate: is the fine-tuned better than the LLM?
+   Yes -> deploy small model (cheaper, faster)
+   No  -> use LLM (more flexible)
 
-   Consideraciones adicionales:
-   - Latencia critica (<100ms)? -> Modelo pequeno
-   - Privacidad de datos? -> Modelo local/fine-tuned
-   - Presupuesto limitado? -> Modelo pequeno
-   - Tarea cambia frecuentemente? -> LLM con prompting
+   Additional considerations:
+   - Critical latency (<100ms)? -> Small model
+   - Data privacy? -> Local/fine-tuned model
+   - Limited budget? -> Small model
+   - Task changes frequently? -> LLM with prompting
 ```
 
 ---
 
-## Tips Practicos para NLP en Consultoria
+## Practical Tips for NLP in Consulting
 
-1. **Empieza siempre con un baseline simple** - TF-IDF + Logistic Regression o zero-shot con un LLM. Te sorprendera lo lejos que llegan.
+1. **Always start with a simple baseline** - TF-IDF + Logistic Regression or zero-shot with an LLM. You'll be surprised how far they go.
 
-2. **La calidad de datos > tamano del modelo** - 500 ejemplos bien etiquetados con un BERT valen mas que 50,000 ejemplos ruidosos.
+2. **Data quality > model size** - 500 well-labeled examples with a BERT are worth more than 50,000 noisy examples.
 
-3. **Multilingue?** Usa modelos multilingues (mBERT, XLM-RoBERTa) o LLMs que ya son multilingues.
+3. **Multilingual?** Use multilingual models (mBERT, XLM-RoBERTa) or LLMs that are already multilingual.
 
-4. **Siempre evalua en datos reales del cliente**, no en benchmarks academicos. La distribucion del mundo real es diferente.
+4. **Always evaluate on real client data**, not on academic benchmarks. The real-world distribution is different.
 
-5. **Versionado de datos y modelos** desde el dia 1. Usa herramientas como DVC o MLflow.
+5. **Data and model versioning** from day 1. Use tools like DVC or MLflow.
 
-6. **Para demos rapidas al cliente**, usa `pipeline()` de HuggingFace o un LLM via API. Luego optimiza.
+6. **For quick client demos**, use HuggingFace `pipeline()` or an LLM via API. Then optimize.
 
-7. **El preprocesamiento en espanol** tiene particularidades: acentos, caracteres especiales, modelos especificos (BETO, RoBERTa-BNE para espanol).
+7. **Spanish text preprocessing** has particularities: accents, special characters, specific models (BETO, RoBERTa-BNE for Spanish).

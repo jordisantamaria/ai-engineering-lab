@@ -1,81 +1,81 @@
-# Deteccion automatica de defectos en manufactura
+# Automated Defect Detection in Manufacturing
 
-## Problema de negocio
+## Business Problem
 
-La inspeccion visual manual en lineas de produccion presenta desafios criticos:
+Manual visual inspection on production lines presents critical challenges:
 
-- **Lentitud**: un inspector humano tarda entre 5-15 segundos por pieza, limitando el throughput de la linea.
-- **Inconsistencia**: la precision varia segun la fatiga, iluminacion y experiencia del inspector. Estudios muestran que la tasa de deteccion manual cae un 20-30% tras 2 horas continuas.
-- **Coste elevado**: mantener equipos de inspectores 24/7 en tres turnos supone un coste salarial significativo.
-- **Defectos escapados**: los defectos que llegan al cliente generan devoluciones, reclamaciones de garantia y dano reputacional.
+- **Slowness**: a human inspector takes between 5-15 seconds per part, limiting line throughput.
+- **Inconsistency**: accuracy varies with fatigue, lighting, and inspector experience. Studies show that the manual detection rate drops 20-30% after 2 continuous hours.
+- **High cost**: maintaining inspection teams 24/7 across three shifts represents a significant salary cost.
+- **Escaped defects**: defects reaching the customer generate returns, warranty claims, and reputational damage.
 
-## Solucion propuesta
+## Proposed Solution
 
-Sistema de vision por computador que detecta defectos en productos en tiempo real, integrado directamente en la linea de produccion.
+Computer vision system that detects defects in products in real time, integrated directly into the production line.
 
-### Arquitectura tecnica
+### Technical Architecture
 
 ```
-Camara industrial --> Preprocesamiento imagen --> EfficientNet-B0 (Transfer Learning)
+Industrial camera --> Image preprocessing --> EfficientNet-B0 (Transfer Learning)
                                                         |
                                                   Classification Head
                                                         |
-                                              Defecto / No defecto
-                                              (+ tipo de defecto)
+                                              Defect / No defect
+                                              (+ defect type)
                                                         |
                                                   FastAPI Server
                                                         |
-                                              Dashboard / Alertas
+                                              Dashboard / Alerts
 ```
 
-- **Modelo base**: EfficientNet-B0 preentrenado en ImageNet, con la ultima capa fully-connected reemplazada para clasificacion binaria (defecto/no-defecto) o multi-clase (tipo de defecto).
-- **Transfer Learning**: se congelan las primeras capas del backbone y se entrenan solo las ultimas capas + classification head, permitiendo entrenar con pocos datos (~500-1000 imagenes).
-- **Data Augmentation**: rotaciones, flips, cambios de brillo/contraste, recortes aleatorios para robustecer el modelo.
-- **Servicio de inferencia**: API REST con FastAPI, containerizado con Docker para despliegue sencillo.
+- **Base model**: EfficientNet-B0 pretrained on ImageNet, with the last fully-connected layer replaced for binary classification (defect/no-defect) or multi-class (defect type).
+- **Transfer Learning**: the first layers of the backbone are frozen and only the last layers + classification head are trained, allowing training with few data (~500-1000 images).
+- **Data Augmentation**: rotations, flips, brightness/contrast changes, random crops to make the model more robust.
+- **Inference service**: REST API with FastAPI, containerized with Docker for easy deployment.
 
 ### Dataset
 
-- **MVTec Anomaly Detection Dataset** (MVTec AD): dataset de referencia para deteccion de defectos industriales con 15 categorias de productos y multiples tipos de defecto.
-- Alternativa: dataset sintetico incluido en el repositorio para demos rapidas.
+- **MVTec Anomaly Detection Dataset** (MVTec AD): reference dataset for industrial defect detection with 15 product categories and multiple defect types.
+- Alternative: synthetic dataset included in the repository for quick demos.
 
-## Resultados esperados
+## Expected Results
 
-| Metrica | Valor |
+| Metric | Value |
 |---------|-------|
 | Accuracy | >95% |
 | Precision | >93% |
 | Recall | >94% |
-| Tiempo de inferencia | <100ms por imagen |
-| Throughput | >10 imagenes/segundo |
+| Inference time | <100ms per image |
+| Throughput | >10 images/second |
 
-## Tecnologias
+## Technologies
 
-- **PyTorch** + **torchvision**: framework de deep learning y modelos preentrenados
-- **Albumentations**: data augmentation avanzada
-- **FastAPI**: API REST de alto rendimiento
-- **ONNX Runtime**: inferencia optimizada en produccion
-- **Docker**: containerizacion para despliegue
-- **OpenCV**: preprocesamiento de imagenes
+- **PyTorch** + **torchvision**: deep learning framework and pretrained models
+- **Albumentations**: advanced data augmentation
+- **FastAPI**: high-performance REST API
+- **ONNX Runtime**: optimized inference in production
+- **Docker**: containerization for deployment
+- **OpenCV**: image preprocessing
 
-## Como ejecutar
+## How to Run
 
-### 1. Instalacion
+### 1. Installation
 
 ```bash
-# Clonar el repositorio
+# Clone the repository
 git clone <repo-url>
 cd portfolio/01-defect-detection
 
-# Crear entorno virtual
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # venv\Scripts\activate   # Windows
 
-# Instalar dependencias
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Entrenar el modelo
+### 2. Train the Model
 
 ```bash
 python src/train.py \
@@ -86,7 +86,7 @@ python src/train.py \
     --output_dir models/
 ```
 
-La estructura esperada del directorio de datos:
+Expected data directory structure:
 ```
 data/defects/
     train/
@@ -101,15 +101,15 @@ data/defects/
         defect/
 ```
 
-### 3. Lanzar la API
+### 3. Launch the API
 
 ```bash
 python src/api.py
-# o bien:
+# or:
 uvicorn src.api:app --host 0.0.0.0 --port 8000
 ```
 
-### 4. Probar la prediccion
+### 4. Test Prediction
 
 ```bash
 curl -X POST "http://localhost:8000/predict" \
@@ -123,35 +123,35 @@ docker build -t defect-detection .
 docker run -p 8000:8000 defect-detection
 ```
 
-## Como presentarlo: pitch para cliente
+## How to Present It: Client Pitch
 
-### Propuesta de valor
+### Value Proposition
 
-> "Imagine sustituir la variabilidad humana por un sistema que inspecciona cada pieza en menos de 100 milisegundos, 24 horas al dia, 7 dias a la semana, sin fatiga y con una precision superior al 95%."
+> "Imagine replacing human variability with a system that inspects every part in less than 100 milliseconds, 24 hours a day, 7 days a week, without fatigue and with accuracy above 95%."
 
-### ROI estimado
+### Estimated ROI
 
-**Escenario**: planta con 3 turnos, 4 inspectores por turno (12 inspectores totales).
+**Scenario**: plant with 3 shifts, 4 inspectors per shift (12 inspectors total).
 
-| Concepto | Antes | Despues |
+| Item | Before | After |
 |----------|-------|---------|
-| Coste inspeccion anual | ~360.000 EUR (12 inspectores) | ~80.000 EUR (2 inspectores + sistema) |
-| Defectos escapados | 2-5% | <0.5% |
-| Velocidad inspeccion | 5-15 seg/pieza | <0.1 seg/pieza |
-| Disponibilidad | Sujeta a turnos/bajas | 24/7 continuo |
+| Annual inspection cost | ~360,000 EUR (12 inspectors) | ~80,000 EUR (2 inspectors + system) |
+| Escaped defects | 2-5% | <0.5% |
+| Inspection speed | 5-15 sec/part | <0.1 sec/part |
+| Availability | Subject to shifts/absences | 24/7 continuous |
 
-**Ahorro neto estimado: ~280.000 EUR/ano**, sin contar la reduccion en costes de garantia y devoluciones.
+**Estimated net savings: ~280,000 EUR/year**, not counting the reduction in warranty and return costs.
 
-### Puntos clave para la presentacion
+### Key Points for the Presentation
 
-1. **Demo en vivo**: mostrar la API procesando imagenes en tiempo real.
-2. **Metricas claras**: precision, recall, y velocidad de inferencia.
-3. **Escalabilidad**: un modelo, multiples camaras/lineas.
-4. **Integracion**: se conecta con sistemas SCADA/MES existentes via API REST.
-5. **Mejora continua**: el modelo se puede reentrenar con nuevos tipos de defecto sin redisenar el sistema.
+1. **Live demo**: show the API processing images in real time.
+2. **Clear metrics**: precision, recall, and inference speed.
+3. **Scalability**: one model, multiple cameras/lines.
+4. **Integration**: connects to existing SCADA/MES systems via REST API.
+5. **Continuous improvement**: the model can be retrained with new defect types without redesigning the system.
 
-### Preguntas frecuentes del cliente
+### Frequently Asked Client Questions
 
-- **"Y si aparece un tipo de defecto nuevo?"** - Se recogen imagenes del nuevo defecto, se reentrena el modelo (fine-tuning rapido), y se despliega sin parar la linea.
-- **"Que pasa si falla el sistema?"** - Fallback a inspeccion manual. El sistema tiene health checks y alertas automaticas.
-- **"Cuanto tarda la implementacion?"** - Piloto funcional en 4-6 semanas. Integracion completa en 2-3 meses.
+- **"What if a new type of defect appears?"** - Images of the new defect are collected, the model is retrained (quick fine-tuning), and deployed without stopping the line.
+- **"What happens if the system fails?"** - Fallback to manual inspection. The system has health checks and automatic alerts.
+- **"How long does implementation take?"** - Functional pilot in 4-6 weeks. Full integration in 2-3 months.

@@ -1,56 +1,56 @@
 # Computer Vision
 
-## Que es Computer Vision y Por Que Importa
+## What is Computer Vision and Why It Matters
 
-Computer Vision (CV) permite a las maquinas "ver" e interpretar imagenes y video. En consultoria, es una de las areas con mayor impacto tangible porque automatiza tareas visuales que antes requerían inspeccion humana.
+Computer Vision (CV) allows machines to "see" and interpret images and video. In consulting, it is one of the areas with the greatest tangible impact because it automates visual tasks that previously required human inspection.
 
-### Aplicaciones por Industria
+### Applications by Industry
 
-| Industria | Aplicacion | Tecnica CV |
+| Industry | Application | CV Technique |
 |---|---|---|
-| Manufactura | Deteccion de defectos en linea de produccion | Object Detection / Clasificacion |
-| Retail | Conteo de personas, analisis de estantes | Object Detection, Tracking |
-| Salud | Analisis de radiografias, patologia digital | Clasificacion, Segmentacion |
-| Agricultura | Deteccion de plagas, conteo de frutos | Object Detection, Segmentacion |
-| Logistica | Lectura de matriculas, OCR de documentos | OCR, Object Detection |
-| Construccion | Monitoreo de avance de obra | Segmentacion, Clasificacion |
-| Seguros | Evaluacion de danos en vehiculos | Object Detection, Clasificacion |
-| Seguridad | Deteccion de intrusos, reconocimiento facial | Detection, Reconocimiento |
+| Manufacturing | Defect detection on production lines | Object Detection / Classification |
+| Retail | People counting, shelf analysis | Object Detection, Tracking |
+| Healthcare | X-ray analysis, digital pathology | Classification, Segmentation |
+| Agriculture | Pest detection, fruit counting | Object Detection, Segmentation |
+| Logistics | License plate reading, document OCR | OCR, Object Detection |
+| Construction | Construction progress monitoring | Segmentation, Classification |
+| Insurance | Vehicle damage assessment | Object Detection, Classification |
+| Security | Intrusion detection, face recognition | Detection, Recognition |
 
 ---
 
-## Imagenes como Datos
+## Images as Data
 
-### Representacion de Imagenes
+### Image Representation
 
-Una imagen digital es una matriz de numeros. Cada numero representa la intensidad de un pixel.
+A digital image is a matrix of numbers. Each number represents the intensity of a pixel.
 
 ```
-Grayscale (1 canal):           RGB (3 canales):
+Grayscale (1 channel):           RGB (3 channels):
                                 R        G        B
 [120, 130, 125]             [255,0,0] [0,255,0] [0,0,255]
 [118, 135, 128]             [128,0,0] [0,128,0] [0,0,128]
 [122, 131, 127]             [64,0,0]  [0,64,0]  [0,0,64]
 ```
 
-**Conceptos clave:**
+**Key concepts:**
 
-| Concepto | Descripcion |
+| Concept | Description |
 |---|---|
-| **Pixel** | Unidad minima de una imagen. Valor entre 0 (negro) y 255 (blanco) |
-| **Canales** | Grayscale = 1 canal, RGB = 3 canales, RGBA = 4 canales |
-| **Resolucion** | Ancho x Alto en pixeles (ej: 1920x1080) |
-| **Profundidad de color** | Bits por canal. 8 bits = 0-255, 16 bits = 0-65535 |
+| **Pixel** | Smallest unit of an image. Value between 0 (black) and 255 (white) |
+| **Channels** | Grayscale = 1 channel, RGB = 3 channels, RGBA = 4 channels |
+| **Resolution** | Width x Height in pixels (e.g., 1920x1080) |
+| **Color depth** | Bits per channel. 8 bits = 0-255, 16 bits = 0-65535 |
 
-### Tensores de Imagenes en PyTorch
+### Image Tensors in PyTorch
 
-PyTorch usa la convencion **(B, C, H, W)**:
+PyTorch uses the convention **(B, C, H, W)**:
 
 ```
-B = Batch size     (cuantas imagenes procesas a la vez)
-C = Channels       (3 para RGB, 1 para grayscale)
-H = Height         (alto en pixeles)
-W = Width          (ancho en pixeles)
+B = Batch size     (how many images you process at once)
+C = Channels       (3 for RGB, 1 for grayscale)
+H = Height         (height in pixels)
+W = Width          (width in pixels)
 ```
 
 ```python
@@ -58,35 +58,35 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
-# Cargar imagen y convertir a tensor
+# Load image and convert to tensor
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.ToTensor(),  # Convierte a tensor (C, H, W) y escala a [0, 1]
+    transforms.ToTensor(),  # Converts to tensor (C, H, W) and scales to [0, 1]
 ])
 
-img = Image.open("foto.jpg")
+img = Image.open("photo.jpg")
 tensor = transform(img)
 print(tensor.shape)  # torch.Size([3, 224, 224])
 
-# Crear un batch
-batch = tensor.unsqueeze(0)  # Agrega dimension de batch
+# Create a batch
+batch = tensor.unsqueeze(0)  # Add batch dimension
 print(batch.shape)  # torch.Size([1, 3, 224, 224])
 ```
 
-> **Punto clave:** `ToTensor()` hace dos cosas: convierte la imagen a tensor y escala los valores de [0, 255] a [0.0, 1.0].
+> **Key point:** `ToTensor()` does two things: converts the image to a tensor and scales values from [0, 255] to [0.0, 1.0].
 
-### Normalizacion de Imagenes
+### Image Normalization
 
-Los modelos preentrenados en ImageNet esperan imagenes normalizadas con estas estadisticas:
+Models pretrained on ImageNet expect images normalized with these statistics:
 
 ```python
-# Estadisticas de ImageNet
+# ImageNet statistics
 normalize = transforms.Normalize(
-    mean=[0.485, 0.456, 0.406],  # Media por canal (R, G, B)
-    std=[0.229, 0.224, 0.225]    # Desviacion estandar por canal
+    mean=[0.485, 0.456, 0.406],  # Mean per channel (R, G, B)
+    std=[0.229, 0.224, 0.225]    # Standard deviation per channel
 )
 
-# Pipeline completo tipico
+# Typical complete pipeline
 transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -96,20 +96,20 @@ transform = transforms.Compose([
 ])
 ```
 
-La normalizacion centra los datos alrededor de 0 con desviacion ~1, lo que ayuda a que el entrenamiento sea mas estable. Si entrenas desde cero, puedes calcular tus propias estadisticas.
+Normalization centers the data around 0 with deviation ~1, which helps make training more stable. If you train from scratch, you can compute your own statistics.
 
 ---
 
 ## CNNs (Convolutional Neural Networks)
 
-Las CNNs son la arquitectura fundamental de CV. La idea central: usar filtros pequenos que se deslizan por la imagen detectando patrones locales.
+CNNs are the fundamental architecture of CV. The central idea: use small filters that slide across the image detecting local patterns.
 
-### Convolucion: Filtros y Kernels
+### Convolution: Filters and Kernels
 
-Un filtro (kernel) es una matriz pequena que se desliza por la imagen, multiplicando y sumando valores. Cada filtro detecta un patron especifico.
+A filter (kernel) is a small matrix that slides across the image, multiplying and summing values. Each filter detects a specific pattern.
 
 ```
-Imagen de entrada (5x5):        Filtro 3x3 (detector de bordes verticales):
+Input image (5x5):              Filter 3x3 (vertical edge detector):
 
 1  0  1  0  1                    1  0  -1
 0  1  0  1  0                    1  0  -1
@@ -117,40 +117,40 @@ Imagen de entrada (5x5):        Filtro 3x3 (detector de bordes verticales):
 0  1  0  1  0
 1  0  1  0  1
 
-Operacion de convolucion (posicion superior-izquierda):
+Convolution operation (top-left position):
 
   1*1 + 0*0 + 1*(-1)     =  0
 + 0*1 + 1*0 + 0*(-1)     =  0
 + 1*1 + 0*0 + 1*(-1)     =  0
                           ----
-  Resultado en esa posicion: 0
+  Result at that position: 0
 
-El filtro se desliza por toda la imagen generando el "feature map":
+The filter slides across the entire image generating the "feature map":
 
-Imagen 5x5  -->  [Filtro 3x3]  -->  Feature Map 3x3
+Image 5x5  -->  [Filter 3x3]  -->  Feature Map 3x3
 ```
 
-La intuicion es simple: el filtro "busca" un patron especifico en cada posicion de la imagen. Si el patron esta presente, produce un valor alto; si no, un valor bajo o cero.
+The intuition is simple: the filter "looks for" a specific pattern at each position of the image. If the pattern is present, it produces a high value; if not, a low value or zero.
 
-### Stride y Padding
+### Stride and Padding
 
 ```
-Stride = 1 (por defecto):        Stride = 2 (salta posiciones):
-El filtro se mueve 1 pixel        El filtro se mueve 2 pixeles
-a la vez. Salida grande.          a la vez. Salida mas pequena.
+Stride = 1 (default):           Stride = 2 (skips positions):
+The filter moves 1 pixel         The filter moves 2 pixels
+at a time. Large output.         at a time. Smaller output.
 
-Padding = 0 (valid):             Padding = 1 (same):
-La salida se encoge.              Se agregan ceros alrededor.
-5x5 input + 3x3 filtro           La salida mantiene el tamano
-= 3x3 output                     de la entrada.
+Padding = 0 (valid):            Padding = 1 (same):
+The output shrinks.              Zeros are added around.
+5x5 input + 3x3 filter          The output maintains the
+= 3x3 output                    size of the input.
 
-Formula del tamano de salida:
+Output size formula:
 output_size = (input_size - kernel_size + 2 * padding) / stride + 1
 ```
 
 ### Pooling
 
-Reduce el tamano espacial de los feature maps, manteniendo la informacion mas relevante.
+Reduces the spatial size of feature maps, keeping the most relevant information.
 
 ```
 Max Pooling 2x2 (stride=2):
@@ -161,54 +161,54 @@ Max Pooling 2x2 (stride=2):
 [3  1 | 8  2]
 [4  5 | 3  7]
 
-Toma el maximo de cada region 2x2.
-Reduce el tamano a la mitad.
+Takes the maximum of each 2x2 region.
+Reduces the size by half.
 ```
 
-| Tipo | Que hace | Cuando usar |
+| Type | What it does | When to use |
 |---|---|---|
-| **Max Pooling** | Toma el maximo de cada region | Mas comun. Conserva las activaciones mas fuertes |
-| **Average Pooling** | Promedio de cada region | Menos comun. Usado a veces en capas finales |
-| **Global Average Pooling** | Promedio de todo el feature map | Reemplaza capas FC al final de la red |
+| **Max Pooling** | Takes the maximum of each region | Most common. Preserves the strongest activations |
+| **Average Pooling** | Average of each region | Less common. Sometimes used in final layers |
+| **Global Average Pooling** | Average of the entire feature map | Replaces FC layers at the end of the network |
 
-### Feature Maps: Aprendizaje Jerarquico
+### Feature Maps: Hierarchical Learning
 
-La magia de las CNNs es que aprenden features de forma jerarquica, de lo simple a lo complejo:
+The magic of CNNs is that they learn features hierarchically, from simple to complex:
 
 ```
-Capa 1 (temprana):     Capa 2-3 (media):      Capa 4+ (profunda):
-Detecta bordes,        Detecta texturas,       Detecta partes de
-lineas, gradientes     patrones, formas        objetos y objetos
-                       simples                 completos
+Layer 1 (early):       Layer 2-3 (middle):     Layer 4+ (deep):
+Detects edges,         Detects textures,       Detects object parts
+lines, gradients       patterns, simple        and complete objects
+                       shapes
 
-  |  / -- \            /--\  |||               [ojo] [nariz]
-  |  \ -- /            \--/  ===               [rueda] [ala]
+  |  / -- \            /--\  |||               [eye] [nose]
+  |  \ -- /            \--/  ===               [wheel] [wing]
 ```
 
-> **Punto clave:** No necesitas disenar los filtros manualmente. La red los aprende durante el entrenamiento optimizando la funcion de perdida.
+> **Key point:** You don't need to design filters manually. The network learns them during training by optimizing the loss function.
 
-### Arquitectura Tipica de una CNN
+### Typical CNN Architecture
 
 ```
 Input Image
     |
     v
-[Conv2d] --> [BatchNorm] --> [ReLU] --> [MaxPool]     Bloque 1
+[Conv2d] --> [BatchNorm] --> [ReLU] --> [MaxPool]     Block 1
     |
     v
-[Conv2d] --> [BatchNorm] --> [ReLU] --> [MaxPool]     Bloque 2
+[Conv2d] --> [BatchNorm] --> [ReLU] --> [MaxPool]     Block 2
     |
     v
-[Conv2d] --> [BatchNorm] --> [ReLU] --> [MaxPool]     Bloque 3
+[Conv2d] --> [BatchNorm] --> [ReLU] --> [MaxPool]     Block 3
     |
     v
-[Global Average Pooling]                               Reduccion
+[Global Average Pooling]                               Reduction
     |
     v
-[Fully Connected] --> [Softmax/Sigmoid]                Clasificacion
+[Fully Connected] --> [Softmax/Sigmoid]                Classification
     |
     v
-Output (probabilidades por clase)
+Output (probabilities per class)
 ```
 
 ```python
@@ -218,19 +218,19 @@ class SimpleCNN(nn.Module):
     def __init__(self, num_classes=10):
         super().__init__()
         self.features = nn.Sequential(
-            # Bloque 1: 3 canales -> 32 filtros
+            # Block 1: 3 channels -> 32 filters
             nn.Conv2d(3, 32, kernel_size=3, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(2),
 
-            # Bloque 2: 32 -> 64 filtros
+            # Block 2: 32 -> 64 filters
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(2),
 
-            # Bloque 3: 64 -> 128 filtros
+            # Block 3: 64 -> 128 filters
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
@@ -247,29 +247,29 @@ class SimpleCNN(nn.Module):
 
 ---
 
-## Arquitecturas Importantes
+## Important Architectures
 
-### Tabla Comparativa
+### Comparison Table
 
-| Arquitectura | Ano | Parametros (M) | Top-1 ImageNet (%) | Velocidad relativa | Idea clave |
+| Architecture | Year | Parameters (M) | Top-1 ImageNet (%) | Relative Speed | Key Idea |
 |---|---|---|---|---|---|
-| LeNet-5 | 1998 | 0.06 | - | Muy rapida | Primera CNN exitosa (digitos) |
-| AlexNet | 2012 | 61 | 63.3 | Rapida | Inicio del deep learning en CV |
-| VGG-16 | 2014 | 138 | 74.4 | Lenta | Filtros 3x3 apilados, simple pero pesada |
-| ResNet-50 | 2015 | 25.6 | 79.3 | Media | Residual connections |
-| EfficientNet-B0 | 2019 | 5.3 | 77.1 | Rapida | Compound scaling |
-| EfficientNet-B7 | 2019 | 66 | 84.3 | Lenta | Mejor accuracy pre-ViT |
-| ViT-B/16 | 2020 | 86 | 81.8 | Media | Transformers para vision |
-| ConvNeXt-T | 2022 | 29 | 82.1 | Media | CNN modernizada, compite con ViT |
+| LeNet-5 | 1998 | 0.06 | - | Very fast | First successful CNN (digits) |
+| AlexNet | 2012 | 61 | 63.3 | Fast | Start of deep learning in CV |
+| VGG-16 | 2014 | 138 | 74.4 | Slow | Stacked 3x3 filters, simple but heavy |
+| ResNet-50 | 2015 | 25.6 | 79.3 | Medium | Residual connections |
+| EfficientNet-B0 | 2019 | 5.3 | 77.1 | Fast | Compound scaling |
+| EfficientNet-B7 | 2019 | 66 | 84.3 | Slow | Best accuracy pre-ViT |
+| ViT-B/16 | 2020 | 86 | 81.8 | Medium | Transformers for vision |
+| ConvNeXt-T | 2022 | 29 | 82.1 | Medium | Modernized CNN, competes with ViT |
 
 ### ResNet: Residual Connections
 
-El problema: redes mas profundas deberian ser mejores, pero en la practica empeoran (degradation problem). No es overfitting, sino que es dificil optimizar redes muy profundas.
+The problem: deeper networks should be better, but in practice they get worse (degradation problem). It's not overfitting, but rather it's difficult to optimize very deep networks.
 
-La solucion de ResNet: **skip connections** (conexiones residuales).
+ResNet's solution: **skip connections** (residual connections).
 
 ```
-Bloque estandar:                Bloque residual (ResNet):
+Standard block:                 Residual block (ResNet):
 
 x --> [Conv] --> [Conv] --> y   x ----> [Conv] --> [Conv] --> (+) --> y
                                  |                            ^
@@ -278,124 +278,124 @@ x --> [Conv] --> [Conv] --> y   x ----> [Conv] --> [Conv] --> (+) --> y
 
 y = F(x)                       y = F(x) + x
 
-En lugar de aprender y = F(x),  la red aprende el "residuo": F(x) = y - x
-Es mas facil aprender un residuo pequeno que una transformacion completa.
+Instead of learning y = F(x),  the network learns the "residual": F(x) = y - x
+It's easier to learn a small residual than a complete transformation.
 ```
 
-> **Intuicion:** si la capa ideal es la identidad (no hacer nada), es mucho mas facil aprender F(x) = 0 y obtener y = x, que aprender F(x) = x directamente. Esto permite entrenar redes de 100+ capas.
+> **Intuition:** if the ideal layer is the identity (do nothing), it's much easier to learn F(x) = 0 and get y = x, than to learn F(x) = x directly. This allows training networks with 100+ layers.
 
-### EfficientNet: Scaling Compuesto
+### EfficientNet: Compound Scaling
 
-EfficientNet propone escalar tres dimensiones a la vez en proporciones optimas:
+EfficientNet proposes scaling three dimensions at once in optimal proportions:
 
 ```
-Dimensiones de escalado:
+Scaling dimensions:
 
-Ancho (width):    Mas filtros por capa        [32] -> [64]
-Profundidad:      Mas capas                   3 bloques -> 6 bloques
-Resolucion:       Imagenes mas grandes        224x224 -> 380x380
+Width:        More filters per layer        [32] -> [64]
+Depth:        More layers                   3 blocks -> 6 blocks
+Resolution:   Larger images                 224x224 -> 380x380
 
-EfficientNet escala las tres de forma equilibrada:
-ancho = alpha^phi
-profundidad = beta^phi
-resolucion = gamma^phi
+EfficientNet scales all three in a balanced way:
+width = alpha^phi
+depth = beta^phi
+resolution = gamma^phi
 
-donde phi es el coeficiente de escalado (B0=0, B1=1, ..., B7=7)
+where phi is the scaling coefficient (B0=0, B1=1, ..., B7=7)
 ```
 
 ### Vision Transformer (ViT)
 
-ViT aplica la arquitectura Transformer (de NLP) directamente a imagenes:
+ViT applies the Transformer architecture (from NLP) directly to images:
 
 ```
-Imagen 224x224
+Image 224x224
       |
       v
-Dividir en parches 16x16 = 196 parches
+Split into 16x16 patches = 196 patches
       |
       v
-Cada parche se aplana y proyecta a un embedding (como un "token")
+Each patch is flattened and projected to an embedding (like a "token")
       |
       v
-Agregar positional embeddings + [CLS] token
+Add positional embeddings + [CLS] token
       |
       v
-Transformer Encoder (self-attention entre parches)
+Transformer Encoder (self-attention between patches)
       |
       v
-[CLS] token --> Clasificacion
+[CLS] token --> Classification
 ```
 
-> **Cuando usar ViT:** funciona mejor con grandes cantidades de datos. Para datasets pequenos, ResNet y EfficientNet suelen ganar. ConvNeXt es una alternativa que combina lo mejor de ambos mundos.
+> **When to use ViT:** works better with large amounts of data. For small datasets, ResNet and EfficientNet usually win. ConvNeXt is an alternative that combines the best of both worlds.
 
 ---
 
-## Transfer Learning en CV
+## Transfer Learning in CV
 
-Transfer Learning es **la tecnica mas importante en CV practico**. En lugar de entrenar desde cero, usas un modelo preentrenado y lo adaptas a tu problema.
+Transfer Learning is **the most important technique in practical CV**. Instead of training from scratch, you use a pretrained model and adapt it to your problem.
 
-### Por Que Funciona
+### Why It Works
 
-Los primeros layers de una CNN aprenden features generales (bordes, texturas) utiles para cualquier tarea visual. Solo los ultimos layers son especificos del problema.
+The first layers of a CNN learn general features (edges, textures) useful for any visual task. Only the last layers are problem-specific.
 
-### Uso con torchvision
+### Usage with torchvision
 
 ```python
 import torchvision.models as models
 import torch.nn as nn
 
-# 1. Cargar modelo preentrenado
+# 1. Load pretrained model
 model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
 
-# 2. Congelar todas las capas
+# 2. Freeze all layers
 for param in model.parameters():
     param.requires_grad = False
 
-# 3. Reemplazar la ultima capa (classifier head)
+# 3. Replace the last layer (classifier head)
 num_features = model.fc.in_features
 model.fc = nn.Sequential(
     nn.Dropout(0.3),
     nn.Linear(num_features, 256),
     nn.ReLU(),
-    nn.Linear(256, num_classes)  # Tu numero de clases
+    nn.Linear(256, num_classes)  # Your number of classes
 )
 
-# 4. Solo los parametros nuevos se entrenan
+# 4. Only the new parameters are trained
 optimizer = torch.optim.Adam(model.fc.parameters(), lr=1e-3)
 ```
 
-### Fine-Tuning Avanzado: Learning Rates por Capa
+### Advanced Fine-Tuning: Per-Layer Learning Rates
 
 ```python
-# Descongelar gradualmente y usar learning rates diferentes
-# Las capas mas profundas (cerca de la salida) aprenden mas rapido
-# Las capas tempranas (features generales) se ajustan menos
+# Gradually unfreeze and use different learning rates
+# Deeper layers (near the output) learn faster
+# Early layers (general features) are adjusted less
 
 param_groups = [
-    {"params": model.layer1.parameters(), "lr": 1e-5},   # Casi congelado
+    {"params": model.layer1.parameters(), "lr": 1e-5},   # Almost frozen
     {"params": model.layer2.parameters(), "lr": 5e-5},
     {"params": model.layer3.parameters(), "lr": 1e-4},
     {"params": model.layer4.parameters(), "lr": 5e-4},
-    {"params": model.fc.parameters(), "lr": 1e-3},       # Aprende mas
+    {"params": model.fc.parameters(), "lr": 1e-3},       # Learns more
 ]
 
 optimizer = torch.optim.Adam(param_groups)
 ```
 
-### Cuando Funciona Transfer Learning
+### When Transfer Learning Works
 
-| Escenario | Datos | Similitud con ImageNet | Estrategia |
+| Scenario | Data | Similarity to ImageNet | Strategy |
 |---|---|---|---|
-| **Ideal** | Pocos datos (<1K) | Alta (fotos naturales) | Congelar todo, solo entrenar head |
-| **Comun** | Datos medios (1K-10K) | Media | Fine-tune ultimas capas + head |
-| **Mucho dato** | Muchos datos (>50K) | Baja (medico, satelital) | Fine-tune completo, lr bajo en primeras capas |
-| **Dominio muy diferente** | Muchos datos | Muy baja | Considerar entrenar desde cero |
+| **Ideal** | Few data (<1K) | High (natural photos) | Freeze everything, only train head |
+| **Common** | Medium data (1K-10K) | Medium | Fine-tune last layers + head |
+| **Lots of data** | Many data (>50K) | Low (medical, satellite) | Full fine-tune, low lr on first layers |
+| **Very different domain** | Many data | Very low | Consider training from scratch |
 
 ---
 
 ## Data Augmentation
 
-Data augmentation genera variaciones artificiales de tus imagenes de entrenamiento, aumentando la diversidad sin necesidad de mas datos reales.
+Data augmentation generates artificial variations of your training images, increasing diversity without needing more real data.
 
 ### torchvision.transforms
 
@@ -419,7 +419,7 @@ train_transform = transforms.Compose([
     transforms.RandomErasing(p=0.2),  # Cutout-like
 ])
 
-# Para validacion/test: NO augmentation, solo resize y normalize
+# For validation/test: NO augmentation, only resize and normalize
 val_transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -429,7 +429,7 @@ val_transform = transforms.Compose([
 ])
 ```
 
-### Albumentations (Mas Potente)
+### Albumentations (More Powerful)
 
 ```python
 import albumentations as A
@@ -438,14 +438,14 @@ from albumentations.pytorch import ToTensorV2
 train_transform = A.Compose([
     A.RandomResizedCrop(224, 224, scale=(0.8, 1.0)),
     A.HorizontalFlip(p=0.5),
-    A.VerticalFlip(p=0.2),  # Util para satelital, microscopia
+    A.VerticalFlip(p=0.2),  # Useful for satellite, microscopy
     A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.2, rotate_limit=30, p=0.5),
     A.OneOf([
         A.GaussNoise(var_limit=(10, 50)),
         A.GaussianBlur(blur_limit=(3, 7)),
         A.MotionBlur(blur_limit=7),
     ], p=0.3),
-    A.CLAHE(clip_limit=4.0, p=0.3),  # Mejora contraste
+    A.CLAHE(clip_limit=4.0, p=0.3),  # Contrast enhancement
     A.CoarseDropout(  # Cutout
         max_holes=8, max_height=32, max_width=32,
         fill_value=0, p=0.3
@@ -455,58 +455,58 @@ train_transform = A.Compose([
 ])
 ```
 
-> **Albumentations vs torchvision:** Albumentations es mas rapido (implementado en C/OpenCV), tiene mas augmentations, y soporta augmentations para bounding boxes y mascaras de segmentacion. **Recomendado para proyectos serios.**
+> **Albumentations vs torchvision:** Albumentations is faster (implemented in C/OpenCV), has more augmentations, and supports augmentations for bounding boxes and segmentation masks. **Recommended for serious projects.**
 
-### Augmentations Comunes
+### Common Augmentations
 
-| Augmentation | Descripcion | Cuando usar |
+| Augmentation | Description | When to use |
 |---|---|---|
-| **HorizontalFlip** | Espejo horizontal | Casi siempre (no en OCR/texto) |
-| **VerticalFlip** | Espejo vertical | Satelital, microscopia, aereo |
-| **Rotation** | Rotar imagen | Cuando la orientacion no importa |
-| **RandomCrop** | Recortar region aleatoria | Siempre util |
-| **ColorJitter** | Variar brillo/contraste/saturacion | Fotos naturales |
-| **Cutout/Erasing** | Borrar regiones aleatorias | Regularizacion efectiva |
-| **MixUp** | Mezclar dos imagenes y sus labels | Regularizacion avanzada |
-| **CutMix** | Pegar un trozo de otra imagen | Similar a MixUp, a veces mejor |
+| **HorizontalFlip** | Horizontal mirror | Almost always (not for OCR/text) |
+| **VerticalFlip** | Vertical mirror | Satellite, microscopy, aerial |
+| **Rotation** | Rotate image | When orientation doesn't matter |
+| **RandomCrop** | Crop random region | Always useful |
+| **ColorJitter** | Vary brightness/contrast/saturation | Natural photos |
+| **Cutout/Erasing** | Erase random regions | Effective regularization |
+| **MixUp** | Blend two images and their labels | Advanced regularization |
+| **CutMix** | Paste a piece of another image | Similar to MixUp, sometimes better |
 
 ### Test Time Augmentation (TTA)
 
-Aplicar augmentations tambien en inference y promediar predicciones. Mejora accuracy ~1-3% a costa de mas tiempo.
+Apply augmentations also during inference and average predictions. Improves accuracy ~1-3% at the cost of more time.
 
 ```python
 def predict_with_tta(model, image, transforms_list, n_augments=5):
-    """Predice con TTA: aplica augmentations y promedia."""
+    """Predict with TTA: apply augmentations and average."""
     predictions = []
 
-    # Prediccion sin augmentation
+    # Prediction without augmentation
     pred = model(original_transform(image).unsqueeze(0))
     predictions.append(pred)
 
-    # Predicciones con augmentations
+    # Predictions with augmentations
     for _ in range(n_augments):
         aug_image = tta_transform(image)
         pred = model(aug_image.unsqueeze(0))
         predictions.append(pred)
 
-    # Promediar probabilidades
+    # Average probabilities
     avg_pred = torch.stack(predictions).mean(dim=0)
     return avg_pred
 ```
 
 ---
 
-## Tareas de Computer Vision
+## Computer Vision Tasks
 
-### Clasificacion de Imagenes
+### Image Classification
 
-La tarea mas basica: dado una imagen, predecir su clase.
+The most basic task: given an image, predict its class.
 
 ```python
-# Single-label: una clase por imagen (softmax)
-# Multi-label: multiples clases por imagen (sigmoid)
+# Single-label: one class per image (softmax)
+# Multi-label: multiple classes per image (sigmoid)
 
-# Con modelo preentrenado
+# With pretrained model
 from torchvision import models
 
 # Single-label
@@ -521,43 +521,43 @@ criterion = nn.BCEWithLogitsLoss()
 
 ### Object Detection
 
-Detectar Y localizar objetos en una imagen con bounding boxes.
+Detect AND locate objects in an image with bounding boxes.
 
-**Conceptos Clave:**
+**Key Concepts:**
 
 ```
-Bounding Box: [x_min, y_min, x_max, y_max] o [x_center, y_center, width, height]
+Bounding Box: [x_min, y_min, x_max, y_max] or [x_center, y_center, width, height]
 
 IoU (Intersection over Union):
-                 Area de interseccion
+                 Intersection area
    IoU = ---------------------------------
-           Area de union de ambos boxes
+           Union area of both boxes
 
-   IoU = 1.0 -> Cajas identicas
-   IoU = 0.0 -> Sin solapamiento
-   IoU > 0.5 -> Generalmente se considera "correcto"
+   IoU = 1.0 -> Identical boxes
+   IoU = 0.0 -> No overlap
+   IoU > 0.5 -> Generally considered "correct"
 
 NMS (Non-Maximum Suppression):
-   Cuando el modelo predice multiples boxes para el mismo objeto,
-   NMS elimina los duplicados quedandose con el de mayor confianza.
+   When the model predicts multiple boxes for the same object,
+   NMS removes duplicates keeping the one with highest confidence.
 
 Anchor Boxes:
-   Boxes predefinidos de diferentes tamaños y proporciones
-   que sirven como punto de partida para las predicciones.
+   Predefined boxes of different sizes and aspect ratios
+   that serve as starting points for predictions.
 ```
 
-**YOLO (You Only Look Once) - El mas Practico:**
+**YOLO (You Only Look Once) - The Most Practical:**
 
 ```python
-# YOLOv8 con ultralytics - la forma mas rapida de hacer detection
+# YOLOv8 with ultralytics - the fastest way to do detection
 from ultralytics import YOLO
 
-# Cargar modelo preentrenado
-model = YOLO("yolov8n.pt")  # nano (rapido), s, m, l, x (preciso)
+# Load pretrained model
+model = YOLO("yolov8n.pt")  # nano (fast), s, m, l, x (accurate)
 
-# Entrenar con tus datos
+# Train with your data
 model.train(
-    data="mi_dataset.yaml",  # Formato YOLO
+    data="my_dataset.yaml",  # YOLO format
     epochs=100,
     imgsz=640,
     batch=16,
@@ -565,59 +565,59 @@ model.train(
 )
 
 # Inference
-results = model("imagen.jpg")
+results = model("image.jpg")
 for result in results:
     boxes = result.boxes  # Bounding boxes
     for box in boxes:
-        xyxy = box.xyxy[0]      # Coordenadas [x1, y1, x2, y2]
-        conf = box.conf[0]      # Confianza
-        cls = box.cls[0]        # Clase
+        xyxy = box.xyxy[0]      # Coordinates [x1, y1, x2, y2]
+        conf = box.conf[0]      # Confidence
+        cls = box.cls[0]        # Class
 
-# Exportar para produccion
+# Export for production
 model.export(format="onnx")
 ```
 
 **YOLO vs Faster R-CNN:**
 
-| Aspecto | YOLO (v8) | Faster R-CNN |
+| Aspect | YOLO (v8) | Faster R-CNN |
 |---|---|---|
-| Enfoque | One-stage (una pasada) | Two-stage (RPN + clasificacion) |
-| Velocidad | Muy rapido (~30+ FPS) | Mas lento (~5-15 FPS) |
-| Precision | Muy buena | Ligeramente mejor en objetos pequenos |
-| Facilidad de uso | Muy facil (ultralytics) | Mas complejo (detectron2/torchvision) |
-| Mejor para | Tiempo real, edge, proyectos rapidos | Maxima precision, objetos densos |
+| Approach | One-stage (single pass) | Two-stage (RPN + classification) |
+| Speed | Very fast (~30+ FPS) | Slower (~5-15 FPS) |
+| Accuracy | Very good | Slightly better on small objects |
+| Ease of use | Very easy (ultralytics) | More complex (detectron2/torchvision) |
+| Best for | Real-time, edge, quick projects | Maximum accuracy, dense objects |
 
-**Metricas de Detection:**
+**Detection Metrics:**
 
-| Metrica | Descripcion |
+| Metric | Description |
 |---|---|
-| **mAP** | Mean Average Precision: promedio del AP de todas las clases |
-| **AP50** | AP con umbral IoU = 0.5 (el mas usado) |
-| **AP75** | AP con umbral IoU = 0.75 (mas estricto) |
-| **mAP@[.5:.95]** | Promedio de AP en diferentes umbrales IoU (metrica COCO) |
+| **mAP** | Mean Average Precision: average AP across all classes |
+| **AP50** | AP with IoU threshold = 0.5 (most commonly used) |
+| **AP75** | AP with IoU threshold = 0.75 (more strict) |
+| **mAP@[.5:.95]** | Average AP across different IoU thresholds (COCO metric) |
 
-### Segmentacion
+### Segmentation
 
-Clasificar cada pixel de la imagen.
+Classify each pixel of the image.
 
 ```
-Clasificacion:    "Hay un gato"
-Detection:        "Hay un gato AQUI" (bounding box)
-Segmentacion:     "ESTOS pixeles son el gato" (mascara)
+Classification:    "There is a cat"
+Detection:         "There is a cat HERE" (bounding box)
+Segmentation:      "THESE pixels are the cat" (mask)
 ```
 
-**Tipos de Segmentacion:**
+**Segmentation Types:**
 
-| Tipo | Descripcion | Modelo tipico | Uso |
+| Type | Description | Typical Model | Use |
 |---|---|---|---|
-| **Semantica** | Cada pixel tiene una clase, no distingue instancias | U-Net, DeepLab | Medico, satelital |
-| **De instancia** | Distingue entre instancias individuales | Mask R-CNN | Conteo, robotica |
-| **Panoptica** | Combina semantica + instancia | Mask2Former | Lo mas completo |
+| **Semantic** | Each pixel has a class, doesn't distinguish instances | U-Net, DeepLab | Medical, satellite |
+| **Instance** | Distinguishes between individual instances | Mask R-CNN | Counting, robotics |
+| **Panoptic** | Combines semantic + instance | Mask2Former | Most complete |
 
-**U-Net (Segmentacion Semantica):**
+**U-Net (Semantic Segmentation):**
 
 ```
-Arquitectura U-Net (encoder-decoder con skip connections):
+U-Net Architecture (encoder-decoder with skip connections):
 
 Encoder (downsample)                    Decoder (upsample)
     |                                        |
@@ -631,165 +631,165 @@ Encoder (downsample)                    Decoder (upsample)
                 |                              ^
             [Conv,Conv] ----> Bottleneck --> [Conv,Conv]
 
-Las skip connections pasan informacion de alta resolucion
-del encoder al decoder, preservando detalles finos.
+The skip connections pass high-resolution information
+from the encoder to the decoder, preserving fine details.
 ```
 
-### OCR y Document AI
+### OCR and Document AI
 
-| Herramienta | Tipo | Velocidad | Precision | Idiomas | Mejor para |
+| Tool | Type | Speed | Accuracy | Languages | Best for |
 |---|---|---|---|---|---|
-| **Tesseract** | Open source clasico | Rapido | Media | 100+ | OCR basico, documentos limpios |
-| **EasyOCR** | Deep learning, simple | Medio | Buena | 80+ | Texto en escenas, multiples idiomas |
-| **PaddleOCR** | Deep learning, completo | Rapido | Muy buena | 80+ | Produccion, documentos complejos |
-| **AWS Textract** | Cloud API | N/A | Excelente | Limitados | Formularios, tablas, integrado AWS |
-| **Google Vision** | Cloud API | N/A | Excelente | 100+ | Maxima precision, OCR general |
-| **Azure Doc Intelligence** | Cloud API | N/A | Excelente | Muchos | Documentos empresariales |
+| **Tesseract** | Classic open source | Fast | Medium | 100+ | Basic OCR, clean documents |
+| **EasyOCR** | Deep learning, simple | Medium | Good | 80+ | Scene text, multiple languages |
+| **PaddleOCR** | Deep learning, complete | Fast | Very good | 80+ | Production, complex documents |
+| **AWS Textract** | Cloud API | N/A | Excellent | Limited | Forms, tables, AWS integrated |
+| **Google Vision** | Cloud API | N/A | Excellent | 100+ | Maximum accuracy, general OCR |
+| **Azure Doc Intelligence** | Cloud API | N/A | Excellent | Many | Enterprise documents |
 
 ```python
-# EasyOCR - rapido de implementar
+# EasyOCR - quick to implement
 import easyocr
 
-reader = easyocr.Reader(['es', 'en'])  # Espanol e ingles
-results = reader.readtext('documento.jpg')
+reader = easyocr.Reader(['es', 'en'])  # Spanish and English
+results = reader.readtext('document.jpg')
 
 for (bbox, text, confidence) in results:
-    print(f"Texto: {text}, Confianza: {confidence:.2f}")
+    print(f"Text: {text}, Confidence: {confidence:.2f}")
 
-# PaddleOCR - mas robusto para produccion
+# PaddleOCR - more robust for production
 from paddleocr import PaddleOCR
 
 ocr = PaddleOCR(use_angle_cls=True, lang='es')
-result = ocr.ocr('documento.jpg', cls=True)
+result = ocr.ocr('document.jpg', cls=True)
 ```
 
 **Document Layout Analysis:**
 
-Para documentos complejos (facturas, formularios), no basta con OCR. Necesitas entender la estructura:
+For complex documents (invoices, forms), OCR alone is not enough. You need to understand the structure:
 
-1. **Detectar regiones:** titulos, parrafos, tablas, figuras
-2. **Extraer texto** de cada region
-3. **Entender relaciones** entre regiones (que campo va con que valor)
+1. **Detect regions:** titles, paragraphs, tables, figures
+2. **Extract text** from each region
+3. **Understand relationships** between regions (which field goes with which value)
 
-Herramientas: LayoutLM (Microsoft), Donut (sin OCR, end-to-end), DocTR.
+Tools: LayoutLM (Microsoft), Donut (no OCR, end-to-end), DocTR.
 
 ---
 
-## Datasets Populares para Practicar
+## Popular Datasets for Practice
 
-| Dataset | Tamano | Tarea | Nivel | Notas |
+| Dataset | Size | Task | Level | Notes |
 |---|---|---|---|---|
-| **MNIST** | 70K imagenes 28x28 | Clasificacion digitos | Principiante | El "Hello World" de CV |
-| **CIFAR-10** | 60K imagenes 32x32 | Clasificacion 10 clases | Principiante | Imagenes pequenas, util para experimentar |
-| **ImageNet** | 1.2M imagenes | Clasificacion 1000 clases | Referencia | El benchmark estandar |
-| **COCO** | 330K imagenes | Detection + Segmentacion | Intermedio | El mas usado para detection |
-| **Pascal VOC** | 11K imagenes | Detection + Segmentacion | Intermedio | Clasico, mas pequeno que COCO |
-| **Open Images** | 9M imagenes | Detection + Segmentacion | Avanzado | Enorme, muchas clases |
+| **MNIST** | 70K images 28x28 | Digit classification | Beginner | The "Hello World" of CV |
+| **CIFAR-10** | 60K images 32x32 | 10-class classification | Beginner | Small images, useful for experimenting |
+| **ImageNet** | 1.2M images | 1000-class classification | Reference | The standard benchmark |
+| **COCO** | 330K images | Detection + Segmentation | Intermediate | Most used for detection |
+| **Pascal VOC** | 11K images | Detection + Segmentation | Intermediate | Classic, smaller than COCO |
+| **Open Images** | 9M images | Detection + Segmentation | Advanced | Huge, many classes |
 
 ```python
-# Cargar datasets con torchvision
+# Load datasets with torchvision
 from torchvision import datasets
 
 # CIFAR-10
 train = datasets.CIFAR10(root="./data", train=True, download=True, transform=transform)
 
-# Para datasets custom: ImageFolder
-# Estructura: root/class_name/image.jpg
+# For custom datasets: ImageFolder
+# Structure: root/class_name/image.jpg
 train = datasets.ImageFolder(root="./data/train", transform=transform)
 ```
 
-**Roboflow** para datasets custom: plataforma que te permite buscar datasets publicos, hacer labeling, aplicar augmentations, y exportar en cualquier formato (YOLO, COCO, VOC, etc.).
+**Roboflow** for custom datasets: a platform that lets you search public datasets, do labeling, apply augmentations, and export in any format (YOLO, COCO, VOC, etc.).
 
 ---
 
-## Labeling de Datos
+## Data Labeling
 
-### Herramientas de Labeling
+### Labeling Tools
 
-| Herramienta | Tipo | Tareas | Costo | Mejor para |
+| Tool | Type | Tasks | Cost | Best for |
 |---|---|---|---|---|
-| **Label Studio** | Open source / Cloud | Todas | Gratis / Pago | Versatil, todo tipo de datos |
-| **CVAT** | Open source | CV (boxes, segmentacion) | Gratis | Labeling de imagenes/video |
-| **Roboflow** | Cloud | CV | Freemium | Workflow completo CV |
-| **V7** | Cloud | CV + Video | Pago | Equipos grandes, auto-labeling |
+| **Label Studio** | Open source / Cloud | All | Free / Paid | Versatile, all data types |
+| **CVAT** | Open source | CV (boxes, segmentation) | Free | Image/video labeling |
+| **Roboflow** | Cloud | CV | Freemium | Complete CV workflow |
+| **V7** | Cloud | CV + Video | Paid | Large teams, auto-labeling |
 
-### Tips para Labeling Eficiente
+### Tips for Efficient Labeling
 
-1. **Definir guia de anotacion clara** antes de empezar (que es cada clase, bordes ambiguos)
-2. **Empezar con pocas clases** e ir expandiendo
-3. **Medir inter-annotator agreement** si hay multiples personas anotando
-4. **Pre-anotar con un modelo** y luego corregir (semi-automatico)
-5. **Iteraciones rapidas:** anotar pocas imagenes -> entrenar -> evaluar -> anotar mas
+1. **Define a clear annotation guide** before starting (what each class is, ambiguous edges)
+2. **Start with few classes** and expand gradually
+3. **Measure inter-annotator agreement** if multiple people are annotating
+4. **Pre-annotate with a model** and then correct (semi-automatic)
+5. **Fast iterations:** annotate few images -> train -> evaluate -> annotate more
 
 ### Active Learning
 
-Concepto: en lugar de anotar imagenes al azar, dejar que el modelo te diga cuales imagenes son mas "utiles" para anotar (las que tienen mas incertidumbre). Reduce el labeling necesario en un 30-70%.
+Concept: instead of annotating images randomly, let the model tell you which images are most "useful" to annotate (those with the most uncertainty). Reduces the labeling needed by 30-70%.
 
 ```
-Ciclo de Active Learning:
-1. Entrenar modelo con datos anotados existentes
-2. Predecir sobre datos sin anotar
-3. Seleccionar las imagenes con mayor incertidumbre
-4. Anotar esas imagenes (las mas informativas)
-5. Re-entrenar el modelo
-6. Repetir
+Active Learning Cycle:
+1. Train model with existing annotated data
+2. Predict on unannotated data
+3. Select images with highest uncertainty
+4. Annotate those images (the most informative ones)
+5. Retrain the model
+6. Repeat
 ```
 
 ---
 
-## Tips Practicos para Proyectos CV en Consultoria
+## Practical Tips for CV Projects in Consulting
 
-### Siempre Empezar con Transfer Learning
+### Always Start with Transfer Learning
 
-Nunca entrenes desde cero a menos que tengas una muy buena razon. Un ResNet50 preentrenado con 100 imagenes te va a dar mejores resultados que una CNN custom con 10,000.
+Never train from scratch unless you have a very good reason. A pretrained ResNet50 with 100 images will give you better results than a custom CNN with 10,000.
 
-### Cuantos Datos Necesitas (Reglas de Oro)
+### How Much Data You Need (Rules of Thumb)
 
-| Tarea | Datos minimos viables | Datos recomendados |
+| Task | Minimum Viable Data | Recommended Data |
 |---|---|---|
-| Clasificacion binaria (transfer learning) | 50-100 por clase | 500+ por clase |
-| Clasificacion multi-clase | 100+ por clase | 1000+ por clase |
-| Object Detection | 200+ bounding boxes por clase | 1000+ por clase |
-| Segmentacion semantica | 100+ mascaras | 500+ mascaras |
+| Binary classification (transfer learning) | 50-100 per class | 500+ per class |
+| Multi-class classification | 100+ per class | 1000+ per class |
+| Object Detection | 200+ bounding boxes per class | 1000+ per class |
+| Semantic segmentation | 100+ masks | 500+ masks |
 
-### Datasets Desbalanceados en CV
+### Imbalanced Datasets in CV
 
 ```python
-# Opcion 1: Weighted sampler (mas comun en CV)
+# Option 1: Weighted sampler (most common in CV)
 from torch.utils.data import WeightedRandomSampler
 
-class_counts = [1000, 200, 50]  # Imagenes por clase
+class_counts = [1000, 200, 50]  # Images per class
 weights = 1.0 / torch.tensor(class_counts, dtype=torch.float)
-sample_weights = weights[targets]  # targets = lista de labels
+sample_weights = weights[targets]  # targets = list of labels
 
 sampler = WeightedRandomSampler(sample_weights, len(sample_weights))
 loader = DataLoader(dataset, batch_size=32, sampler=sampler)
 
-# Opcion 2: Class weights en la loss
-weights = torch.tensor([1.0, 5.0, 20.0])  # Inverso de frecuencia
+# Option 2: Class weights in the loss
+weights = torch.tensor([1.0, 5.0, 20.0])  # Inverse of frequency
 criterion = nn.CrossEntropyLoss(weight=weights)
 
-# Opcion 3: Data augmentation agresiva en clases minoritarias
+# Option 3: Aggressive data augmentation on minority classes
 ```
 
 ### Edge Deployment
 
-Para llevar modelos a dispositivos (movil, IoT, camaras):
+For deploying models to devices (mobile, IoT, cameras):
 
-| Framework | Descripcion | Mejor para |
+| Framework | Description | Best for |
 |---|---|---|
-| **ONNX** | Formato estandar de intercambio | Interoperabilidad entre frameworks |
-| **TensorRT** | Optimizador de NVIDIA | GPUs NVIDIA (maxima velocidad) |
-| **OpenVINO** | Optimizador de Intel | CPUs Intel, edge devices |
-| **Core ML** | Framework de Apple | iOS/macOS |
-| **TFLite** | TensorFlow Lite | Android, microcontroladores |
+| **ONNX** | Standard interchange format | Interoperability between frameworks |
+| **TensorRT** | NVIDIA optimizer | NVIDIA GPUs (maximum speed) |
+| **OpenVINO** | Intel optimizer | Intel CPUs, edge devices |
+| **Core ML** | Apple framework | iOS/macOS |
+| **TFLite** | TensorFlow Lite | Android, microcontrollers |
 
 ```python
-# Exportar a ONNX desde PyTorch
+# Export to ONNX from PyTorch
 import torch.onnx
 
 dummy_input = torch.randn(1, 3, 224, 224)
-torch.onnx.export(model, dummy_input, "modelo.onnx",
+torch.onnx.export(model, dummy_input, "model.onnx",
                   input_names=["input"],
                   output_names=["output"],
                   dynamic_axes={"input": {0: "batch_size"},
@@ -798,18 +798,18 @@ torch.onnx.export(model, dummy_input, "modelo.onnx",
 
 ---
 
-## Checklist de Proyecto CV
+## CV Project Checklist
 
 ```
-[ ] Definir el problema con el cliente (clasificacion? detection? segmentacion?)
-[ ] Recopilar y explorar datos (calidad, cantidad, balance)
-[ ] Definir metrica de exito con el cliente
-[ ] Elegir modelo base (empezar con pretrained)
-[ ] Configurar data augmentation
-[ ] Entrenar con transfer learning
-[ ] Evaluar en validation set
-[ ] Iterar: mas datos? mejor augmentation? modelo mas grande?
-[ ] Interpretar resultados (confusion matrix, errores comunes)
-[ ] Optimizar para deployment si es necesario (ONNX, quantizacion)
-[ ] Monitorear en produccion (data drift visual)
+[ ] Define the problem with the client (classification? detection? segmentation?)
+[ ] Collect and explore data (quality, quantity, balance)
+[ ] Define success metric with the client
+[ ] Choose base model (start with pretrained)
+[ ] Configure data augmentation
+[ ] Train with transfer learning
+[ ] Evaluate on validation set
+[ ] Iterate: more data? better augmentation? larger model?
+[ ] Interpret results (confusion matrix, common errors)
+[ ] Optimize for deployment if necessary (ONNX, quantization)
+[ ] Monitor in production (visual data drift)
 ```

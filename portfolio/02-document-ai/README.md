@@ -1,71 +1,71 @@
-# Extraccion automatica de datos de documentos
+# Automated Data Extraction from Documents
 
-## Problema de negocio
+## Business Problem
 
-El procesamiento manual de documentos (facturas, albaranes, pedidos, contratos) es una tarea que consume tiempo y recursos en cualquier organizacion:
+Manual document processing (invoices, delivery notes, purchase orders, contracts) is a task that consumes time and resources in any organization:
 
-- **Tedioso**: un empleado tarda 3-5 minutos por factura para introducir datos manualmente en el ERP.
-- **Propenso a errores**: la tasa de error humano en entrada de datos es del 1-4%, lo que genera discrepancias contables y problemas de auditoria.
-- **No escalable**: en picos de actividad (cierre mensual, campanas) se acumulan documentos sin procesar.
-- **Coste oculto**: el tiempo dedicado a tareas repetitivas impide que el personal se dedique a tareas de mayor valor.
+- **Tedious**: an employee takes 3-5 minutes per invoice to manually enter data into the ERP.
+- **Error-prone**: the human data entry error rate is 1-4%, generating accounting discrepancies and audit issues.
+- **Not scalable**: during activity peaks (monthly closing, campaigns), unprocessed documents pile up.
+- **Hidden cost**: time spent on repetitive tasks prevents staff from focusing on higher-value tasks.
 
-## Solucion propuesta
+## Proposed Solution
 
-Pipeline automatizado de extraccion de informacion que combina OCR (reconocimiento optico de caracteres) con NLP (procesamiento de lenguaje natural) para extraer campos clave de documentos de forma automatica.
+Automated information extraction pipeline that combines OCR (Optical Character Recognition) with NLP (Natural Language Processing) to automatically extract key fields from documents.
 
-### Arquitectura
+### Architecture
 
 ```
-Documento (imagen/PDF)
+Document (image/PDF)
         |
         v
-  Preprocesamiento
-  (deskew, denoise, binarizacion)
+  Preprocessing
+  (deskew, denoise, binarization)
         |
         v
-  Motor OCR (EasyOCR / PaddleOCR)
+  OCR Engine (EasyOCR / PaddleOCR)
         |
         v
-  Texto + Bounding Boxes + Confianza
+  Text + Bounding Boxes + Confidence
         |
         v
-  Extractor de Campos (regex + heuristica)
+  Field Extractor (regex + heuristics)
         |
         v
-  Datos Estructurados (JSON)
-  - Fecha
-  - Numero de factura
-  - Proveedor
-  - Importe total
-  - Conceptos / lineas de detalle
+  Structured Data (JSON)
+  - Date
+  - Invoice number
+  - Vendor
+  - Total amount
+  - Line items / detail lines
 ```
 
-### Componentes clave
+### Key Components
 
-1. **Preprocesamiento de imagen**: correccion de inclinacion, eliminacion de ruido y binarizacion para maximizar la precision del OCR.
-2. **Motor OCR dual**: soporte para EasyOCR (mas sencillo) y PaddleOCR (mas preciso en documentos complejos).
-3. **Extractor inteligente**: combinacion de patrones regex para campos estandar (fechas, importes) con heuristicas posicionales (el total suele estar en la parte inferior, el proveedor en la cabecera).
+1. **Image preprocessing**: skew correction, noise removal, and binarization to maximize OCR accuracy.
+2. **Dual OCR engine**: support for EasyOCR (simpler) and PaddleOCR (more accurate on complex documents).
+3. **Smart extractor**: combination of regex patterns for standard fields (dates, amounts) with positional heuristics (the total is usually at the bottom, the vendor in the header).
 
-## Resultados esperados
+## Expected Results
 
-| Metrica | Valor |
+| Metric | Value |
 |---------|-------|
-| Precision extraccion de campos | >90% |
-| Tiempo por documento | <3 segundos |
-| Tipos de documento soportados | Facturas, albaranes, pedidos |
-| Idiomas OCR | Espanol, Ingles, Catalan |
+| Field extraction accuracy | >90% |
+| Time per document | <3 seconds |
+| Supported document types | Invoices, delivery notes, purchase orders |
+| OCR languages | Spanish, English, Catalan |
 
-## Tecnologias
+## Technologies
 
-- **EasyOCR**: motor OCR open-source con soporte multi-idioma
-- **PaddleOCR**: motor OCR de alto rendimiento de Baidu
-- **OpenCV**: preprocesamiento de imagenes
-- **FastAPI**: API REST para integracion
-- **Pydantic**: validacion de datos estructurados
+- **EasyOCR**: open-source OCR engine with multi-language support
+- **PaddleOCR**: high-performance OCR engine from Baidu
+- **OpenCV**: image preprocessing
+- **FastAPI**: REST API for integration
+- **Pydantic**: structured data validation
 
-## Como ejecutar
+## How to Run
 
-### 1. Instalacion
+### 1. Installation
 
 ```bash
 cd portfolio/02-document-ai
@@ -74,20 +74,20 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Lanzar la API
+### 2. Launch the API
 
 ```bash
 uvicorn src.api:app --host 0.0.0.0 --port 8001
 ```
 
-### 3. Extraer datos de un documento
+### 3. Extract Data from a Document
 
 ```bash
 curl -X POST "http://localhost:8001/extract" \
-    -F "file=@factura_ejemplo.jpg"
+    -F "file=@invoice_example.jpg"
 ```
 
-Respuesta esperada:
+Expected response:
 ```json
 {
     "invoice_number": "FAC-2024-001234",
@@ -109,35 +109,35 @@ docker build -t document-ai .
 docker run -p 8001:8001 document-ai
 ```
 
-## Como presentarlo: pitch para cliente
+## How to Present It: Client Pitch
 
-### Propuesta de valor
+### Value Proposition
 
-> "Transforme pilas de facturas en datos estructurados en segundos, no en horas. Nuestro sistema extrae automaticamente la informacion clave de cualquier documento, reduciendo errores y liberando a su equipo para tareas estrategicas."
+> "Turn piles of invoices into structured data in seconds, not hours. Our system automatically extracts key information from any document, reducing errors and freeing your team for strategic tasks."
 
-### ROI estimado
+### Estimated ROI
 
-**Escenario**: empresa que procesa 2.000 facturas/mes con 2 empleados dedicados.
+**Scenario**: company processing 2,000 invoices/month with 2 dedicated employees.
 
-| Concepto | Antes | Despues |
+| Item | Before | After |
 |----------|-------|---------|
-| Tiempo por factura | 3-5 minutos | <10 segundos |
-| Horas mensuales dedicadas | ~130 horas | ~15 horas (revision) |
-| Tasa de error | 2-4% | <0.5% |
-| Coste mensual proceso | ~4.000 EUR | ~1.200 EUR |
+| Time per invoice | 3-5 minutes | <10 seconds |
+| Monthly hours dedicated | ~130 hours | ~15 hours (review) |
+| Error rate | 2-4% | <0.5% |
+| Monthly processing cost | ~4,000 EUR | ~1,200 EUR |
 
-**Ahorro estimado: ~33.600 EUR/ano** en coste de procesamiento, mas la eliminacion de costes por errores (discrepancias, reclamaciones, retrabajos).
+**Estimated savings: ~33,600 EUR/year** in processing costs, plus the elimination of error-related costs (discrepancies, claims, rework).
 
-### Puntos clave para la presentacion
+### Key Points for the Presentation
 
-1. **Demo con documentos reales**: pedir al cliente que traiga 2-3 facturas de su dia a dia y procesarlas en directo.
-2. **Integracion con ERP**: los datos extraidos se pueden enviar directamente a SAP, Navision, Sage, etc.
-3. **Aprendizaje continuo**: el sistema mejora con el feedback del usuario (correcciones).
-4. **Cumplimiento**: trazabilidad completa del procesamiento para auditorias.
-5. **Multi-formato**: funciona con escaneos, fotos de movil y PDFs.
+1. **Demo with real documents**: ask the client to bring 2-3 invoices from their daily operations and process them live.
+2. **ERP integration**: extracted data can be sent directly to SAP, Navision, Sage, etc.
+3. **Continuous learning**: the system improves with user feedback (corrections).
+4. **Compliance**: full processing traceability for audits.
+5. **Multi-format**: works with scans, mobile phone photos, and PDFs.
 
-### Preguntas frecuentes del cliente
+### Frequently Asked Client Questions
 
-- **"Funciona con nuestras facturas?"** - Si, el sistema se adapta a cualquier formato. En la fase de piloto se calibra con sus documentos especificos.
-- **"Que pasa si el OCR falla?"** - Los documentos con baja confianza (<80%) se marcan para revision humana. El sistema prioriza precision sobre cobertura.
-- **"Se puede integrar con nuestro ERP?"** - Si, la API devuelve JSON estructurado que se mapea a los campos de cualquier ERP via integracion estandar.
+- **"Does it work with our invoices?"** - Yes, the system adapts to any format. During the pilot phase, it is calibrated with your specific documents.
+- **"What happens if the OCR fails?"** - Documents with low confidence (<80%) are flagged for human review. The system prioritizes accuracy over coverage.
+- **"Can it integrate with our ERP?"** - Yes, the API returns structured JSON that maps to any ERP fields via standard integration.

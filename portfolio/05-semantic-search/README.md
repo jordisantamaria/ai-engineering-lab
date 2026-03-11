@@ -1,41 +1,41 @@
-# Busqueda semantica para documentacion enterprise
+# Semantic Search for Enterprise Documentation
 
-## Problema de negocio
+## Business Problem
 
-La busqueda por palabras clave en documentacion interna presenta limitaciones criticas en entornos empresariales:
+Keyword search in internal documentation has critical limitations in enterprise environments:
 
-- **Vocabulario desalineado**: los usuarios buscan "como pedir vacaciones" pero el documento dice "solicitud de ausencia reglamentaria". La busqueda por keywords no encuentra el resultado.
-- **Sinonimos y contexto**: buscar "cancelar pedido" no encuentra documentos sobre "anulacion de ordenes de compra" o "devolucion de productos".
-- **Sobrecarga informativa**: los empleados pasan una media de 1.8 horas/dia buscando informacion interna (McKinsey). En empresas grandes, este coste es enorme.
-- **Conocimiento perdido**: el 80% del conocimiento corporativo esta en documentos no estructurados (PDFs, wikis, emails, manuales). Si no se puede encontrar, no existe.
+- **Misaligned vocabulary**: users search "how to request time off" but the document says "statutory absence request". Keyword search doesn't find the result.
+- **Synonyms and context**: searching "cancel order" doesn't find documents about "purchase order annulment" or "product returns".
+- **Information overload**: employees spend an average of 1.8 hours/day searching for internal information (McKinsey). In large companies, this cost is enormous.
+- **Lost knowledge**: 80% of corporate knowledge is in unstructured documents (PDFs, wikis, emails, manuals). If it can't be found, it doesn't exist.
 
-## Solucion propuesta
+## Proposed Solution
 
-Sistema de busqueda semantica que entiende el **significado** de las consultas, no solo las palabras exactas. Usa embeddings de lenguaje para representar documentos y consultas en un espacio vectorial donde la proximidad indica similitud semantica.
+Semantic search system that understands the **meaning** of queries, not just exact words. It uses language embeddings to represent documents and queries in a vector space where proximity indicates semantic similarity.
 
-### Arquitectura
+### Architecture
 
 ```
-Documentos corporativos
+Corporate documents
         |
         v
   Sentence-BERT (encoding)
         |
         v
-  Embeddings (vectores 384/768-dim)
+  Embeddings (384/768-dim vectors)
         |
         v
-  FAISS Index (busqueda vectorial rapida)
+  FAISS Index (fast vector search)
         |
         v
-  [Opcional] Cross-Encoder Reranking
+  [Optional] Cross-Encoder Reranking
         |
         v
-  Resultados ordenados por relevancia semantica
+  Results ranked by semantic relevance
 
   ---
 
-  Consulta del usuario
+  User query
         |
         v
   Sentence-BERT (encoding)
@@ -47,36 +47,36 @@ Documentos corporativos
   FAISS nearest neighbor search
         |
         v
-  Top-K documentos + scores
+  Top-K documents + scores
 ```
 
-### Componentes clave
+### Key Components
 
-1. **Sentence-BERT**: modelo de embeddings que convierte texto en vectores densos capturando el significado semantico.
-2. **FAISS (Facebook AI Similarity Search)**: biblioteca de busqueda vectorial de alto rendimiento. Soporta billones de vectores con tiempos de respuesta <10ms.
-3. **Cross-Encoder Reranking**: paso opcional que reordena los resultados iniciales con un modelo mas preciso para mejorar la calidad del top-5.
-4. **Busqueda hibrida**: combina busqueda semantica con busqueda por keywords (BM25) para lo mejor de ambos mundos.
+1. **Sentence-BERT**: embedding model that converts text into dense vectors capturing semantic meaning.
+2. **FAISS (Facebook AI Similarity Search)**: high-performance vector search library. Supports billions of vectors with response times <10ms.
+3. **Cross-Encoder Reranking**: optional step that reranks initial results with a more precise model to improve top-5 quality.
+4. **Hybrid search**: combines semantic search with keyword search (BM25) for the best of both worlds.
 
-## Resultados esperados
+## Expected Results
 
-| Metrica | Keyword Search | Busqueda Semantica |
+| Metric | Keyword Search | Semantic Search |
 |---------|---------------|-------------------|
 | MRR (Mean Reciprocal Rank) | 0.35 | >0.65 |
 | Recall@10 | 0.45 | >0.80 |
-| Tiempo de busqueda | ~50ms | <100ms |
-| Satisfaccion usuario | 55% | >85% |
+| Search time | ~50ms | <100ms |
+| User satisfaction | 55% | >85% |
 
-## Tecnologias
+## Technologies
 
-- **sentence-transformers**: embeddings semanticos de ultima generacion
-- **FAISS**: busqueda vectorial de alto rendimiento (Meta AI)
-- **FastAPI**: API REST para integracion
-- **numpy / pandas**: manipulacion de datos y vectores
-- **Pydantic**: validacion de datos
+- **sentence-transformers**: state-of-the-art semantic embeddings
+- **FAISS**: high-performance vector search (Meta AI)
+- **FastAPI**: REST API for integration
+- **numpy / pandas**: data and vector manipulation
+- **Pydantic**: data validation
 
-## Como ejecutar
+## How to Run
 
-### 1. Instalacion
+### 1. Installation
 
 ```bash
 cd portfolio/05-semantic-search
@@ -85,46 +85,46 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Lanzar la API
+### 2. Launch the API
 
 ```bash
 uvicorn src.api:app --host 0.0.0.0 --port 8004
 ```
 
-### 3. Indexar documentos
+### 3. Index Documents
 
 ```bash
 curl -X POST "http://localhost:8004/index" \
     -H "Content-Type: application/json" \
     -d '{
         "documents": [
-            {"id": "doc1", "text": "Procedimiento para solicitar vacaciones anuales"},
-            {"id": "doc2", "text": "Politica de devolucion de productos defectuosos"},
-            {"id": "doc3", "text": "Guia de onboarding para nuevos empleados"}
+            {"id": "doc1", "text": "Procedure for requesting annual leave"},
+            {"id": "doc2", "text": "Return policy for defective products"},
+            {"id": "doc3", "text": "Onboarding guide for new employees"}
         ]
     }'
 ```
 
-### 4. Buscar
+### 4. Search
 
 ```bash
 curl -X POST "http://localhost:8004/search" \
     -H "Content-Type: application/json" \
-    -d '{"query": "como pedir dias libres", "top_k": 5}'
+    -d '{"query": "how to request days off", "top_k": 5}'
 ```
 
-Respuesta esperada:
+Expected response:
 ```json
 {
     "results": [
         {
             "document_id": "doc1",
-            "text": "Procedimiento para solicitar vacaciones anuales",
+            "text": "Procedure for requesting annual leave",
             "score": 0.8923,
             "rank": 1
         }
     ],
-    "query": "como pedir dias libres",
+    "query": "how to request days off",
     "total_results": 1,
     "search_time_ms": 12.5
 }
@@ -137,36 +137,36 @@ docker build -t semantic-search .
 docker run -p 8004:8004 semantic-search
 ```
 
-## Como presentarlo: pitch para cliente
+## How to Present It: Client Pitch
 
-### Propuesta de valor
+### Value Proposition
 
-> "Sus empleados encuentran la informacion que necesitan 3x mas rapido. Nuestra busqueda semantica entiende lo que el usuario *quiere decir*, no solo lo que escribe. Funciona con documentos en multiples idiomas y no requiere etiquetado manual."
+> "Your employees find the information they need 3x faster. Our semantic search understands what the user *means*, not just what they type. It works with documents in multiple languages and requires no manual labeling."
 
-### ROI estimado
+### Estimated ROI
 
-**Escenario**: empresa con 1.000 empleados que pasan 30 minutos/dia buscando informacion interna.
+**Scenario**: company with 1,000 employees who spend 30 minutes/day searching for internal information.
 
-| Concepto | Antes (keywords) | Despues (semantica) |
+| Item | Before (keywords) | After (semantic) |
 |----------|-------------------|---------------------|
-| Tiempo busqueda/dia/empleado | 30 min | 10 min |
-| Horas totales/mes perdidas | 10.000 h | 3.333 h |
-| Coste productividad perdida (30 EUR/h) | 300.000 EUR/mes | 100.000 EUR/mes |
-| Busquedas exitosas (1er intento) | 40% | >80% |
+| Search time/day/employee | 30 min | 10 min |
+| Total hours lost/month | 10,000 h | 3,333 h |
+| Lost productivity cost (30 EUR/h) | 300,000 EUR/month | 100,000 EUR/month |
+| Successful searches (1st attempt) | 40% | >80% |
 
-**Ahorro estimado: ~200.000 EUR/mes** en productividad recuperada. Adicionalmente, reduccion de errores por uso de informacion desactualizada o incorrecta.
+**Estimated savings: ~200,000 EUR/month** in recovered productivity. Additionally, reduction in errors from using outdated or incorrect information.
 
-### Puntos clave para la presentacion
+### Key Points for the Presentation
 
-1. **Demo en vivo**: indexar algunos documentos del cliente y demostrar busquedas semanticas que fallan con keywords.
-2. **Multi-idioma**: el modelo soporta busquedas en espanol, ingles, catalan y otros idiomas simultaneamente.
-3. **Incrementalidad**: se pueden anadir documentos al indice sin reconstruirlo desde cero.
-4. **Integracion**: API REST que se conecta con cualquier wiki, intranet o sistema de gestion documental.
-5. **Privacidad**: todo se ejecuta on-premise, los documentos no salen de la infraestructura del cliente.
+1. **Live demo**: index some of the client's documents and demonstrate semantic searches that fail with keywords.
+2. **Multi-language**: the model supports searches in Spanish, English, Catalan, and other languages simultaneously.
+3. **Incrementality**: documents can be added to the index without rebuilding it from scratch.
+4. **Integration**: REST API that connects to any wiki, intranet, or document management system.
+5. **Privacy**: everything runs on-premise, documents never leave the client's infrastructure.
 
-### Preguntas frecuentes del cliente
+### Frequently Asked Client Questions
 
-- **"Funciona con PDFs y documentos escaneados?"** - Si, se combina con OCR para documentos escaneados y con extractores de texto para PDFs nativos.
-- **"Cuantos documentos puede manejar?"** - FAISS escala a millones de documentos con tiempos de respuesta <100ms. Para colecciones muy grandes se usa un indice IVF (Inverted File).
-- **"Necesita GPU?"** - No para servir (CPU es suficiente para busqueda). Si es recomendable GPU para el indexado inicial si hay muchos documentos.
-- **"Se puede integrar con nuestro SharePoint/Confluence?"** - Si, via conectores que extraen el contenido y lo indexan periodicamente.
+- **"Does it work with PDFs and scanned documents?"** - Yes, it combines with OCR for scanned documents and with text extractors for native PDFs.
+- **"How many documents can it handle?"** - FAISS scales to millions of documents with response times <100ms. For very large collections, an IVF (Inverted File) index is used.
+- **"Does it need a GPU?"** - Not for serving (CPU is sufficient for search). GPU is recommended for initial indexing if there are many documents.
+- **"Can it integrate with our SharePoint/Confluence?"** - Yes, via connectors that extract content and index it periodically.

@@ -1,84 +1,84 @@
 # AI Engineering Lab
 
-Repositorio de aprendizaje práctico de AI/ML para consultoría. Cubre desde fundamentos de ML hasta proyectos de portfolio listos para presentar a clientes.
+Hands-on AI/ML learning repository for consulting. Covers from ML fundamentals to portfolio projects ready to present to clients.
 
 **Stack**: Python + PyTorch + scikit-learn + HuggingFace + XGBoost + FastAPI
 
-## Estructura
+## Structure
 
 ```
-docs/           → Teoría y conceptos (lectura + referencia)
-notebooks/      → Código interactivo (aprender haciendo)
-portfolio/      → Proyectos completos (demos para clientes)
+docs/           → Theory and concepts (reading + reference)
+notebooks/      → Interactive code (learn by doing)
+portfolio/      → Complete projects (client demos)
 ```
 
-## Roadmap de estudio
+## Study Roadmap
 
-### Fase 1: Fundamentos (Semana 1-2)
-- [ ] Setup del entorno (`docs/00-environment-setup`)
-- [ ] Python para AI: NumPy, Pandas, Matplotlib (`docs/01-python-for-ai`)
+### Phase 1: Fundamentals (Week 1-2)
+- [ ] Environment setup (`docs/00-environment-setup`)
+- [ ] Python for AI: NumPy, Pandas, Matplotlib (`docs/01-python-for-ai`)
 - [ ] Notebook: `01-numpy-pandas-essentials.ipynb`
-- [ ] ML fundamentals: supervised, unsupervised, métricas (`docs/02-ml-fundamentals`)
+- [ ] ML fundamentals: supervised, unsupervised, metrics (`docs/02-ml-fundamentals`)
 - [ ] Notebook: `02-sklearn-ml-pipeline.ipynb`
 
-### Fase 2: Deep Learning (Semana 3-4)
-- [ ] Deep Learning: redes neuronales, backprop, optimizers (`docs/03-deep-learning`)
+### Phase 2: Deep Learning (Week 3-4)
+- [ ] Deep Learning: neural networks, backprop, optimizers (`docs/03-deep-learning`)
 - [ ] Notebook: `03-pytorch-fundamentals.ipynb`
 - [ ] Computer Vision: CNNs, transfer learning (`docs/04-computer-vision`)
 - [ ] Notebooks: `04-cnn-image-classification.ipynb`, `05-transfer-learning.ipynb`
 - [ ] Notebook: `06-object-detection-yolo.ipynb`
 
-### Fase 3: NLP y Tabular (Semana 5-6)
-- [ ] NLP: tokenización, transformers, fine-tuning (`docs/05-nlp`)
+### Phase 3: NLP and Tabular (Week 5-6)
+- [ ] NLP: tokenization, transformers, fine-tuning (`docs/05-nlp`)
 - [ ] Notebooks: `07-nlp-transformers.ipynb`, `09-fine-tuning-huggingface.ipynb`
 - [ ] Tabular ML: XGBoost, LightGBM, feature engineering (`docs/06-tabular-ml`)
 - [ ] Notebook: `08-tabular-xgboost-lightgbm.ipynb`
 
-### Fase 4: Deployment y MLOps (Semana 7-8)
+### Phase 4: Deployment and MLOps (Week 7-8)
 - [ ] Model deployment: FastAPI, Docker (`docs/07-deployment`)
 - [ ] Notebook: `10-model-serving-fastapi.ipynb`
 - [ ] MLOps: experiment tracking, pipelines (`docs/08-mlops`)
 
-### Fase 5: Portfolio (Semana 9-12)
-- [ ] Proyecto 1: Detección de defectos (Computer Vision)
-- [ ] Proyecto 2: Document AI (OCR + extracción)
-- [ ] Proyecto 3: Churn prediction (Tabular ML)
-- [ ] Proyecto 4: Motor de recomendaciones (Embeddings + ML)
-- [ ] Proyecto 5: Búsqueda semántica (NLP + Vector DB)
+### Phase 5: Portfolio (Week 9-12)
+- [ ] Project 1: Defect detection (Computer Vision)
+- [ ] Project 2: Document AI (OCR + extraction)
+- [ ] Project 3: Churn prediction (Tabular ML)
+- [ ] Project 4: Recommendation engine (Embeddings + ML)
+- [ ] Project 5: Semantic search (NLP + Vector DB)
 
-## Prerequisitos
+## Prerequisites
 
 - Python 3.10+
-- GPU recomendada para Deep Learning (o usar Google Colab / cloud GPU)
-- Conocimientos básicos de programación en Python
+- GPU recommended for Deep Learning (or use Google Colab / cloud GPU)
+- Basic Python programming knowledge
 
-## Setup rápido
+## Quick Setup
 
 ```bash
-# Clonar repo
+# Clone repo
 git clone <repo-url>
 cd ai-engineering-lab
 
-# Crear entorno virtual
+# Create virtual environment
 python -m venv .venv
 source .venv/bin/activate  # Linux/Mac
 # .venv\Scripts\activate   # Windows
 
-# Instalar dependencias
+# Install dependencies
 pip install -r requirements.txt
 
-# Lanzar Jupyter
+# Launch Jupyter
 jupyter lab
 ```
 
-## Para qué sirve cada parte
+## What Each Section Is For
 
-| Sección | Para qué | Cuándo usarla |
-|---------|----------|---------------|
-| `docs/` | Entender la teoría y conceptos | Antes de escribir código |
-| `notebooks/` | Aprender con código interactivo | Mientras estudias cada tema |
-| `portfolio/` | Proyectos completos de demo | Para presentar a clientes |
+| Section | Purpose | When to use it |
+|---------|---------|----------------|
+| `docs/` | Understand theory and concepts | Before writing code |
+| `notebooks/` | Learn with interactive code | While studying each topic |
+| `portfolio/` | Complete demo projects | To present to clients |
 
-## Qué falta por cubrir
+## What's Not Covered Yet
 
-Ver `docs/09-whats-next/README.md` para un roadmap de temas avanzados que podrías necesitar según el tipo de proyecto.
+See `docs/09-whats-next/README.md` for a roadmap of advanced topics you might need depending on the type of project.

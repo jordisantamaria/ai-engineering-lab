@@ -1,103 +1,103 @@
 # Tabular ML
 
-## Por Que Tabular ML es el 80% de Proyectos de Consultoria
+## Why Tabular ML is 80% of Consulting Projects
 
-La mayoria de datos empresariales viven en tablas: bases de datos SQL, hojas de calculo, CSVs, data warehouses. Cuando un cliente dice "quiero predecir X", casi siempre X depende de datos tabulares: transacciones, caracteristicas de clientes, metricas operativas, logs.
+Most enterprise data lives in tables: SQL databases, spreadsheets, CSVs, data warehouses. When a client says "I want to predict X", almost always X depends on tabular data: transactions, customer characteristics, operational metrics, logs.
 
 ```
-Datos en consultoria tipica:
+Data in typical consulting:
 
-70-80%  ->  Tablas (SQL, CSV, Excel)  ->  Gradient Boosting
-10-15%  ->  Texto (emails, tickets)   ->  NLP / LLMs
-5-10%   ->  Imagenes (defectos, docs) ->  Computer Vision
-1-5%    ->  Series temporales          ->  Time Series models
+70-80%  ->  Tables (SQL, CSV, Excel)  ->  Gradient Boosting
+10-15%  ->  Text (emails, tickets)    ->  NLP / LLMs
+5-10%   ->  Images (defects, docs)    ->  Computer Vision
+1-5%    ->  Time series               ->  Time Series models
 ```
 
-> **Realidad:** Dominar XGBoost/LightGBM + feature engineering te resuelve la mayoria de proyectos reales de ML en consultoria.
+> **Reality:** Mastering XGBoost/LightGBM + feature engineering solves the majority of real ML consulting projects.
 
 ---
 
-## Gradient Boosting: El Rey de Tabular
+## Gradient Boosting: The King of Tabular
 
-### Intuicion
+### Intuition
 
-Gradient Boosting construye un ensemble de arboles de decision debiles, donde cada arbol nuevo **aprende de los errores del anterior**.
+Gradient Boosting builds an ensemble of weak decision trees, where each new tree **learns from the errors of the previous one**.
 
 ```
-Proceso de Boosting:
+Boosting process:
 
-Datos originales: y_real = [10, 20, 30, 40, 50]
+Original data: y_real = [10, 20, 30, 40, 50]
 
-Paso 1: Arbol 1 predice (simple, debil)
+Step 1: Tree 1 predicts (simple, weak)
   y_pred_1 = [12, 18, 28, 35, 48]
-  residuos = [10-12, 20-18, 30-28, 40-35, 50-48]
+  residuals = [10-12, 20-18, 30-28, 40-35, 50-48]
             = [-2, 2, 2, 5, 2]
 
-Paso 2: Arbol 2 se entrena sobre los RESIDUOS
-  Intenta predecir: [-2, 2, 2, 5, 2]
+Step 2: Tree 2 is trained on the RESIDUALS
+  Tries to predict: [-2, 2, 2, 5, 2]
   y_pred_2 = [-1.5, 1.8, 2.1, 4.5, 1.9]
 
-Paso 3: Combinar (con learning rate = 0.1)
+Step 3: Combine (with learning rate = 0.1)
   y_final = y_pred_1 + 0.1 * y_pred_2
            = [12, 18, 28, 35, 48] + 0.1 * [-1.5, 1.8, 2.1, 4.5, 1.9]
            = [11.85, 18.18, 28.21, 35.45, 48.19]
 
-  Mas cerca de [10, 20, 30, 40, 50]!
+  Closer to [10, 20, 30, 40, 50]!
 
-Paso 4: Calcular nuevos residuos, entrenar Arbol 3...
-Paso 5: Repetir N veces (n_estimators)
+Step 4: Compute new residuals, train Tree 3...
+Step 5: Repeat N times (n_estimators)
 
-Cada arbol corrige un poco los errores acumulados.
-El learning rate controla cuanto "confia" en cada arbol nuevo.
+Each tree corrects a bit of the accumulated errors.
+The learning rate controls how much it "trusts" each new tree.
 ```
 
 ```
-Diagrama del proceso:
+Process diagram:
 
-  Datos -----> [Arbol 1] -----> Prediccion 1
+  Data -----> [Tree 1] -----> Prediction 1
                                      |
-                              Calcular Residuos
+                              Compute Residuals
                                      |
-  Residuos_1 -> [Arbol 2] -----> Prediccion 2
+  Residuals_1 -> [Tree 2] -----> Prediction 2
                                      |
-                              Calcular Residuos
+                              Compute Residuals
                                      |
-  Residuos_2 -> [Arbol 3] -----> Prediccion 3
+  Residuals_2 -> [Tree 3] -----> Prediction 3
                                      |
                                    ...
                                      |
-  Prediccion Final = Pred_1 + lr*Pred_2 + lr*Pred_3 + ... + lr*Pred_N
+  Final Prediction = Pred_1 + lr*Pred_2 + lr*Pred_3 + ... + lr*Pred_N
 ```
 
 ---
 
 ### XGBoost
 
-XGBoost (eXtreme Gradient Boosting) es la implementacion mas popular y robusta.
+XGBoost (eXtreme Gradient Boosting) is the most popular and robust implementation.
 
-**Como funciona (intuicion):**
+**How it works (intuition):**
 
-A diferencia de gradient boosting clasico, XGBoost:
-- Usa una **funcion objetivo regularizada** (evita overfitting)
-- Construye arboles de forma **level-wise** (nivel por nivel)
-- Maneja valores missing de forma nativa
-- Paraleliza la construccion de arboles
+Unlike classic gradient boosting, XGBoost:
+- Uses a **regularized objective function** (prevents overfitting)
+- Builds trees in a **level-wise** fashion (level by level)
+- Handles missing values natively
+- Parallelizes tree construction
 
-**Hiperparametros Clave:**
+**Key Hyperparameters:**
 
-| Parametro | Rango tipico | Que controla | Efecto |
+| Parameter | Typical Range | What it controls | Effect |
 |---|---|---|---|
-| `n_estimators` | 100-10000 | Numero de arboles | Mas = mejor hasta overfitting |
-| `max_depth` | 3-10 | Profundidad maxima del arbol | Mas = mas complejo, mas overfit |
-| `learning_rate` (eta) | 0.01-0.3 | Cuanto aporta cada arbol | Menor = mas arboles necesarios, mejor generalizacion |
-| `subsample` | 0.5-1.0 | Fraccion de filas por arbol | Menor = mas regularizacion |
-| `colsample_bytree` | 0.5-1.0 | Fraccion de columnas por arbol | Menor = mas regularizacion |
-| `reg_alpha` (L1) | 0-10 | Regularizacion L1 | Mayor = mas sparsity |
-| `reg_lambda` (L2) | 0-10 | Regularizacion L2 | Mayor = pesos mas pequenos |
-| `min_child_weight` | 1-10 | Min peso de hoja | Mayor = mas conservador |
-| `gamma` | 0-5 | Min reduccion de loss para split | Mayor = menos splits |
+| `n_estimators` | 100-10000 | Number of trees | More = better until overfitting |
+| `max_depth` | 3-10 | Maximum tree depth | More = more complex, more overfit |
+| `learning_rate` (eta) | 0.01-0.3 | How much each tree contributes | Lower = more trees needed, better generalization |
+| `subsample` | 0.5-1.0 | Fraction of rows per tree | Lower = more regularization |
+| `colsample_bytree` | 0.5-1.0 | Fraction of columns per tree | Lower = more regularization |
+| `reg_alpha` (L1) | 0-10 | L1 regularization | Higher = more sparsity |
+| `reg_lambda` (L2) | 0-10 | L2 regularization | Higher = smaller weights |
+| `min_child_weight` | 1-10 | Min leaf weight | Higher = more conservative |
+| `gamma` | 0-5 | Min loss reduction for split | Higher = fewer splits |
 
-**Ejemplo de Codigo Completo:**
+**Complete Code Example:**
 
 ```python
 import xgboost as xgb
@@ -105,8 +105,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, roc_auc_score
 import pandas as pd
 
-# Cargar datos
-df = pd.read_csv("datos.csv")
+# Load data
+df = pd.read_csv("data.csv")
 X = df.drop("target", axis=1)
 y = df["target"]
 
@@ -115,7 +115,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# Crear modelo
+# Create model
 model = xgb.XGBClassifier(
     n_estimators=1000,
     max_depth=6,
@@ -125,21 +125,21 @@ model = xgb.XGBClassifier(
     reg_alpha=0.1,
     reg_lambda=1.0,
     min_child_weight=3,
-    scale_pos_weight=len(y_train[y_train==0]) / len(y_train[y_train==1]),  # Para desbalance
+    scale_pos_weight=len(y_train[y_train==0]) / len(y_train[y_train==1]),  # For imbalance
     random_state=42,
     n_jobs=-1,
     eval_metric="auc",
     early_stopping_rounds=50,
 )
 
-# Entrenar con early stopping
+# Train with early stopping
 model.fit(
     X_train, y_train,
     eval_set=[(X_test, y_test)],
     verbose=100,
 )
 
-# Evaluar
+# Evaluate
 y_pred = model.predict(X_test)
 y_prob = model.predict_proba(X_test)[:, 1]
 
@@ -147,7 +147,7 @@ print(classification_report(y_test, y_pred))
 print(f"AUC-ROC: {roc_auc_score(y_test, y_prob):.4f}")
 
 # Best iteration
-print(f"Mejor iteracion: {model.best_iteration}")
+print(f"Best iteration: {model.best_iteration}")
 ```
 
 **Feature Importance:**
@@ -155,12 +155,12 @@ print(f"Mejor iteracion: {model.best_iteration}")
 ```python
 import matplotlib.pyplot as plt
 
-# Tres tipos de importancia en XGBoost
-# 1. Gain: reduccion promedio de la loss cuando se usa la feature
-# 2. Weight (frequency): cuantas veces se usa la feature en splits
-# 3. Cover: numero promedio de muestras afectadas por splits de esta feature
+# Three types of importance in XGBoost
+# 1. Gain: average loss reduction when the feature is used
+# 2. Weight (frequency): how many times the feature is used in splits
+# 3. Cover: average number of samples affected by splits of this feature
 
-# Gain es la mas informativa
+# Gain is the most informative
 importances = model.get_booster().get_score(importance_type="gain")
 sorted_imp = sorted(importances.items(), key=lambda x: x[1], reverse=True)
 
@@ -177,14 +177,14 @@ plt.show()
 
 ### LightGBM
 
-LightGBM (Light Gradient Boosting Machine) de Microsoft. Generalmente mas rapido que XGBoost.
+LightGBM (Light Gradient Boosting Machine) from Microsoft. Generally faster than XGBoost.
 
-**Diferencias con XGBoost:**
+**Differences from XGBoost:**
 
 ```
 XGBoost (level-wise):          LightGBM (leaf-wise):
-Crece TODOS los nodos           Crece el nodo con MAYOR
-del mismo nivel                  reduccion de loss
+Grows ALL nodes at the          Grows the node with the GREATEST
+same level                      loss reduction
 
        [root]                         [root]
       /      \                       /      \
@@ -192,41 +192,41 @@ del mismo nivel                  reduccion de loss
    /   \    /   \                 /   \
  [C]  [D] [E]  [F]             [C]  [D]
 
-Mas uniforme,                   Mas preciso pero
-menos overfit                   puede hacer overfit
-                                en datos pequenos
+More uniform,                   More accurate but
+less overfit                    can overfit on
+                                small data
 ```
 
-**Ventajas de LightGBM:**
+**Advantages of LightGBM:**
 
-| Ventaja | Descripcion |
+| Advantage | Description |
 |---|---|
-| **GOSS** | Gradient-based One-Side Sampling: mantiene muestras con gradiente grande, samplea las de gradiente pequeno |
-| **EFB** | Exclusive Feature Bundling: agrupa features mutuamente exclusivas (reduce dimensionalidad) |
-| **Categoricals nativo** | No necesitas one-hot encoding, LightGBM maneja categoricals directamente |
-| **Velocidad** | 2-10x mas rapido que XGBoost en datasets grandes |
+| **GOSS** | Gradient-based One-Side Sampling: keeps samples with large gradient, samples those with small gradient |
+| **EFB** | Exclusive Feature Bundling: bundles mutually exclusive features (reduces dimensionality) |
+| **Native categoricals** | No need for one-hot encoding, LightGBM handles categoricals directly |
+| **Speed** | 2-10x faster than XGBoost on large datasets |
 
-**Hiperparametros Clave de LightGBM:**
+**Key LightGBM Hyperparameters:**
 
 ```python
 import lightgbm as lgb
 
 model = lgb.LGBMClassifier(
     n_estimators=1000,
-    max_depth=-1,              # Sin limite (leaf-wise lo controla num_leaves)
-    num_leaves=31,             # Maximo hojas por arbol (CLAVE en LightGBM)
+    max_depth=-1,              # No limit (leaf-wise is controlled by num_leaves)
+    num_leaves=31,             # Max leaves per tree (KEY in LightGBM)
     learning_rate=0.1,
-    subsample=0.8,             # Llamado 'bagging_fraction' internamente
-    colsample_bytree=0.8,     # Llamado 'feature_fraction' internamente
+    subsample=0.8,             # Called 'bagging_fraction' internally
+    colsample_bytree=0.8,     # Called 'feature_fraction' internally
     reg_alpha=0.1,
     reg_lambda=1.0,
-    min_child_samples=20,      # Minimo muestras en hoja
+    min_child_samples=20,      # Minimum samples in leaf
     random_state=42,
     n_jobs=-1,
     verbose=-1,
 )
 
-# Entrenar con early stopping
+# Train with early stopping
 model.fit(
     X_train, y_train,
     eval_set=[(X_test, y_test)],
@@ -234,33 +234,33 @@ model.fit(
         lgb.early_stopping(50),
         lgb.log_evaluation(100),
     ],
-    categorical_feature=["ciudad", "tipo_producto"],  # Categoricals nativo!
+    categorical_feature=["city", "product_type"],  # Native categoricals!
 )
 ```
 
-### Cuando Elegir LightGBM vs XGBoost
+### When to Choose LightGBM vs XGBoost
 
-| Criterio | XGBoost | LightGBM |
+| Criterion | XGBoost | LightGBM |
 |---|---|---|
-| **Dataset grande (>100K filas)** | Lento | Mucho mas rapido |
-| **Dataset pequeno (<10K filas)** | Menos overfit | Puede hacer overfit |
-| **Muchas categoricals** | Necesita encoding | Nativo (mas rapido, a veces mejor) |
-| **Feature importance** | Buena | Buena |
-| **GPU support** | Si | Si |
-| **Comunidad/docs** | Mas madura | Muy buena tambien |
-| **Competiciones Kaggle** | Popular | Muy popular |
-| **Produccion empresarial** | Muy estable | Muy estable |
+| **Large dataset (>100K rows)** | Slow | Much faster |
+| **Small dataset (<10K rows)** | Less overfit | Can overfit |
+| **Many categoricals** | Needs encoding | Native (faster, sometimes better) |
+| **Feature importance** | Good | Good |
+| **GPU support** | Yes | Yes |
+| **Community/docs** | More mature | Very good too |
+| **Kaggle competitions** | Popular | Very popular |
+| **Enterprise production** | Very stable | Very stable |
 
-> **Consejo practico:** Prueba ambos. La diferencia en accuracy suele ser <1%. LightGBM es mas rapido para iterar. Para la entrega final, usa el que de mejor resultado en cross-validation.
+> **Practical advice:** Try both. The accuracy difference is usually <1%. LightGBM is faster for iterating. For the final delivery, use whichever gives the best cross-validation result.
 
 ### CatBoost
 
-CatBoost (de Yandex) es otra alternativa solida:
+CatBoost (from Yandex) is another solid alternative:
 
-- **Excelente con categoricals** sin necesidad de encoding (mejor que LightGBM para categoricals de alta cardinalidad)
-- **Menos tuning necesario** - los defaults son buenos
-- **Ordered boosting** - reduce data leakage en el entrenamiento
-- Generalmente un poco mas lento que LightGBM
+- **Excellent with categoricals** without needing encoding (better than LightGBM for high-cardinality categoricals)
+- **Less tuning needed** - defaults are good
+- **Ordered boosting** - reduces data leakage during training
+- Generally slightly slower than LightGBM
 
 ```python
 from catboost import CatBoostClassifier
@@ -269,7 +269,7 @@ model = CatBoostClassifier(
     iterations=1000,
     depth=6,
     learning_rate=0.1,
-    cat_features=["ciudad", "tipo_producto"],  # Indicas cuales son categoricals
+    cat_features=["city", "product_type"],  # Indicate which are categoricals
     verbose=100,
 )
 model.fit(X_train, y_train, eval_set=(X_test, y_test))
@@ -277,81 +277,81 @@ model.fit(X_train, y_train, eval_set=(X_test, y_test))
 
 ---
 
-## Feature Engineering Avanzado para Tabular
+## Advanced Feature Engineering for Tabular
 
-Feature engineering es lo que mas impacto tiene en el rendimiento de modelos tabulares. Un XGBoost con buenas features > cualquier modelo con features crudas.
+Feature engineering is what has the most impact on tabular model performance. An XGBoost with good features > any model with raw features.
 
 ### Aggregation Features (GroupBy Stats)
 
 ```python
-# Para cada cliente, calcular estadisticas de sus transacciones
+# For each customer, compute statistics of their transactions
 agg_features = df.groupby("customer_id").agg(
-    total_transacciones=("amount", "count"),
-    monto_promedio=("amount", "mean"),
-    monto_maximo=("amount", "max"),
-    monto_std=("amount", "std"),
-    dias_como_cliente=("date", lambda x: (x.max() - x.min()).days),
-    categorias_unicas=("category", "nunique"),
+    total_transactions=("amount", "count"),
+    avg_amount=("amount", "mean"),
+    max_amount=("amount", "max"),
+    std_amount=("amount", "std"),
+    days_as_customer=("date", lambda x: (x.max() - x.min()).days),
+    unique_categories=("category", "nunique"),
 ).reset_index()
 
-# Merge con el dataset original
+# Merge with the original dataset
 df = df.merge(agg_features, on="customer_id", how="left")
 ```
 
 ### Interaction Features
 
 ```python
-# Crear features que capturen relaciones entre variables
-df["ingreso_por_edad"] = df["ingreso_anual"] / (df["edad"] + 1)
-df["deuda_sobre_ingreso"] = df["deuda_total"] / (df["ingreso_anual"] + 1)
-df["balance_promedio_por_cuenta"] = df["balance_total"] / (df["num_cuentas"] + 1)
+# Create features that capture relationships between variables
+df["income_per_age"] = df["annual_income"] / (df["age"] + 1)
+df["debt_to_income"] = df["total_debt"] / (df["annual_income"] + 1)
+df["avg_balance_per_account"] = df["total_balance"] / (df["num_accounts"] + 1)
 
-# Diferencias y ratios son muy utiles
-df["diferencia_precio"] = df["precio_actual"] - df["precio_anterior"]
-df["ratio_precio"] = df["precio_actual"] / (df["precio_anterior"] + 1)
+# Differences and ratios are very useful
+df["price_difference"] = df["current_price"] - df["previous_price"]
+df["price_ratio"] = df["current_price"] / (df["previous_price"] + 1)
 ```
 
 ### Time-Based Features
 
 ```python
-# Extraer componentes temporales
-df["dia_semana"] = df["fecha"].dt.dayofweek       # 0=Lunes, 6=Domingo
-df["mes"] = df["fecha"].dt.month
-df["trimestre"] = df["fecha"].dt.quarter
-df["dia_del_mes"] = df["fecha"].dt.day
-df["es_fin_de_semana"] = df["dia_semana"].isin([5, 6]).astype(int)
-df["hora"] = df["fecha"].dt.hour
-df["es_horario_laboral"] = df["hora"].between(9, 18).astype(int)
+# Extract temporal components
+df["day_of_week"] = df["date"].dt.dayofweek       # 0=Monday, 6=Sunday
+df["month"] = df["date"].dt.month
+df["quarter"] = df["date"].dt.quarter
+df["day_of_month"] = df["date"].dt.day
+df["is_weekend"] = df["day_of_week"].isin([5, 6]).astype(int)
+df["hour"] = df["date"].dt.hour
+df["is_business_hours"] = df["hour"].between(9, 18).astype(int)
 
-# Lag features (valores pasados)
-df = df.sort_values(["customer_id", "fecha"])
-df["monto_anterior"] = df.groupby("customer_id")["amount"].shift(1)
-df["monto_hace_7_dias"] = df.groupby("customer_id")["amount"].shift(7)
+# Lag features (past values)
+df = df.sort_values(["customer_id", "date"])
+df["previous_amount"] = df.groupby("customer_id")["amount"].shift(1)
+df["amount_7_days_ago"] = df.groupby("customer_id")["amount"].shift(7)
 
 # Rolling statistics
-df["monto_media_7d"] = (
+df["amount_mean_7d"] = (
     df.groupby("customer_id")["amount"]
     .transform(lambda x: x.rolling(7, min_periods=1).mean())
 )
-df["monto_std_30d"] = (
+df["amount_std_30d"] = (
     df.groupby("customer_id")["amount"]
     .transform(lambda x: x.rolling(30, min_periods=1).std())
 )
 ```
 
-### Encoding de Categoricals
+### Categorical Encoding
 
 ```python
-# Frequency Encoding: reemplazar categoria por su frecuencia
-freq_encoding = df["ciudad"].value_counts(normalize=True)
-df["ciudad_freq"] = df["ciudad"].map(freq_encoding)
+# Frequency Encoding: replace category by its frequency
+freq_encoding = df["city"].value_counts(normalize=True)
+df["city_freq"] = df["city"].map(freq_encoding)
 
-# Target Encoding (CON CUIDADO - data leakage!)
-# Usar solo con cross-validation apropiado
+# Target Encoding (WITH CARE - data leakage!)
+# Only use with proper cross-validation
 from sklearn.model_selection import KFold
 
 def target_encode_cv(df, col, target, n_splits=5):
-    """Target encoding con cross-validation para evitar leakage."""
+    """Target encoding with cross-validation to avoid leakage."""
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
     df[f"{col}_target_enc"] = 0.0
     global_mean = df[target].mean()
@@ -364,160 +364,160 @@ def target_encode_cv(df, col, target, n_splits=5):
     return df
 
 # Feature Crosses
-df["ciudad_x_tipo"] = df["ciudad"].astype(str) + "_" + df["tipo_producto"].astype(str)
+df["city_x_type"] = df["city"].astype(str) + "_" + df["product_type"].astype(str)
 ```
 
-### Tips de Feature Engineering
+### Feature Engineering Tips
 
-| Tecnica | Cuando aporta valor |
+| Technique | When it adds value |
 |---|---|
-| **Aggregation features** | Datos transaccionales con entidad (cliente, producto) |
-| **Interaction features** | Cuando dos features juntas son mas informativas |
-| **Time features** | Datos con componente temporal |
-| **Frequency encoding** | Categoricals de alta cardinalidad |
-| **Target encoding** | Categoricals correlacionadas con el target (cuidado con leakage) |
-| **Feature crosses** | Cuando la combinacion de categorias importa |
-| **Polynomial features** | Relaciones no lineales simples (cuidado con dimension) |
+| **Aggregation features** | Transactional data with an entity (customer, product) |
+| **Interaction features** | When two features together are more informative |
+| **Time features** | Data with a temporal component |
+| **Frequency encoding** | High-cardinality categoricals |
+| **Target encoding** | Categoricals correlated with the target (beware leakage) |
+| **Feature crosses** | When the combination of categories matters |
+| **Polynomial features** | Simple nonlinear relationships (beware dimensionality) |
 
 ---
 
-## Manejo de Problemas Comunes
+## Handling Common Problems
 
-### Clases Desbalanceadas
+### Imbalanced Classes
 
-El problema mas comun en clasificacion empresarial (fraude 1%, churn 5%, defectos 2%).
+The most common problem in enterprise classification (fraud 1%, churn 5%, defects 2%).
 
 ```python
 from imblearn.over_sampling import SMOTE
 from sklearn.utils.class_weight import compute_class_weight
 import numpy as np
 
-# Opcion 1: SMOTE (Oversampling sintetico)
+# Option 1: SMOTE (Synthetic oversampling)
 smote = SMOTE(random_state=42)
 X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
-# Cuidado: solo aplicar a train, NUNCA a test/validation
+# Caution: only apply to train, NEVER to test/validation
 
-# Opcion 2: Class weights (mas simple, recomendado)
+# Option 2: Class weights (simpler, recommended)
 weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
 weight_dict = dict(zip(np.unique(y_train), weights))
 
-# En XGBoost
+# In XGBoost
 model = xgb.XGBClassifier(
     scale_pos_weight=len(y_train[y_train==0]) / len(y_train[y_train==1])
 )
 
-# En LightGBM
+# In LightGBM
 model = lgb.LGBMClassifier(
     class_weight="balanced",
-    # O manualmente:
+    # Or manually:
     # is_unbalance=True,
 )
 
-# Opcion 3: Threshold tuning
+# Option 3: Threshold tuning
 from sklearn.metrics import precision_recall_curve
 
 y_prob = model.predict_proba(X_test)[:, 1]
 precisions, recalls, thresholds = precision_recall_curve(y_test, y_prob)
 
-# Encontrar threshold que maximice F1
+# Find threshold that maximizes F1
 f1_scores = 2 * (precisions * recalls) / (precisions + recalls + 1e-8)
 best_threshold = thresholds[np.argmax(f1_scores)]
 y_pred_custom = (y_prob >= best_threshold).astype(int)
 ```
 
-**Metricas para datos desbalanceados:**
+**Metrics for imbalanced data:**
 
-| Metrica | Usar? | Por que |
+| Metric | Use? | Why |
 |---|---|---|
-| **Accuracy** | NO | 99% accuracy prediciendo siempre "no fraude" con 1% fraude |
-| **F1-score** | SI | Balancea precision y recall |
-| **AUC-PR** | SI | Mejor que AUC-ROC para desbalance severo |
-| **AUC-ROC** | Parcial | Puede ser optimista con mucho desbalance |
-| **Precision@K** | SI | "De los top K alertas, cuantas son reales?" |
+| **Accuracy** | NO | 99% accuracy predicting always "no fraud" with 1% fraud |
+| **F1-score** | YES | Balances precision and recall |
+| **AUC-PR** | YES | Better than AUC-ROC for severe imbalance |
+| **AUC-ROC** | Partial | Can be optimistic with heavy imbalance |
+| **Precision@K** | YES | "Of the top K alerts, how many are real?" |
 
 ### Missing Values
 
 ```python
-# XGBoost y LightGBM manejan NaN nativamente - muchas veces es MEJOR
-# dejar los NaN como estan que imputar
+# XGBoost and LightGBM handle NaN natively - often it's BETTER
+# to leave NaN as-is than to impute
 
-# Si necesitas imputar (para otros modelos o features nuevas):
+# If you need to impute (for other models or new features):
 from sklearn.impute import SimpleImputer
 
-# Numerico: mediana (robusta a outliers)
+# Numeric: median (robust to outliers)
 num_imputer = SimpleImputer(strategy="median")
 
-# Categorico: moda o valor especial
+# Categorical: mode or special value
 cat_imputer = SimpleImputer(strategy="constant", fill_value="MISSING")
 
-# Crear features de "missing" (pueden ser informativas!)
-df["ingreso_missing"] = df["ingreso"].isna().astype(int)
+# Create "missing" features (they can be informative!)
+df["income_missing"] = df["income"].isna().astype(int)
 ```
 
 ### High Cardinality Categoricals
 
-Cuando una variable categorica tiene muchos valores unicos (ciudades, codigos postales, IDs de producto).
+When a categorical variable has many unique values (cities, zip codes, product IDs).
 
 ```python
-# Problema: One-hot encoding de 10,000 ciudades = 10,000 columnas
+# Problem: One-hot encoding of 10,000 cities = 10,000 columns
 
-# Solucion 1: Target encoding (ver seccion anterior)
+# Solution 1: Target encoding (see previous section)
 
-# Solucion 2: Frequency encoding
-df["ciudad_freq"] = df["ciudad"].map(df["ciudad"].value_counts(normalize=True))
+# Solution 2: Frequency encoding
+df["city_freq"] = df["city"].map(df["city"].value_counts(normalize=True))
 
-# Solucion 3: Agrupar categorias raras
-threshold = 0.01  # Categorias con <1% de frecuencia
-freq = df["ciudad"].value_counts(normalize=True)
-df["ciudad_agrupada"] = df["ciudad"].apply(
-    lambda x: x if freq[x] >= threshold else "OTROS"
+# Solution 3: Group rare categories
+threshold = 0.01  # Categories with <1% frequency
+freq = df["city"].value_counts(normalize=True)
+df["city_grouped"] = df["city"].apply(
+    lambda x: x if freq[x] >= threshold else "OTHER"
 )
 
-# Solucion 4: LightGBM/CatBoost con categoricals nativos (lo mejor)
-# Solo pasas la lista de columnas categoricas y el modelo las maneja
+# Solution 4: LightGBM/CatBoost with native categoricals (the best)
+# Just pass the list of categorical columns and the model handles them
 ```
 
 ### Feature Leakage
 
-**Que es:** cuando tu modelo tiene acceso a informacion que no tendria en produccion, inflando metricas artificialmente.
+**What it is:** when your model has access to information it wouldn't have in production, artificially inflating metrics.
 
 ```
-Fuentes comunes de leakage en datos de negocio:
+Common sources of leakage in business data:
 
-1. Features del futuro:
-   Predecir churn de marzo usando datos de abril
-   -> Asegurar que las features solo usan datos ANTERIORES al evento
+1. Future features:
+   Predicting March churn using April data
+   -> Ensure features only use data BEFORE the event
 
 2. Target leakage:
-   Predecir si un paciente tiene diabetes usando "medicacion_diabetes"
-   -> La medicacion es CONSECUENCIA del diagnostico
+   Predicting if a patient has diabetes using "diabetes_medication"
+   -> The medication is a CONSEQUENCE of the diagnosis
 
 3. Train-test contamination:
-   Normalizar ANTES del split (el test "ve" estadisticas del train)
-   -> Siempre hacer fit en train, transform en test
+   Normalizing BEFORE the split (the test "sees" training statistics)
+   -> Always fit on train, transform on test
 
 4. Group leakage:
-   Mismo cliente en train y test (el modelo "recuerda" al cliente)
-   -> Hacer split por GRUPO, no por fila
+   Same customer in train and test (the model "remembers" the customer)
+   -> Split by GROUP, not by row
 ```
 
-**Como detectar leakage:**
+**How to detect leakage:**
 
 ```python
-# Senal de alarma: AUC > 0.99 en tu primer modelo
-# Verificar feature importance: si una feature domina, investigar
+# Warning sign: AUC > 0.99 on your first model
+# Check feature importance: if one feature dominates, investigate
 
 importance = model.feature_importances_
 for feat, imp in sorted(zip(X.columns, importance), key=lambda x: -x[1])[:5]:
     print(f"{feat}: {imp:.4f}")
 
-# Si la feature top tiene importancia desproporcionada,
-# investigar si hay leakage
+# If the top feature has disproportionate importance,
+# investigate whether there's leakage
 ```
 
 ---
 
-## Pipeline de Produccion con scikit-learn
+## Production Pipeline with scikit-learn
 
 ### ColumnTransformer + Pipeline
 
@@ -528,32 +528,32 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
 import lightgbm as lgb
 
-# Definir tipos de columnas
-numeric_features = ["edad", "ingreso", "balance", "num_transacciones"]
-categorical_features = ["ciudad", "tipo_cuenta", "segmento"]
+# Define column types
+numeric_features = ["age", "income", "balance", "num_transactions"]
+categorical_features = ["city", "account_type", "segment"]
 
-# Pipeline para numericas
+# Pipeline for numerics
 numeric_transformer = Pipeline([
     ("imputer", SimpleImputer(strategy="median")),
-    ("scaler", StandardScaler()),  # No necesario para tree models, pero si para otros
+    ("scaler", StandardScaler()),  # Not necessary for tree models, but yes for others
 ])
 
-# Pipeline para categoricas
+# Pipeline for categoricals
 categorical_transformer = Pipeline([
     ("imputer", SimpleImputer(strategy="constant", fill_value="MISSING")),
     ("encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
 ])
 
-# Combinar
+# Combine
 preprocessor = ColumnTransformer(
     transformers=[
         ("num", numeric_transformer, numeric_features),
         ("cat", categorical_transformer, categorical_features),
     ],
-    remainder="drop",  # Descartar columnas no listadas
+    remainder="drop",  # Drop unlisted columns
 )
 
-# Pipeline completo
+# Complete pipeline
 pipeline = Pipeline([
     ("preprocessor", preprocessor),
     ("classifier", lgb.LGBMClassifier(
@@ -564,55 +564,55 @@ pipeline = Pipeline([
     )),
 ])
 
-# Entrenar
+# Train
 pipeline.fit(X_train, y_train)
 
-# Predecir (el preprocessing se aplica automaticamente)
+# Predict (preprocessing is applied automatically)
 y_pred = pipeline.predict(X_test)
 y_prob = pipeline.predict_proba(X_test)[:, 1]
 ```
 
-### Serializacion con joblib
+### Serialization with joblib
 
 ```python
 import joblib
 
-# Guardar pipeline completo (preprocessing + modelo)
-joblib.dump(pipeline, "modelo_churn_v1.joblib")
+# Save complete pipeline (preprocessing + model)
+joblib.dump(pipeline, "churn_model_v1.joblib")
 
-# Cargar en produccion
-pipeline_loaded = joblib.load("modelo_churn_v1.joblib")
+# Load in production
+pipeline_loaded = joblib.load("churn_model_v1.joblib")
 
-# Predecir con datos nuevos (mismas columnas que en entrenamiento)
-nuevo_cliente = pd.DataFrame({
-    "edad": [35],
-    "ingreso": [50000],
+# Predict with new data (same columns as in training)
+new_customer = pd.DataFrame({
+    "age": [35],
+    "income": [50000],
     "balance": [12000],
-    "num_transacciones": [45],
-    "ciudad": ["Madrid"],
-    "tipo_cuenta": ["premium"],
-    "segmento": ["retail"],
+    "num_transactions": [45],
+    "city": ["Madrid"],
+    "account_type": ["premium"],
+    "segment": ["retail"],
 })
 
-probabilidad_churn = pipeline_loaded.predict_proba(nuevo_cliente)[:, 1]
-print(f"Probabilidad de churn: {probabilidad_churn[0]:.2%}")
+churn_probability = pipeline_loaded.predict_proba(new_customer)[:, 1]
+print(f"Churn probability: {churn_probability[0]:.2%}")
 ```
 
 ---
 
-## Hyperparameter Tuning con Optuna
+## Hyperparameter Tuning with Optuna
 
-### Por Que Optuna
+### Why Optuna
 
-| Metodo | Eficiencia | Implementacion |
+| Method | Efficiency | Implementation |
 |---|---|---|
-| **Grid Search** | Mala (explora todo) | Simple |
-| **Random Search** | Aceptable | Simple |
-| **Optuna** (Bayesian) | Muy buena | Moderada |
+| **Grid Search** | Poor (explores everything) | Simple |
+| **Random Search** | Acceptable | Simple |
+| **Optuna** (Bayesian) | Very good | Moderate |
 
-Optuna usa **optimizacion bayesiana**: aprende de ejecuciones anteriores para elegir los proximos hiperparametros de forma inteligente.
+Optuna uses **Bayesian optimization**: it learns from previous runs to intelligently choose the next hyperparameters.
 
-### Ejemplo Completo con XGBoost + Optuna
+### Complete Example with XGBoost + Optuna
 
 ```python
 import optuna
@@ -620,7 +620,7 @@ from sklearn.model_selection import cross_val_score
 import xgboost as xgb
 
 def objective(trial):
-    """Funcion objetivo que Optuna optimiza."""
+    """Objective function that Optuna optimizes."""
 
     params = {
         "n_estimators": trial.suggest_int("n_estimators", 100, 2000),
@@ -642,7 +642,7 @@ def objective(trial):
         early_stopping_rounds=50,
     )
 
-    # Cross-validation con early stopping
+    # Cross-validation with early stopping
     scores = cross_val_score(
         model, X_train, y_train,
         cv=5,
@@ -655,50 +655,50 @@ def objective(trial):
 
     return scores.mean()
 
-# Ejecutar optimizacion
+# Run optimization
 study = optuna.create_study(direction="maximize")
 study.optimize(objective, n_trials=100, show_progress_bar=True)
 
-# Mejores hiperparametros
-print(f"Mejor AUC: {study.best_value:.4f}")
-print(f"Mejores params: {study.best_params}")
+# Best hyperparameters
+print(f"Best AUC: {study.best_value:.4f}")
+print(f"Best params: {study.best_params}")
 
-# Entrenar modelo final con los mejores parametros
+# Train final model with best parameters
 best_model = xgb.XGBClassifier(**study.best_params, random_state=42, n_jobs=-1)
 best_model.fit(X_train, y_train)
 ```
 
-### Tips de Tuning
+### Tuning Tips
 
-**Orden de importancia para tunear:**
+**Order of importance for tuning:**
 
 ```
-1. learning_rate + n_estimators  (los mas impactantes)
-   -> Empieza con lr=0.1, n_estimators=1000 + early stopping
+1. learning_rate + n_estimators  (most impactful)
+   -> Start with lr=0.1, n_estimators=1000 + early stopping
 
-2. max_depth / num_leaves  (complejidad del arbol)
-   -> max_depth=6 es un buen inicio
+2. max_depth / num_leaves  (tree complexity)
+   -> max_depth=6 is a good start
 
-3. subsample + colsample_bytree  (regularizacion por sampling)
-   -> 0.8 es un buen inicio para ambos
+3. subsample + colsample_bytree  (regularization via sampling)
+   -> 0.8 is a good start for both
 
-4. reg_alpha + reg_lambda  (regularizacion explicita)
-   -> Usualmente valores pequenos
+4. reg_alpha + reg_lambda  (explicit regularization)
+   -> Usually small values
 
-5. min_child_weight / min_child_samples  (control de hojas)
-   -> Incrementar si hay overfitting
+5. min_child_weight / min_child_samples  (leaf control)
+   -> Increase if there's overfitting
 ```
 
 ---
 
-## Interpretabilidad
+## Interpretability
 
-En consultoria, la interpretabilidad es **tan importante como la accuracy**. El cliente pregunta "por que el modelo predice esto?" y necesitas responder.
+In consulting, interpretability is **as important as accuracy**. The client asks "why does the model predict this?" and you need to answer.
 
 ### Feature Importance (Built-in)
 
 ```python
-# Los tree models tienen feature importance integrada
+# Tree models have built-in feature importance
 importance = pd.DataFrame({
     "feature": X_train.columns,
     "importance": model.feature_importances_,
@@ -707,68 +707,68 @@ importance = pd.DataFrame({
 print(importance.head(10))
 ```
 
-Limitacion: la feature importance global te dice que features son importantes EN PROMEDIO, pero no por que una prediccion INDIVIDUAL es como es.
+Limitation: global feature importance tells you which features are important ON AVERAGE, but not why a specific INDIVIDUAL prediction is what it is.
 
 ### SHAP Values
 
-SHAP (SHapley Additive exPlanations) te dice **cuanto contribuye cada feature a cada prediccion individual**.
+SHAP (SHapley Additive exPlanations) tells you **how much each feature contributes to each individual prediction**.
 
-**Intuicion:**
+**Intuition:**
 
 ```
-Prediccion para Cliente X: probabilidad de churn = 78%
-Baseline (promedio del dataset): 25%
+Prediction for Customer X: churn probability = 78%
+Baseline (dataset average): 25%
 
-SHAP descompone la diferencia (78% - 25% = 53%):
+SHAP decomposes the difference (78% - 25% = 53%):
 
-  antiguedad_meses = 3     -> +20% (poco tiempo como cliente)
-  num_quejas = 5           -> +15% (muchas quejas)
-  uso_app_mensual = 2      -> +12% (usa poco la app)
-  ingreso = 80000          -> -5%  (ingreso alto reduce churn)
-  tipo_cuenta = premium    -> -3%  (las premium churnan menos)
-  ... otras features ...   -> +14%
+  tenure_months = 3        -> +20% (short time as customer)
+  num_complaints = 5       -> +15% (many complaints)
+  monthly_app_usage = 2    -> +12% (uses the app very little)
+  income = 80000           -> -5%  (high income reduces churn)
+  account_type = premium   -> -3%  (premium accounts churn less)
+  ... other features ...   -> +14%
   -----------------------------------------
   Total SHAP:                 +53% (25% base + 53% = 78%)
 
-Cada valor SHAP se interpreta como:
-"Esta feature empujo la prediccion X puntos hacia arriba/abajo
-comparado con el promedio del dataset"
+Each SHAP value is interpreted as:
+"This feature pushed the prediction X points up/down
+compared to the dataset average"
 ```
 
-**Ejemplo de Codigo:**
+**Code Example:**
 
 ```python
 import shap
 
-# Crear explainer (usa TreeExplainer para modelos de arboles - MUY rapido)
+# Create explainer (uses TreeExplainer for tree models - VERY fast)
 explainer = shap.TreeExplainer(model)
 shap_values = explainer.shap_values(X_test)
 
-# 1. Summary Plot: importancia global + direccion del efecto
+# 1. Summary Plot: global importance + direction of effect
 shap.summary_plot(shap_values, X_test)
-# Muestra las features ordenadas por importancia
-# Cada punto es una muestra
-# Color = valor de la feature (rojo=alto, azul=bajo)
-# Posicion horizontal = efecto en la prediccion
+# Shows features ordered by importance
+# Each point is a sample
+# Color = feature value (red=high, blue=low)
+# Horizontal position = effect on prediction
 
-# 2. Waterfall Plot: explicacion de UNA prediccion
+# 2. Waterfall Plot: explanation of ONE prediction
 shap.waterfall_plot(shap.Explanation(
-    values=shap_values[0],         # Primera muestra
+    values=shap_values[0],         # First sample
     base_values=explainer.expected_value,
     data=X_test.iloc[0],
     feature_names=X_test.columns.tolist(),
 ))
 
-# 3. Force Plot: otra forma de ver una prediccion individual
+# 3. Force Plot: another way to see an individual prediction
 shap.force_plot(
     explainer.expected_value,
     shap_values[0],
     X_test.iloc[0],
 )
 
-# 4. Dependence Plot: como afecta UNA feature a las predicciones
-shap.dependence_plot("antiguedad_meses", shap_values, X_test)
-# Muestra la relacion entre el valor de la feature y su efecto SHAP
+# 4. Dependence Plot: how ONE feature affects predictions
+shap.dependence_plot("tenure_months", shap_values, X_test)
+# Shows the relationship between feature value and its SHAP effect
 ```
 
 ### Partial Dependence Plots (PDP)
@@ -776,70 +776,70 @@ shap.dependence_plot("antiguedad_meses", shap_values, X_test)
 ```python
 from sklearn.inspection import PartialDependenceDisplay
 
-# PDP muestra el efecto MARGINAL promedio de una feature
+# PDP shows the MARGINAL average effect of a feature
 PartialDependenceDisplay.from_estimator(
     model, X_test,
-    features=["antiguedad_meses", "num_transacciones"],
-    kind="both",  # Muestra ICE lines + PDP promedio
+    features=["tenure_months", "num_transactions"],
+    kind="both",  # Shows ICE lines + PDP average
 )
 ```
 
-Diferencia SHAP vs PDP:
-- **SHAP:** efecto de cada feature para cada prediccion (local)
-- **PDP:** efecto promedio de una feature sobre todo el dataset (global)
-- En consultoria, **SHAP** es mas util para explicar predicciones individuales al cliente.
+Difference SHAP vs PDP:
+- **SHAP:** effect of each feature for each prediction (local)
+- **PDP:** average effect of a feature over the entire dataset (global)
+- In consulting, **SHAP** is more useful for explaining individual predictions to the client.
 
 ### LIME
 
-LIME (Local Interpretable Model-agnostic Explanations) crea un modelo simple (lineal) que aproxima el comportamiento del modelo complejo alrededor de una prediccion especifica. Util cuando no puedes usar SHAP (modelos no-tree), pero SHAP es mas robusto.
+LIME (Local Interpretable Model-agnostic Explanations) creates a simple (linear) model that approximates the complex model's behavior around a specific prediction. Useful when you can't use SHAP (non-tree models), but SHAP is more robust.
 
 ---
 
-## Cuando Usar Deep Learning para Tabular
+## When to Use Deep Learning for Tabular
 
-### Modelos de DL para Tabular
+### DL Models for Tabular
 
-| Modelo | Descripcion | Performance |
+| Model | Description | Performance |
 |---|---|---|
-| **TabNet** | Atencion + feature selection | Similar a GBM, a veces mejor |
-| **FT-Transformer** | Feature Tokenizer + Transformer | Competitivo con GBM |
-| **TabTransformer** | Embeddings categoricos + Transformer | Bueno con muchas categoricals |
+| **TabNet** | Attention + feature selection | Similar to GBM, sometimes better |
+| **FT-Transformer** | Feature Tokenizer + Transformer | Competitive with GBM |
+| **TabTransformer** | Categorical embeddings + Transformer | Good with many categoricals |
 
-### Realidad
+### Reality
 
 ```
-Benchmark tipico en datos tabulares:
+Typical benchmark on tabular data:
 
 XGBoost/LightGBM:  AUC = 0.892
 TabNet:             AUC = 0.887
 FT-Transformer:    AUC = 0.890
 Neural Network:     AUC = 0.875
 
-Diferencia: marginal o inexistente
-Complejidad: MUCHO mayor para DL
-Tiempo de desarrollo: 5x mas para DL
+Difference: marginal or nonexistent
+Complexity: MUCH higher for DL
+Development time: 5x more for DL
 ```
 
-> **Regla practica:** Gradient boosting gana en tabular puro en >95% de los casos. La excepcion es cuando tienes datos **multimodales** (tabla + imagenes + texto) donde DL permite fusionar todo en un modelo end-to-end.
+> **Practical rule:** Gradient boosting wins on pure tabular data in >95% of cases. The exception is when you have **multimodal** data (table + images + text) where DL allows fusing everything in an end-to-end model.
 
 ---
 
-## Caso Tipo de Consultoria Paso a Paso
+## Typical Consulting Case Step by Step
 
-### Escenario: Prediccion de Churn para una Telco
+### Scenario: Churn Prediction for a Telco
 
-#### 1. Reunion con el Cliente
+#### 1. Meeting with the Client
 
 ```
-Preguntas clave:
-- Que consideran "churn"? (cancelacion, no uso en 30 dias?)
-- Que acciones tomaran con las predicciones? (ofertas de retencion?)
-- Que datos tienen disponibles?
-- Cual es el costo de un falso positivo vs falso negativo?
-- Cada cuanto necesitan predicciones? (diario, mensual?)
+Key questions:
+- What do they consider "churn"? (cancellation, no usage in 30 days?)
+- What actions will they take with predictions? (retention offers?)
+- What data do they have available?
+- What is the cost of a false positive vs false negative?
+- How often do they need predictions? (daily, monthly?)
 ```
 
-#### 2. Explorar Datos (EDA)
+#### 2. Explore Data (EDA)
 
 ```python
 import pandas as pd
@@ -848,26 +848,26 @@ import seaborn as sns
 
 df = pd.read_csv("telco_data.csv")
 
-# Resumen rapido
+# Quick summary
 print(f"Shape: {df.shape}")
 print(f"\nTarget distribution:\n{df['churn'].value_counts(normalize=True)}")
 print(f"\nMissing values:\n{df.isnull().sum()[df.isnull().sum() > 0]}")
 print(f"\nDtypes:\n{df.dtypes.value_counts()}")
 
-# Correlaciones con el target
+# Correlations with the target
 numeric_cols = df.select_dtypes(include="number").columns
 correlations = df[numeric_cols].corrwith(df["churn"]).abs().sort_values(ascending=False)
-print(f"\nCorrelaciones con churn:\n{correlations.head(10)}")
+print(f"\nCorrelations with churn:\n{correlations.head(10)}")
 ```
 
-#### 3. Definir Metrica de Exito
+#### 3. Define Success Metric
 
 ```
-Con el cliente se acuerda:
-- Metrica primaria: F1-score (balance entre precision y recall)
-- Metrica secundaria: AUC-PR (por el desbalance)
-- Objetivo: F1 > 0.70 (baseline actual del equipo de datos: 0.55)
-- Constraint: Recall > 0.75 (no perder mas del 25% de churners)
+Agreed with the client:
+- Primary metric: F1-score (balance between precision and recall)
+- Secondary metric: AUC-PR (due to imbalance)
+- Goal: F1 > 0.70 (data team's current baseline: 0.55)
+- Constraint: Recall > 0.75 (don't miss more than 25% of churners)
 ```
 
 #### 4. Baseline
@@ -876,32 +876,32 @@ Con el cliente se acuerda:
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, classification_report
 
-# Baseline simple
+# Simple baseline
 baseline = LogisticRegression(class_weight="balanced", max_iter=1000)
 baseline.fit(X_train_processed, y_train)
 y_pred_baseline = baseline.predict(X_test_processed)
 
 print("=== BASELINE (Logistic Regression) ===")
 print(classification_report(y_test, y_pred_baseline))
-# F1 de clase positiva: 0.58
+# Positive class F1: 0.58
 ```
 
 #### 5. Feature Engineering
 
 ```python
-# Features de comportamiento
-df["tendencia_uso"] = df["uso_mes_actual"] - df["uso_mes_anterior"]
-df["ratio_uso"] = df["uso_mes_actual"] / (df["uso_mes_anterior"] + 1)
-df["quejas_por_mes"] = df["total_quejas"] / (df["meses_antiguedad"] + 1)
+# Behavior features
+df["usage_trend"] = df["current_month_usage"] - df["previous_month_usage"]
+df["usage_ratio"] = df["current_month_usage"] / (df["previous_month_usage"] + 1)
+df["complaints_per_month"] = df["total_complaints"] / (df["tenure_months"] + 1)
 
-# Features de engagement
-df["usa_app"] = (df["logins_app_mensual"] > 0).astype(int)
-df["dias_sin_actividad"] = (pd.Timestamp.now() - df["ultima_actividad"]).dt.days
+# Engagement features
+df["uses_app"] = (df["monthly_app_logins"] > 0).astype(int)
+df["days_without_activity"] = (pd.Timestamp.now() - df["last_activity"]).dt.days
 
 # Aggregations
 agg = df.groupby("plan_id").agg(
-    churn_rate_plan=("churn", "mean"),
-    avg_antiguedad_plan=("meses_antiguedad", "mean"),
+    plan_churn_rate=("churn", "mean"),
+    plan_avg_tenure=("tenure_months", "mean"),
 ).reset_index()
 df = df.merge(agg, on="plan_id", how="left")
 ```
@@ -930,10 +930,10 @@ model.fit(
 y_pred = model.predict(X_test)
 print("=== LightGBM ===")
 print(classification_report(y_test, y_pred))
-# F1 de clase positiva: 0.74 (mejora significativa!)
+# Positive class F1: 0.74 (significant improvement!)
 ```
 
-#### 7. Interpretar Resultados con SHAP
+#### 7. Interpret Results with SHAP
 
 ```python
 import shap
@@ -941,12 +941,12 @@ import shap
 explainer = shap.TreeExplainer(model)
 shap_values = explainer.shap_values(X_test)
 
-# Para la presentacion al cliente:
-# 1. Factores globales que causan churn
-shap.summary_plot(shap_values[1], X_test)  # [1] = clase positiva (churn)
+# For the client presentation:
+# 1. Global factors that cause churn
+shap.summary_plot(shap_values[1], X_test)  # [1] = positive class (churn)
 
-# 2. Ejemplo individual: "Por que este cliente tiene alto riesgo?"
-idx = 42  # Un cliente con alta probabilidad de churn
+# 2. Individual example: "Why does this customer have high risk?"
+idx = 42  # A customer with high churn probability
 shap.waterfall_plot(shap.Explanation(
     values=shap_values[1][idx],
     base_values=explainer.expected_value[1],
@@ -955,25 +955,25 @@ shap.waterfall_plot(shap.Explanation(
 ))
 ```
 
-#### 8. Presentar al Cliente
+#### 8. Present to the Client
 
 ```
-Estructura de la presentacion:
+Presentation structure:
 
-1. Recordatorio del objetivo y la metrica acordada
-2. Resultados:
-   - "Nuestro modelo identifica correctamente el 78% de clientes que van a churnar"
-   - "De cada 10 alertas, 7 son churners reales"
-3. Factores clave de churn (SHAP summary plot):
-   - Tendencia de uso decreciente
-   - Quejas recientes sin resolver
-   - Baja antiguedad
-4. Ejemplo concreto (SHAP waterfall):
-   - "Este cliente tiene 82% probabilidad de churn PORQUE..."
-5. Recomendaciones de negocio:
-   - Priorizar retencion en clientes con uso decreciente
-   - Resolver quejas en <48h reduce churn un 30%
-6. Proximos pasos: deployment, monitoreo
+1. Reminder of the objective and agreed metric
+2. Results:
+   - "Our model correctly identifies 78% of customers who will churn"
+   - "Of every 10 alerts, 7 are real churners"
+3. Key churn factors (SHAP summary plot):
+   - Decreasing usage trend
+   - Recent unresolved complaints
+   - Low tenure
+4. Concrete example (SHAP waterfall):
+   - "This customer has 82% churn probability BECAUSE..."
+5. Business recommendations:
+   - Prioritize retention for customers with decreasing usage
+   - Resolving complaints in <48h reduces churn by 30%
+6. Next steps: deployment, monitoring
 ```
 
 #### 9. Deployment
@@ -981,68 +981,68 @@ Estructura de la presentacion:
 ```python
 import joblib
 
-# Guardar modelo
+# Save model
 joblib.dump(pipeline, "churn_model_v1.joblib")
 
-# En produccion (script diario):
+# In production (daily script):
 def predict_churn_batch(new_data_path):
-    """Predecir churn para todos los clientes activos."""
+    """Predict churn for all active customers."""
     model = joblib.load("churn_model_v1.joblib")
     df = pd.read_csv(new_data_path)
 
-    # Feature engineering (mismas transformaciones que en entrenamiento)
+    # Feature engineering (same transformations as in training)
     df = create_features(df)
 
-    # Predecir
+    # Predict
     df["churn_probability"] = model.predict_proba(df[feature_columns])[:, 1]
     df["churn_risk"] = pd.cut(
         df["churn_probability"],
         bins=[0, 0.3, 0.6, 1.0],
-        labels=["bajo", "medio", "alto"]
+        labels=["low", "medium", "high"]
     )
 
-    # Exportar para el equipo de retencion
-    high_risk = df[df["churn_risk"] == "alto"].sort_values(
+    # Export for the retention team
+    high_risk = df[df["churn_risk"] == "high"].sort_values(
         "churn_probability", ascending=False
     )
-    high_risk.to_csv("clientes_alto_riesgo.csv", index=False)
+    high_risk.to_csv("high_risk_customers.csv", index=False)
 
     return high_risk
 ```
 
 ---
 
-## Checklist de Proyecto Tabular ML
+## Tabular ML Project Checklist
 
 ```
-FASE 1: Entender el problema
-[ ] Reunirse con el cliente y entender el problema de negocio
-[ ] Definir la variable target con precision
-[ ] Acordar metrica de exito
-[ ] Identificar fuentes de datos
+PHASE 1: Understand the problem
+[ ] Meet with the client and understand the business problem
+[ ] Define the target variable precisely
+[ ] Agree on success metric
+[ ] Identify data sources
 
-FASE 2: Datos
-[ ] EDA: distribucion del target, missing values, outliers
-[ ] Identificar y manejar data leakage
-[ ] Definir split temporal o por grupos (no random si hay dependencias)
+PHASE 2: Data
+[ ] EDA: target distribution, missing values, outliers
+[ ] Identify and handle data leakage
+[ ] Define temporal or group-based split (not random if there are dependencies)
 [ ] Feature engineering
 
-FASE 3: Modelado
-[ ] Baseline simple (logistic regression o reglas)
-[ ] XGBoost / LightGBM con defaults razonables
-[ ] Feature selection (SHAP, importancia, eliminar ruido)
-[ ] Hyperparameter tuning con Optuna
-[ ] Validacion cruzada (5-fold o temporal)
+PHASE 3: Modeling
+[ ] Simple baseline (logistic regression or rules)
+[ ] XGBoost / LightGBM with reasonable defaults
+[ ] Feature selection (SHAP, importance, remove noise)
+[ ] Hyperparameter tuning with Optuna
+[ ] Cross-validation (5-fold or temporal)
 
-FASE 4: Interpretacion
-[ ] SHAP: factores globales y explicaciones individuales
-[ ] Validar con expertos del dominio (los factores tienen sentido?)
-[ ] Analisis de errores (donde falla el modelo?)
+PHASE 4: Interpretation
+[ ] SHAP: global factors and individual explanations
+[ ] Validate with domain experts (do the factors make sense?)
+[ ] Error analysis (where does the model fail?)
 
-FASE 5: Entrega
-[ ] Pipeline reproducible (ColumnTransformer + Pipeline)
-[ ] Serializar modelo (joblib)
-[ ] Documentar features y transformaciones
-[ ] Presentar resultados al cliente (con interpretabilidad)
-[ ] Plan de monitoreo en produccion
+PHASE 5: Delivery
+[ ] Reproducible pipeline (ColumnTransformer + Pipeline)
+[ ] Serialize model (joblib)
+[ ] Document features and transformations
+[ ] Present results to client (with interpretability)
+[ ] Production monitoring plan
 ```

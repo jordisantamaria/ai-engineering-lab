@@ -1,299 +1,299 @@
 # Deep Learning
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [Por que Deep Learning](#por-que-deep-learning)
-- [Neurona Artificial](#neurona-artificial)
-- [Funciones de Activacion](#funciones-de-activacion)
-- [Arquitectura de una Red Neuronal](#arquitectura-de-una-red-neuronal)
+- [Why Deep Learning](#why-deep-learning)
+- [Artificial Neuron](#artificial-neuron)
+- [Activation Functions](#activation-functions)
+- [Neural Network Architecture](#neural-network-architecture)
 - [Backpropagation](#backpropagation)
 - [Loss Functions](#loss-functions)
 - [Optimizers](#optimizers)
-- [Regularizacion en Deep Learning](#regularizacion-en-deep-learning)
+- [Regularization in Deep Learning](#regularization-in-deep-learning)
 - [PyTorch Fundamentals](#pytorch-fundamentals)
-- [Hiperparametros Clave](#hiperparametros-clave)
+- [Key Hyperparameters](#key-hyperparameters)
 - [Transfer Learning](#transfer-learning)
 - [Mixed Precision Training](#mixed-precision-training)
-- [Tips Practicos](#tips-practicos)
+- [Practical Tips](#practical-tips)
 
 ---
 
-## Por que Deep Learning
+## Why Deep Learning
 
-### Cuando usar DL vs ML clasico
+### When to use DL vs classical ML
 
-| Criterio | ML Clasico (XGBoost, RF) | Deep Learning |
+| Criterion | Classical ML (XGBoost, RF) | Deep Learning |
 |---|---|---|
-| **Datos tabulares** | Casi siempre mejor | Raramente justificado |
-| **Imagenes** | No competitivo | El estandar |
-| **Texto/NLP** | TF-IDF + LR para cosas simples | El estandar (Transformers) |
-| **Audio** | Features manuales + ML | El estandar |
-| **< 10K muestras** | Generalmente mejor | Riesgo de overfitting |
-| **> 100K muestras** | Funciona bien | Empieza a brillar |
-| **Necesitas explicar** | Facil (feature importance) | Dificil (caja negra) |
-| **Tiempo de desarrollo** | Rapido (horas-dias) | Lento (dias-semanas) |
-| **Infraestructura** | CPU suficiente | GPU necesaria |
-| **Produccion** | Ligero, rapido | Pesado, mas latencia |
+| **Tabular data** | Almost always better | Rarely justified |
+| **Images** | Not competitive | The standard |
+| **Text/NLP** | TF-IDF + LR for simple things | The standard (Transformers) |
+| **Audio** | Manual features + ML | The standard |
+| **< 10K samples** | Generally better | Risk of overfitting |
+| **> 100K samples** | Works well | Starts to shine |
+| **Need to explain** | Easy (feature importance) | Difficult (black box) |
+| **Development time** | Fast (hours-days) | Slow (days-weeks) |
+| **Infrastructure** | CPU sufficient | GPU required |
+| **Production** | Lightweight, fast | Heavy, more latency |
 
-### Tabla de decision rapida
+### Quick decision table
 
 ```
-Tengo datos tabulares?
-  ├─ Si --> Usa XGBoost/LightGBM (DL raramente gana en tabular)
-  └─ No --> Que tipo de datos?
-              ├─ Imagenes     --> CNN o Vision Transformer
-              ├─ Texto        --> Transformer (BERT, GPT, etc.)
-              ├─ Audio        --> Transformer (Whisper, etc.)
-              ├─ Video        --> CNN 3D o Video Transformer
-              ├─ Grafos       --> GNN
-              └─ Multimodal   --> Modelos multimodales (CLIP, etc.)
+Do I have tabular data?
+  +- Yes --> Use XGBoost/LightGBM (DL rarely wins on tabular)
+  +- No  --> What type of data?
+              +- Images     --> CNN or Vision Transformer
+              +- Text       --> Transformer (BERT, GPT, etc.)
+              +- Audio      --> Transformer (Whisper, etc.)
+              +- Video      --> 3D CNN or Video Transformer
+              +- Graphs     --> GNN
+              +- Multimodal --> Multimodal models (CLIP, etc.)
 
-Tengo pocos datos (<1K)?
-  ├─ Si --> Transfer learning (modelo preentrenado + fine-tune)
-  └─ No --> Entrenar desde cero es una opcion
+Do I have few data (<1K)?
+  +- Yes --> Transfer learning (pretrained model + fine-tune)
+  +- No  --> Training from scratch is an option
 ```
 
 ---
 
-## Neurona Artificial
+## Artificial Neuron
 
-### Analogia intuitiva
+### Intuitive analogy
 
-Una neurona artificial funciona como una funcion de decision simple:
+An artificial neuron works like a simple decision function:
 
 ```
-Entradas (features)     Pesos (importancia)       Suma ponderada        Activacion     Salida
-     x1 ──── w1 ────┐
-                      ├──── z = w1*x1 + w2*x2 + w3*x3 + b ──── f(z) ──── output
-     x2 ──── w2 ────┤                       ↑
-                      │                    bias (sesgo)
-     x3 ──── w3 ────┘
+Inputs (features)       Weights (importance)       Weighted sum          Activation     Output
+     x1 ---- w1 ----+
+                      +---- z = w1*x1 + w2*x2 + w3*x3 + b ---- f(z) ---- output
+     x2 ---- w2 ----|                       ^
+                      |                    bias
+     x3 ---- w3 ----+
 
-Ejemplo: predecir si aprobaras un examen
-  x1 = horas de estudio    w1 = 0.6  (muy importante)
-  x2 = horas de sueno      w2 = 0.3  (importante)
-  x3 = cafe bebido          w3 = 0.1  (poco importante)
-  b  = -5.0                           (umbral base)
+Example: predict if you will pass an exam
+  x1 = hours of study       w1 = 0.6  (very important)
+  x2 = hours of sleep       w2 = 0.3  (important)
+  x3 = coffee consumed      w3 = 0.1  (not very important)
+  b  = -5.0                           (base threshold)
 
   z = 0.6*8 + 0.3*7 + 0.1*3 + (-5.0) = 4.8 + 2.1 + 0.3 - 5.0 = 2.2
-  output = sigmoid(2.2) = 0.90  --> 90% probabilidad de aprobar
+  output = sigmoid(2.2) = 0.90  --> 90% probability of passing
 ```
 
-**Lo que el modelo "aprende"** son los pesos (w1, w2, w3) y el bias (b). El entrenamiento ajusta estos valores para minimizar el error.
+**What the model "learns"** are the weights (w1, w2, w3) and the bias (b). Training adjusts these values to minimize the error.
 
 ---
 
-## Funciones de Activacion
+## Activation Functions
 
-Las funciones de activacion introducen no-linealidad. Sin ellas, una red neuronal de muchas capas seria equivalente a una sola capa lineal (multiplicar matrices da otra matriz).
+Activation functions introduce non-linearity. Without them, a multi-layer neural network would be equivalent to a single linear layer (multiplying matrices gives another matrix).
 
-### Comparativa
+### Comparison
 
-| Funcion | Formula intuitiva | Rango | Uso principal | Ventaja |
+| Function | Intuitive formula | Range | Main use | Advantage |
 |---|---|---|---|---|
-| **ReLU** | max(0, x) | [0, inf) | Hidden layers (default) | Simple, rapida, evita vanishing gradient |
-| **Sigmoid** | 1/(1+e^-x) | (0, 1) | Output binaria | Salida interpretable como probabilidad |
-| **Tanh** | (e^x - e^-x)/(e^x + e^-x) | (-1, 1) | Hidden layers (alternativa a ReLU) | Centrada en 0 |
-| **GELU** | x * P(X <= x) ~= x * sigmoid(1.7*x) | (-0.17, inf) | Transformers | Suave, mejor en NLP |
-| **Softmax** | e^xi / sum(e^xj) | (0, 1), suma=1 | Output multiclase | Distribucion de probabilidad |
-| **Leaky ReLU** | max(0.01*x, x) | (-inf, inf) | Evitar "dying ReLU" | No mata neuronas |
+| **ReLU** | max(0, x) | [0, inf) | Hidden layers (default) | Simple, fast, avoids vanishing gradient |
+| **Sigmoid** | 1/(1+e^-x) | (0, 1) | Binary output | Output interpretable as probability |
+| **Tanh** | (e^x - e^-x)/(e^x + e^-x) | (-1, 1) | Hidden layers (alternative to ReLU) | Centered at 0 |
+| **GELU** | x * P(X <= x) ~= x * sigmoid(1.7*x) | (-0.17, inf) | Transformers | Smooth, better for NLP |
+| **Softmax** | e^xi / sum(e^xj) | (0, 1), sum=1 | Multiclass output | Probability distribution |
+| **Leaky ReLU** | max(0.01*x, x) | (-inf, inf) | Avoid "dying ReLU" | Doesn't kill neurons |
 
-### Graficas ASCII
+### ASCII Graphs
 
 ```
 ReLU: max(0, x)              Sigmoid: 1/(1+e^-x)          Tanh
-      │                            │                            │
-  y   │      /                 1.0 ┤·········──────         1.0 ┤·········──────
-      │     /                      │       /                    │      /
-      │    /                  0.5  ┤──── /                 0.0  ┤────/
-      │   /                        │   /                        │  /
-      │  /                    0.0  ┤──                    -1.0  ┤──
-  ────┼──────── x             ─────┼──────── x             ─────┼──────── x
-      │                            │                            │
-  "Si es negativo, muere"    "Comprime todo               "Como sigmoid pero
-   "Si es positivo, pasa"     entre 0 y 1"                 centrada en 0"
+      |                            |                            |
+  y   |      /                 1.0 |.........------         1.0 |.........------
+      |     /                      |       /                    |      /
+      |    /                  0.5  |---- /                 0.0  |----/
+      |   /                        |   /                        |  /
+      |  /                    0.0  |--                    -1.0  |--
+  ----+-------- x             -----+-------- x             -----+-------- x
+      |                            |                            |
+  "If negative, dies"        "Compresses everything        "Like sigmoid but
+   "If positive, passes"      between 0 and 1"              centered at 0"
 
 GELU                          Leaky ReLU                   Softmax
-      │                            │                       No es una curva, es
-  y   │      /                 y   │      /                una funcion sobre un
-      │    _/                      │    /                   vector que convierte
-      │  _/                        │  /                     numeros en probabilidades:
-      │_/                      ────┼/─────── x
-  ────┼──────── x                 /│                       [2.0, 1.0, 0.1]
-     ~│                          / │                            ↓ softmax
-  "ReLU suave"               "ReLU con pendiente           [0.659, 0.243, 0.098]
-                               para negativos"              Suma = 1.0
+      |                            |                       Not a curve, it's a
+  y   |      /                 y   |      /                function over a vector
+      |    _/                      |    /                   that converts numbers
+      |  _/                        |  /                     into probabilities:
+      |_/                      ----+/------- x
+  ----+-------- x                 /|                       [2.0, 1.0, 0.1]
+     ~|                          / |                            v softmax
+  "Smooth ReLU"              "ReLU with slope              [0.659, 0.243, 0.098]
+                               for negatives"               Sum = 1.0
 ```
 
-### Cuando usar cada una
+### When to use each one
 
 ```python
 import torch.nn as nn
 
-# Hidden layers: ReLU (default seguro)
+# Hidden layers: ReLU (safe default)
 nn.ReLU()
 
-# Hidden layers en Transformers: GELU
+# Hidden layers in Transformers: GELU
 nn.GELU()
 
-# Output para clasificacion binaria: Sigmoid
-nn.Sigmoid()  # Salida entre 0 y 1
+# Output for binary classification: Sigmoid
+nn.Sigmoid()  # Output between 0 and 1
 
-# Output para clasificacion multiclase: Softmax
-nn.Softmax(dim=-1)  # Probabilidades que suman 1
+# Output for multiclass classification: Softmax
+nn.Softmax(dim=-1)  # Probabilities that sum to 1
 
-# Si tienes problemas de "dying ReLU": Leaky ReLU
+# If you have "dying ReLU" problems: Leaky ReLU
 nn.LeakyReLU(negative_slope=0.01)
 ```
 
 ---
 
-## Arquitectura de una Red Neuronal
+## Neural Network Architecture
 
-### Componentes
+### Components
 
 ```
 Input Layer          Hidden Layers            Output Layer
-(features)           (aprendizaje)            (prediccion)
+(features)           (learning)               (prediction)
 
-   x1 ─────┐     ┌── h1 ──┐     ┌── h4 ──┐     ┌── y1
-            ├─────┤         ├─────┤         ├─────┤
-   x2 ─────┤     ├── h2 ──┤     ├── h5 ──┤     └── y2
-            ├─────┤         ├─────┤         │
-   x3 ─────┤     └── h3 ──┘     └── h6 ──┘
-            │
-   x4 ─────┘
+   x1 ---------+     +-- h1 --+     +-- h4 --+     +-- y1
+            +---+-----+         +-----+         +-----+
+   x2 ---------+     +-- h2 --+     +-- h5 --+     +-- y2
+            +---+-----+         +-----+         |
+   x3 ---------+     +-- h3 --+     +-- h6 --+
+            |
+   x4 ------+
 
-  4 features     3 neuronas       3 neuronas       2 clases
+  4 features     3 neurons       3 neurons       2 classes
                  + ReLU           + ReLU           + Softmax
 
-  Cada flecha (─) es un peso (weight) que se aprende.
-  Total de pesos: (4*3) + (3*3) + (3*2) = 12 + 9 + 6 = 27 pesos
-  Total de biases: 3 + 3 + 2 = 8
-  Total de parametros: 35
+  Each arrow (-) is a weight that is learned.
+  Total weights: (4*3) + (3*3) + (3*2) = 12 + 9 + 6 = 27 weights
+  Total biases: 3 + 3 + 2 = 8
+  Total parameters: 35
 ```
 
-### Forward pass (propagacion hacia adelante)
+### Forward pass
 
-Paso a paso, como fluyen los datos por la red:
+Step by step, how data flows through the network:
 
 ```
-Datos de entrada: x = [0.5, 0.3, 0.8, 0.1]
+Input data: x = [0.5, 0.3, 0.8, 0.1]
 
-Capa 1 (input -> hidden 1):
-  z1 = W1 @ x + b1           # Multiplicacion de matrices + bias
+Layer 1 (input -> hidden 1):
+  z1 = W1 @ x + b1           # Matrix multiplication + bias
   # z1 = [0.72, -0.15, 1.23]
-  h1 = ReLU(z1)              # Activacion
-  # h1 = [0.72, 0.00, 1.23]  # Nota: -0.15 se convierte en 0
+  h1 = ReLU(z1)              # Activation
+  # h1 = [0.72, 0.00, 1.23]  # Note: -0.15 becomes 0
 
-Capa 2 (hidden 1 -> hidden 2):
+Layer 2 (hidden 1 -> hidden 2):
   z2 = W2 @ h1 + b2
   h2 = ReLU(z2)
 
-Capa 3 (hidden 2 -> output):
+Layer 3 (hidden 2 -> output):
   z3 = W3 @ h2 + b3
   output = Softmax(z3)
-  # output = [0.85, 0.15]    # 85% clase A, 15% clase B
+  # output = [0.85, 0.15]    # 85% class A, 15% class B
 ```
 
 ```python
 import torch
 import torch.nn as nn
 
-# Definir la red del diagrama
-class RedSimple(nn.Module):
+# Define the network from the diagram
+class SimpleNetwork(nn.Module):
     def __init__(self):
         super().__init__()
-        self.capa1 = nn.Linear(4, 3)    # 4 inputs -> 3 neuronas
-        self.capa2 = nn.Linear(3, 3)    # 3 -> 3 neuronas
-        self.capa3 = nn.Linear(3, 2)    # 3 -> 2 outputs (clases)
+        self.layer1 = nn.Linear(4, 3)    # 4 inputs -> 3 neurons
+        self.layer2 = nn.Linear(3, 3)    # 3 -> 3 neurons
+        self.layer3 = nn.Linear(3, 2)    # 3 -> 2 outputs (classes)
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = self.relu(self.capa1(x))    # Capa 1 + ReLU
-        x = self.relu(self.capa2(x))    # Capa 2 + ReLU
-        x = self.capa3(x)               # Capa 3 (sin activacion - la loss la aplica)
+        x = self.relu(self.layer1(x))    # Layer 1 + ReLU
+        x = self.relu(self.layer2(x))    # Layer 2 + ReLU
+        x = self.layer3(x)               # Layer 3 (no activation - the loss applies it)
         return x
 
-modelo = RedSimple()
-print(f"Parametros totales: {sum(p.numel() for p in modelo.parameters()):,}")
-# 35 parametros
+model = SimpleNetwork()
+print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
+# 35 parameters
 ```
 
 ---
 
 ## Backpropagation
 
-### Intuicion (sin derivaciones formales)
+### Intuition (no formal derivations)
 
-Backpropagation es el algoritmo que "ensena" a la red. Funciona en dos fases:
-
-```
-FORWARD PASS (izquierda a derecha):
-  Input → Capa 1 → Capa 2 → Output → Loss
-  "Hacemos una prediccion y calculamos cuanto nos equivocamos"
-
-BACKWARD PASS (derecha a izquierda):
-  Loss → Capa 2 → Capa 1
-  "Propagamos el error hacia atras, calculando cuanto
-   contribuyo cada peso al error"
-
-ACTUALIZAR PESOS:
-  peso_nuevo = peso_viejo - learning_rate * gradiente
-  "Ajustamos cada peso en la direccion que reduce el error"
-```
-
-### Chain rule: la idea central
-
-La chain rule dice: si un cambio en un peso afecta a la capa siguiente, que afecta a la siguiente, que afecta al loss, podemos calcular cuanto afecta ese peso al loss multiplicando los efectos en cadena.
+Backpropagation is the algorithm that "teaches" the network. It works in two phases:
 
 ```
-Analogia: una cadena de dominos
+FORWARD PASS (left to right):
+  Input -> Layer 1 -> Layer 2 -> Output -> Loss
+  "We make a prediction and calculate how wrong we are"
 
-  Peso w  -->  Neurona h  -->  Output o  -->  Loss L
+BACKWARD PASS (right to left):
+  Loss -> Layer 2 -> Layer 1
+  "We propagate the error backwards, calculating how much
+   each weight contributed to the error"
 
-  ¿Cuanto afecta w al Loss?
+UPDATE WEIGHTS:
+  new_weight = old_weight - learning_rate * gradient
+  "We adjust each weight in the direction that reduces the error"
+```
+
+### Chain rule: the central idea
+
+The chain rule says: if a change in a weight affects the next layer, which affects the next layer, which affects the loss, we can calculate how much that weight affects the loss by multiplying the effects in chain.
+
+```
+Analogy: a chain of dominoes
+
+  Weight w  -->  Neuron h  -->  Output o  -->  Loss L
+
+  How much does w affect the Loss?
   dL/dw = dL/do * do/dh * dh/dw
 
-  Es como preguntar: "si muevo este domino 1mm,
-  cuanto se mueve el ultimo domino?"
-  = (efecto del ultimo) * (efecto del medio) * (efecto del primero)
+  It's like asking: "if I move this domino 1mm,
+  how much does the last domino move?"
+  = (effect of the last) * (effect of the middle) * (effect of the first)
 ```
 
-### Vanishing y Exploding Gradients
+### Vanishing and Exploding Gradients
 
 ```
-VANISHING GRADIENTS (gradientes que desaparecen):
+VANISHING GRADIENTS (gradients that disappear):
 
-  Capas:    [1] ── [2] ── [3] ── [4] ── [5] ── [Loss]
+  Layers:    [1] -- [2] -- [3] -- [4] -- [5] -- [Loss]
 
-  Gradientes: 0.001  0.01   0.1    0.5    1.0
-              ←────────────────────────────────
-              Cada capa multiplica por un numero < 1
-              Las primeras capas apenas aprenden
+  Gradients: 0.001  0.01   0.1    0.5    1.0
+              <------------------------------------
+              Each layer multiplies by a number < 1
+              The first layers barely learn
 
-EXPLODING GRADIENTS (gradientes que explotan):
+EXPLODING GRADIENTS (gradients that explode):
 
-  Gradientes: 1000   100    10     2      1.0
-              ←────────────────────────────────
-              Cada capa multiplica por un numero > 1
-              Los pesos saltan descontroladamente
+  Gradients: 1000   100    10     2      1.0
+              <------------------------------------
+              Each layer multiplies by a number > 1
+              Weights jump uncontrollably
 ```
 
-#### Soluciones
+#### Solutions
 
-| Problema | Solucion | Como |
+| Problem | Solution | How |
 |---|---|---|
-| **Vanishing** | ReLU en vez de sigmoid/tanh | `nn.ReLU()` |
+| **Vanishing** | ReLU instead of sigmoid/tanh | `nn.ReLU()` |
 | **Vanishing** | Residual connections (skip connections) | ResNet, Transformers |
 | **Vanishing** | Batch Normalization | `nn.BatchNorm1d()` |
 | **Vanishing** | Better initialization | `nn.init.kaiming_normal_()` |
 | **Exploding** | Gradient clipping | `torch.nn.utils.clip_grad_norm_()` |
-| **Exploding** | Learning rate mas bajo | `lr=1e-4` en vez de `lr=1e-2` |
-| **Ambos** | Layer Normalization | `nn.LayerNorm()` (usado en Transformers) |
+| **Exploding** | Lower learning rate | `lr=1e-4` instead of `lr=1e-2` |
+| **Both** | Layer Normalization | `nn.LayerNorm()` (used in Transformers) |
 
 ```python
-# Gradient clipping (previene exploding gradients)
+# Gradient clipping (prevents exploding gradients)
 optimizer.zero_grad()
 loss.backward()
 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -304,52 +304,52 @@ optimizer.step()
 
 ## Loss Functions
 
-La loss function mide cuanto se equivoca el modelo. El training consiste en minimizar esta funcion.
+The loss function measures how wrong the model is. Training consists of minimizing this function.
 
-### Cuando usar cada una
+### When to use each one
 
-| Loss | Tipo de problema | Que mide | PyTorch |
+| Loss | Problem type | What it measures | PyTorch |
 |---|---|---|---|
-| **CrossEntropyLoss** | Clasificacion multiclase | Diferencia entre distribucion predicha y real | `nn.CrossEntropyLoss()` |
-| **BCEWithLogitsLoss** | Clasificacion binaria | Diferencia binaria (con estabilidad numerica) | `nn.BCEWithLogitsLoss()` |
-| **MSELoss** | Regresion | Error cuadratico medio | `nn.MSELoss()` |
-| **L1Loss (MAE)** | Regresion robusta a outliers | Error absoluto medio | `nn.L1Loss()` |
-| **HuberLoss** | Regresion (mix MSE + MAE) | MSE cerca de 0, MAE lejos | `nn.HuberLoss()` |
+| **CrossEntropyLoss** | Multiclass classification | Difference between predicted and real distribution | `nn.CrossEntropyLoss()` |
+| **BCEWithLogitsLoss** | Binary classification | Binary difference (with numerical stability) | `nn.BCEWithLogitsLoss()` |
+| **MSELoss** | Regression | Mean squared error | `nn.MSELoss()` |
+| **L1Loss (MAE)** | Regression robust to outliers | Mean absolute error | `nn.L1Loss()` |
+| **HuberLoss** | Regression (mix MSE + MAE) | MSE near 0, MAE far away | `nn.HuberLoss()` |
 
 ```python
 import torch.nn as nn
 
-# Clasificacion multiclase (la mas comun)
-# NOTA: CrossEntropyLoss ya incluye Softmax internamente
-# NO pongas Softmax en la ultima capa si usas esta loss
+# Multiclass classification (the most common)
+# NOTE: CrossEntropyLoss already includes Softmax internally
+# Do NOT put Softmax in the last layer if you use this loss
 loss_fn = nn.CrossEntropyLoss()
 
-logits = model(x)       # Shape: (batch_size, num_clases) - SIN softmax
-target = labels          # Shape: (batch_size,) - indices de clase (0, 1, 2...)
+logits = model(x)       # Shape: (batch_size, num_classes) - WITHOUT softmax
+target = labels          # Shape: (batch_size,) - class indices (0, 1, 2...)
 loss = loss_fn(logits, target)
 
-# Clasificacion binaria
-loss_fn = nn.BCEWithLogitsLoss()  # Incluye sigmoid internamente
-logits = model(x)       # Shape: (batch_size, 1) - SIN sigmoid
-target = labels.float() # Shape: (batch_size, 1) - 0.0 o 1.0
+# Binary classification
+loss_fn = nn.BCEWithLogitsLoss()  # Includes sigmoid internally
+logits = model(x)       # Shape: (batch_size, 1) - WITHOUT sigmoid
+target = labels.float() # Shape: (batch_size, 1) - 0.0 or 1.0
 loss = loss_fn(logits, target)
 
-# Regresion
+# Regression
 loss_fn = nn.MSELoss()
 predictions = model(x)  # Shape: (batch_size, 1)
 target = values          # Shape: (batch_size, 1)
 loss = loss_fn(predictions, target)
 ```
 
-### Clases desbalanceadas
+### Imbalanced classes
 
 ```python
-# Opcion 1: Pesos por clase en la loss
-# Si tienes 90% clase 0 y 10% clase 1
-weights = torch.tensor([1.0, 9.0])  # Dar mas peso a la clase minoritaria
+# Option 1: Class weights in the loss
+# If you have 90% class 0 and 10% class 1
+weights = torch.tensor([1.0, 9.0])  # Give more weight to the minority class
 loss_fn = nn.CrossEntropyLoss(weight=weights)
 
-# Opcion 2: Calcular pesos automaticamente
+# Option 2: Calculate weights automatically
 from sklearn.utils.class_weight import compute_class_weight
 class_weights = compute_class_weight('balanced', classes=np.unique(y_train), y=y_train)
 weights = torch.tensor(class_weights, dtype=torch.float32)
@@ -360,84 +360,84 @@ loss_fn = nn.CrossEntropyLoss(weight=weights)
 
 ## Optimizers
 
-El optimizer es el algoritmo que actualiza los pesos usando los gradientes calculados por backpropagation.
+The optimizer is the algorithm that updates the weights using the gradients calculated by backpropagation.
 
-### Intuicion
+### Intuition
 
 ```
-Imagina que estas en una montana con niebla y quieres llegar al valle (minimo de la loss):
+Imagine you are on a mountain with fog and want to reach the valley (loss minimum):
 
-SGD:         Caminas cuesta abajo. Simple pero lento.
-             En pendientes suaves, apenas avanzas.
+SGD:         You walk downhill. Simple but slow.
+             On gentle slopes, you barely advance.
 
-SGD+Momentum: Caminas cuesta abajo pero con inercia (como una bola rodando).
-             Atraviesas zonas planas sin detenerte.
+SGD+Momentum: You walk downhill but with inertia (like a ball rolling).
+             You cross flat zones without stopping.
 
-Adam:        Caminas cuesta abajo con inercia Y ajustas
-             el tamano del paso automaticamente.
-             Pasos grandes en zonas planas, pequeños en zonas empinadas.
-             ES EL DEFAULT. Usa Adam si no sabes que elegir.
+Adam:        You walk downhill with inertia AND adjust
+             the step size automatically.
+             Large steps in flat zones, small steps in steep zones.
+             THIS IS THE DEFAULT. Use Adam if you don't know what to choose.
 ```
 
-### Tabla comparativa
+### Comparison table
 
-| Optimizer | Descripcion | Cuando usarlo | Learning rate tipico |
+| Optimizer | Description | When to use | Typical learning rate |
 |---|---|---|---|
-| **SGD** | El mas basico | Casi nunca solo | 0.01 - 0.1 |
-| **SGD + Momentum** | SGD con inercia | CNNs, cuando necesitas convergencia fina | 0.01 - 0.1 |
-| **Adam** | Momentum + LR adaptativo | **Default para todo** | 1e-3 - 1e-4 |
-| **AdamW** | Adam + weight decay correcto | **Default para Transformers, fine-tuning** | 1e-4 - 1e-5 |
-| **Adagrad** | LR adaptativo por parametro | Sparse features (NLP antiguo) | 0.01 |
-| **RMSprop** | Version mejorada de Adagrad | RNNs | 1e-3 |
+| **SGD** | The most basic | Almost never alone | 0.01 - 0.1 |
+| **SGD + Momentum** | SGD with inertia | CNNs, when you need fine convergence | 0.01 - 0.1 |
+| **Adam** | Momentum + adaptive LR | **Default for everything** | 1e-3 - 1e-4 |
+| **AdamW** | Adam + correct weight decay | **Default for Transformers, fine-tuning** | 1e-4 - 1e-5 |
+| **Adagrad** | Adaptive LR per parameter | Sparse features (old NLP) | 0.01 |
+| **RMSprop** | Improved version of Adagrad | RNNs | 1e-3 |
 
 ```python
 import torch.optim as optim
 
-# Adam (default recomendado)
+# Adam (recommended default)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-# AdamW (para Transformers y fine-tuning)
+# AdamW (for Transformers and fine-tuning)
 optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=0.01)
 
-# SGD con momentum (para CNNs en entrenamiento largo)
+# SGD with momentum (for CNNs in long training)
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=1e-4)
 ```
 
 ### Learning Rate
 
-El learning rate es el hiperparametro MAS IMPORTANTE. Controla el tamano del paso en cada actualizacion.
+The learning rate is the MOST IMPORTANT hyperparameter. It controls the step size in each update.
 
 ```
-LR demasiado alto:           LR demasiado bajo:          LR correcto:
+LR too high:                 LR too low:                 LR correct:
       Loss                        Loss                       Loss
-      │\  /\                      │\                         │\
-      │ \/  \  /\                 │ \                        │ \
-      │      \/  \  /             │  \                       │  \
-      │           \/              │   \                      │   \___
-      │                           │    \___________          │
-      └──────────── epoch         └──────────── epoch        └──────────── epoch
-  "Salta demasiado,            "Converge pero              "Converge rapido
-   nunca converge"              tardara 10x mas"             y bien"
+      |\  /\                      |\                         |\
+      | \/  \  /\                 | \                        | \
+      |      \/  \  /             |  \                       |  \
+      |           \/              |   \                      |   \___
+      |                           |    \___________          |
+      +------------ epoch         +------------ epoch        +------------ epoch
+  "Jumps too much,             "Converges but               "Converges fast
+   never converges"             will take 10x longer"         and well"
 ```
 
 ### Learning Rate Schedulers
 
-Cambiar el learning rate durante el entrenamiento. Generalmente: empezar alto (explorar) y bajar gradualmente (refinar).
+Change the learning rate during training. Generally: start high (explore) and gradually decrease (refine).
 
 ```python
 from torch.optim.lr_scheduler import (
     StepLR, CosineAnnealingLR, OneCycleLR, LinearLR, SequentialLR
 )
 
-# Step decay: reducir LR cada N epochs
+# Step decay: reduce LR every N epochs
 scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
 # LR: 0.01 -> (epoch 30) -> 0.001 -> (epoch 60) -> 0.0001
 
-# Cosine annealing: reducir LR siguiendo una curva coseno
+# Cosine annealing: reduce LR following a cosine curve
 scheduler = CosineAnnealingLR(optimizer, T_max=100)
-# LR baja suavemente de max a min siguiendo coseno
+# LR smoothly decreases from max to min following cosine
 
-# OneCycleLR: warmup + decay (muy popular, suele dar buenos resultados)
+# OneCycleLR: warmup + decay (very popular, usually gives good results)
 scheduler = OneCycleLR(
     optimizer,
     max_lr=1e-3,
@@ -445,97 +445,97 @@ scheduler = OneCycleLR(
     pct_start=0.1,  # 10% warmup
 )
 
-# Warmup lineal + cosine decay (tipico en Transformers)
+# Linear warmup + cosine decay (typical in Transformers)
 warmup = LinearLR(optimizer, start_factor=0.01, total_iters=warmup_steps)
 cosine = CosineAnnealingLR(optimizer, T_max=total_steps - warmup_steps)
 scheduler = SequentialLR(optimizer, schedulers=[warmup, cosine], milestones=[warmup_steps])
 
-# En el training loop:
+# In the training loop:
 for epoch in range(num_epochs):
     for batch in train_loader:
         loss = train_step(batch)
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        scheduler.step()  # Actualizar LR
+        scheduler.step()  # Update LR
 ```
 
-### Warmup: por que empezar con LR bajo
+### Warmup: why start with low LR
 
 ```
-Sin warmup:                      Con warmup:
+Without warmup:                  With warmup:
   LR                               LR
-  │────────\                       │    /──────\
-  │         \                      │   /        \
-  │          \                     │  /          \
-  │           \___                 │ /            \___
-  └──────────── step               └──────────── step
+  |--------\                       |    /------\
+  |         \                      |   /        \
+  |          \                     |  /          \
+  |           \___                 | /            \___
+  +------------ step               +------------ step
 
-Al inicio los pesos son random.         Primero calentamos con LR bajo
-Un LR alto puede hacer que el          (los pesos se estabilizan), luego
-modelo diverja inmediatamente.         subimos el LR para entrenar rapido.
+At the start weights are random.         First we warm up with low LR
+A high LR can cause the model           (weights stabilize), then we
+to diverge immediately.                  increase LR to train fast.
 ```
 
 ---
 
-## Regularizacion en Deep Learning
+## Regularization in Deep Learning
 
 ### Dropout
 
-Dropout apaga neuronas aleatorias durante el entrenamiento. Esto obliga a la red a no depender de ninguna neurona individual y aprender representaciones mas robustas.
+Dropout turns off random neurons during training. This forces the network not to depend on any individual neuron and learn more robust representations.
 
 ```
-Training (dropout=0.3):           Inference (sin dropout):
+Training (dropout=0.3):           Inference (no dropout):
 
-  [x1]──[h1]──[h4]──[y]           [x1]──[h1]──[h4]──[y]
-  [x2]──[XX]──[h5]──               [x2]──[h2]──[h5]──
-  [x3]──[h3]──[XX]──               [x3]──[h3]──[h6]──
+  [x1]--[h1]--[h4]--[y]           [x1]--[h1]--[h4]--[y]
+  [x2]--[XX]--[h5]--               [x2]--[h2]--[h5]--
+  [x3]--[h3]--[XX]--               [x3]--[h3]--[h6]--
 
-  XX = neurona apagada              Todas activas, pesos
-  (30% apagadas al azar)           escalados por (1-p)
-  Diferente en cada batch!
+  XX = turned off neuron           All active, weights
+  (30% turned off at random)       scaled by (1-p)
+  Different in each batch!
 ```
 
 ```python
-class MiModelo(nn.Module):
+class MyModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.fc1 = nn.Linear(784, 256)
-        self.dropout1 = nn.Dropout(0.3)   # 30% de neuronas apagadas
+        self.dropout1 = nn.Dropout(0.3)   # 30% of neurons turned off
         self.fc2 = nn.Linear(256, 128)
         self.dropout2 = nn.Dropout(0.3)
         self.fc3 = nn.Linear(128, 10)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
-        x = self.dropout1(x)              # Dropout DESPUES de activacion
+        x = self.dropout1(x)              # Dropout AFTER activation
         x = torch.relu(self.fc2(x))
         x = self.dropout2(x)
-        x = self.fc3(x)                    # NO dropout en la ultima capa
+        x = self.fc3(x)                    # NO dropout on the last layer
         return x
 ```
 
-> **Punto clave:** Dropout se usa entre capas ocultas, nunca en la capa de salida. Valores tipicos: 0.1-0.5. En Transformers se usa 0.1 tipicamente.
+> **Key point:** Dropout is used between hidden layers, never on the output layer. Typical values: 0.1-0.5. In Transformers, 0.1 is typically used.
 
 ### Batch Normalization
 
-Normaliza las activaciones de cada capa para que tengan media 0 y varianza 1. Esto estabiliza el entrenamiento y permite usar learning rates mas altos.
+Normalizes the activations of each layer so they have mean 0 and variance 1. This stabilizes training and allows using higher learning rates.
 
 ```
-Sin BatchNorm:                     Con BatchNorm:
-Las activaciones de cada capa      Se normalizan antes de cada capa
-pueden tener rangos muy distintos   -> entrenamiento mas estable
+Without BatchNorm:                With BatchNorm:
+Activations of each layer         Normalized before each layer
+can have very different ranges     -> more stable training
 
-Capa 1 output: [100, -50, 200]     Capa 1 output: [0.2, -1.1, 1.3]
-Capa 2 output: [0.01, 0.003]       Capa 2 output: [-0.5, 0.8]
+Layer 1 output: [100, -50, 200]     Layer 1 output: [0.2, -1.1, 1.3]
+Layer 2 output: [0.01, 0.003]       Layer 2 output: [-0.5, 0.8]
 ```
 
 ```python
-class MiModelo(nn.Module):
+class MyModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.fc1 = nn.Linear(784, 256)
-        self.bn1 = nn.BatchNorm1d(256)    # BatchNorm despues de linear
+        self.bn1 = nn.BatchNorm1d(256)    # BatchNorm after linear
         self.fc2 = nn.Linear(256, 128)
         self.bn2 = nn.BatchNorm1d(128)
         self.fc3 = nn.Linear(128, 10)
@@ -547,23 +547,23 @@ class MiModelo(nn.Module):
         return x
 ```
 
-### Weight Decay (regularizacion L2)
+### Weight Decay (L2 regularization)
 
-Penaliza pesos grandes. En AdamW esta integrado directamente.
+Penalizes large weights. In AdamW it is integrated directly.
 
 ```python
-# Weight decay en el optimizer (la forma correcta con AdamW)
+# Weight decay in the optimizer (the correct way with AdamW)
 optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.01)
 ```
 
 ### Data Augmentation
 
-Crear variaciones de los datos de entrenamiento. Muy efectivo en imagenes.
+Create variations of the training data. Very effective for images.
 
 ```python
 from torchvision import transforms
 
-# Augmentation para imagenes
+# Augmentation for images
 train_transform = transforms.Compose([
     transforms.RandomHorizontalFlip(p=0.5),
     transforms.RandomRotation(degrees=15),
@@ -574,7 +574,7 @@ train_transform = transforms.Compose([
                          std=[0.229, 0.224, 0.225]),
 ])
 
-# Sin augmentation para validacion/test
+# No augmentation for validation/test
 val_transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -586,7 +586,7 @@ val_transform = transforms.Compose([
 
 ### Early Stopping
 
-Detener el entrenamiento cuando la loss de validacion deja de mejorar.
+Stop training when validation loss stops improving.
 
 ```python
 class EarlyStopping:
@@ -606,7 +606,7 @@ class EarlyStopping:
             if self.counter >= self.patience:
                 self.should_stop = True
 
-# Uso
+# Usage
 early_stop = EarlyStopping(patience=10)
 
 for epoch in range(max_epochs):
@@ -615,19 +615,19 @@ for epoch in range(max_epochs):
 
     early_stop(val_loss)
     if early_stop.should_stop:
-        print(f"Early stopping en epoch {epoch}")
+        print(f"Early stopping at epoch {epoch}")
         break
 ```
 
-### Resumen de regularizacion
+### Regularization summary
 
-| Tecnica | Efecto | Donde | Valor tipico |
+| Technique | Effect | Where | Typical value |
 |---|---|---|---|
-| **Dropout** | Apaga neuronas | Entre hidden layers | 0.1-0.5 |
-| **Batch Norm** | Normaliza activaciones | Despues de linear/conv | - |
-| **Weight Decay** | Penaliza pesos grandes | En optimizer | 0.01-0.1 |
-| **Data Augmentation** | Mas datos sinteticos | En DataLoader | Varias |
-| **Early Stopping** | Para entrenamiento | En training loop | patience=5-20 |
+| **Dropout** | Turns off neurons | Between hidden layers | 0.1-0.5 |
+| **Batch Norm** | Normalizes activations | After linear/conv | - |
+| **Weight Decay** | Penalizes large weights | In optimizer | 0.01-0.1 |
+| **Data Augmentation** | More synthetic data | In DataLoader | Various |
+| **Early Stopping** | Stops training | In training loop | patience=5-20 |
 
 ---
 
@@ -635,78 +635,78 @@ for epoch in range(max_epochs):
 
 ### Tensors
 
-Los tensors de PyTorch son como arrays de NumPy pero con dos superpoderes: pueden vivir en GPU y registran operaciones para calcular gradientes automaticamente.
+PyTorch tensors are like NumPy arrays but with two superpowers: they can live on GPU and they record operations to calculate gradients automatically.
 
 ```python
 import torch
 
-# Crear tensors (similar a NumPy)
-x = torch.tensor([1.0, 2.0, 3.0])                 # Desde lista
-x = torch.zeros(3, 4)                               # Tensor de ceros
-x = torch.ones(3, 4)                                # Tensor de unos
+# Create tensors (similar to NumPy)
+x = torch.tensor([1.0, 2.0, 3.0])                 # From list
+x = torch.zeros(3, 4)                               # Tensor of zeros
+x = torch.ones(3, 4)                                # Tensor of ones
 x = torch.randn(3, 4)                               # Normal(0, 1)
 x = torch.arange(0, 10, 2)                          # [0, 2, 4, 6, 8]
 x = torch.linspace(0, 1, 5)                         # [0, 0.25, 0.5, 0.75, 1.0]
 
-# Propiedades
+# Properties
 print(x.shape)     # torch.Size([3, 4])
 print(x.dtype)     # torch.float32
-print(x.device)    # cpu o cuda:0
+print(x.device)    # cpu or cuda:0
 
-# Conversion NumPy <-> PyTorch (comparten memoria si en CPU)
+# NumPy <-> PyTorch conversion (share memory if on CPU)
 numpy_array = x.numpy()
 tensor = torch.from_numpy(numpy_array)
 
-# Operaciones (igual que NumPy)
+# Operations (same as NumPy)
 a = torch.randn(3, 4)
 b = torch.randn(3, 4)
-c = a + b                    # Suma
-d = a @ b.T                  # Multiplicacion de matrices
-e = a * b                    # Multiplicacion elemento a elemento
-f = a.mean(), a.std()        # Estadisticas
+c = a + b                    # Addition
+d = a @ b.T                  # Matrix multiplication
+e = a * b                    # Element-wise multiplication
+f = a.mean(), a.std()        # Statistics
 ```
 
 ### GPU support
 
 ```python
-# Mover a GPU
+# Move to GPU
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-x = torch.randn(1000, 1000, device=device)    # Crear directamente en GPU
-y = torch.randn(1000, 1000).to(device)         # Mover a GPU
+x = torch.randn(1000, 1000, device=device)    # Create directly on GPU
+y = torch.randn(1000, 1000).to(device)         # Move to GPU
 
-# IMPORTANTE: todos los tensors deben estar en el mismo device
-z = x @ y  # OK: ambos en GPU
-# z = x @ torch.randn(1000, 1000)  # ERROR: x en GPU, tensor nuevo en CPU
+# IMPORTANT: all tensors must be on the same device
+z = x @ y  # OK: both on GPU
+# z = x @ torch.randn(1000, 1000)  # ERROR: x on GPU, new tensor on CPU
 ```
 
-### Autograd (diferenciacion automatica)
+### Autograd (automatic differentiation)
 
 ```python
-# PyTorch registra operaciones para calcular gradientes automaticamente
+# PyTorch records operations to calculate gradients automatically
 x = torch.tensor([2.0, 3.0], requires_grad=True)
 
 # Forward pass
 y = x ** 2 + 3 * x      # y = x^2 + 3x
-loss = y.sum()           # Escalar necesario para backward
+loss = y.sum()           # Scalar needed for backward
 
-# Backward pass (calcula gradientes)
+# Backward pass (calculates gradients)
 loss.backward()
 
-# Gradientes: dy/dx = 2x + 3
+# Gradients: dy/dx = 2x + 3
 print(x.grad)            # tensor([7., 9.])  ->  2*2+3=7, 2*3+3=9
 ```
 
-### nn.Module: crear modelos
+### nn.Module: creating models
 
 ```python
 import torch.nn as nn
 
-class ClasificadorImagenes(nn.Module):
-    def __init__(self, num_clases=10):
+class ImageClassifier(nn.Module):
+    def __init__(self, num_classes=10):
         super().__init__()
 
-        # Capas convolucionales
+        # Convolutional layers
         self.features = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, padding=1),
             nn.BatchNorm2d(32),
@@ -719,13 +719,13 @@ class ClasificadorImagenes(nn.Module):
             nn.MaxPool2d(2),               # 112 -> 56
         )
 
-        # Capas fully connected
+        # Fully connected layers
         self.classifier = nn.Sequential(
             nn.Flatten(),
             nn.Linear(64 * 56 * 56, 256),
             nn.ReLU(),
             nn.Dropout(0.3),
-            nn.Linear(256, num_clases),
+            nn.Linear(256, num_classes),
         )
 
     def forward(self, x):
@@ -733,17 +733,17 @@ class ClasificadorImagenes(nn.Module):
         x = self.classifier(x)
         return x
 
-# Instanciar
-model = ClasificadorImagenes(num_clases=10)
-print(f"Parametros: {sum(p.numel() for p in model.parameters()):,}")
+# Instantiate
+model = ImageClassifier(num_classes=10)
+print(f"Parameters: {sum(p.numel() for p in model.parameters()):,}")
 ```
 
-### Dataset y DataLoader
+### Dataset and DataLoader
 
 ```python
 from torch.utils.data import Dataset, DataLoader
 
-class MiDataset(Dataset):
+class MyDataset(Dataset):
     def __init__(self, X, y, transform=None):
         self.X = torch.tensor(X, dtype=torch.float32)
         self.y = torch.tensor(y, dtype=torch.long)
@@ -759,30 +759,30 @@ class MiDataset(Dataset):
             x = self.transform(x)
         return x, y
 
-# Crear datasets
-train_dataset = MiDataset(X_train, y_train)
-val_dataset = MiDataset(X_val, y_val)
+# Create datasets
+train_dataset = MyDataset(X_train, y_train)
+val_dataset = MyDataset(X_val, y_val)
 
-# DataLoaders (manejan batching, shuffling, paralelismo)
+# DataLoaders (handle batching, shuffling, parallelism)
 train_loader = DataLoader(
     train_dataset,
     batch_size=32,
-    shuffle=True,         # Shuffle en train
-    num_workers=4,        # Cargar datos en paralelo
-    pin_memory=True,      # Mas rapido para GPU
-    drop_last=True,       # Descartar ultimo batch incompleto
+    shuffle=True,         # Shuffle on train
+    num_workers=4,        # Load data in parallel
+    pin_memory=True,      # Faster for GPU
+    drop_last=True,       # Discard last incomplete batch
 )
 
 val_loader = DataLoader(
     val_dataset,
-    batch_size=64,        # Puede ser mas grande en val (no hay backward)
-    shuffle=False,        # NO shuffle en val
+    batch_size=64,        # Can be larger on val (no backward)
+    shuffle=False,        # NO shuffle on val
     num_workers=4,
     pin_memory=True,
 )
 ```
 
-### Training loop completo
+### Complete training loop
 
 ```python
 import torch
@@ -791,14 +791,14 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 
 def train_one_epoch(model, train_loader, loss_fn, optimizer, device):
-    """Entrena el modelo por una epoch."""
-    model.train()  # Modo entrenamiento (activa dropout, batchnorm)
+    """Train the model for one epoch."""
+    model.train()  # Training mode (activates dropout, batchnorm)
     total_loss = 0
     correct = 0
     total = 0
 
     for batch_idx, (inputs, targets) in enumerate(train_loader):
-        # Mover datos a device (GPU/CPU)
+        # Move data to device (GPU/CPU)
         inputs = inputs.to(device)
         targets = targets.to(device)
 
@@ -807,11 +807,11 @@ def train_one_epoch(model, train_loader, loss_fn, optimizer, device):
         loss = loss_fn(outputs, targets)
 
         # Backward pass
-        optimizer.zero_grad()     # Limpiar gradientes anteriores
-        loss.backward()           # Calcular gradientes
-        optimizer.step()          # Actualizar pesos
+        optimizer.zero_grad()     # Clear previous gradients
+        loss.backward()           # Calculate gradients
+        optimizer.step()          # Update weights
 
-        # Metricas
+        # Metrics
         total_loss += loss.item()
         _, predicted = outputs.max(1)
         total += targets.size(0)
@@ -822,10 +822,10 @@ def train_one_epoch(model, train_loader, loss_fn, optimizer, device):
     return avg_loss, accuracy
 
 
-@torch.no_grad()  # No calcular gradientes (mas rapido, menos memoria)
+@torch.no_grad()  # Don't calculate gradients (faster, less memory)
 def validate(model, val_loader, loss_fn, device):
-    """Evalua el modelo en el set de validacion."""
-    model.eval()  # Modo evaluacion (desactiva dropout, batchnorm usa stats globales)
+    """Evaluate the model on the validation set."""
+    model.eval()  # Evaluation mode (deactivates dropout, batchnorm uses global stats)
     total_loss = 0
     correct = 0
     total = 0
@@ -849,7 +849,7 @@ def validate(model, val_loader, loss_fn, device):
 
 # === SETUP ===
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = ClasificadorImagenes(num_clases=10).to(device)
+model = ImageClassifier(num_classes=10).to(device)
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.01)
 scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50)
@@ -869,34 +869,34 @@ for epoch in range(50):
           f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} | "
           f"LR: {scheduler.get_last_lr()[0]:.6f}")
 
-    # Guardar mejor modelo
+    # Save best model
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         torch.save(model.state_dict(), 'models/best_model.pt')
-        print(f"  -> Mejor modelo guardado (val_loss: {val_loss:.4f})")
+        print(f"  -> Best model saved (val_loss: {val_loss:.4f})")
 
     # Early stopping
     early_stop(val_loss)
     if early_stop.should_stop:
-        print(f"Early stopping en epoch {epoch+1}")
+        print(f"Early stopping at epoch {epoch+1}")
         break
 
-print(f"\nMejor val_loss: {best_val_loss:.4f}")
+print(f"\nBest val_loss: {best_val_loss:.4f}")
 ```
 
-### Guardar y cargar modelos
+### Saving and loading models
 
 ```python
-# GUARDAR: solo el state_dict (pesos) - RECOMENDADO
-torch.save(model.state_dict(), 'models/modelo_v1.pt')
+# SAVE: only the state_dict (weights) - RECOMMENDED
+torch.save(model.state_dict(), 'models/model_v1.pt')
 
-# CARGAR:
-model = ClasificadorImagenes(num_clases=10)  # Crear la arquitectura
-model.load_state_dict(torch.load('models/modelo_v1.pt', map_location=device))
+# LOAD:
+model = ImageClassifier(num_classes=10)  # Create the architecture
+model.load_state_dict(torch.load('models/model_v1.pt', map_location=device))
 model.to(device)
-model.eval()  # Modo evaluacion para inferencia
+model.eval()  # Evaluation mode for inference
 
-# Guardar checkpoint completo (para resumir entrenamiento)
+# Save complete checkpoint (to resume training)
 checkpoint = {
     'epoch': epoch,
     'model_state_dict': model.state_dict(),
@@ -907,7 +907,7 @@ checkpoint = {
 }
 torch.save(checkpoint, 'models/checkpoint_epoch10.pt')
 
-# Cargar checkpoint
+# Load checkpoint
 checkpoint = torch.load('models/checkpoint_epoch10.pt', map_location=device)
 model.load_state_dict(checkpoint['model_state_dict'])
 optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -918,7 +918,7 @@ start_epoch = checkpoint['epoch'] + 1
 ### Device management
 
 ```python
-# Patron universal
+# Universal pattern
 def get_device():
     if torch.cuda.is_available():
         return torch.device('cuda')
@@ -927,19 +927,19 @@ def get_device():
     return torch.device('cpu')
 
 device = get_device()
-print(f"Usando: {device}")
+print(f"Using: {device}")
 
-# Mover modelo a device
+# Move model to device
 model = model.to(device)
 
-# Mover datos a device (en el training loop)
+# Move data to device (in the training loop)
 inputs = inputs.to(device)
 targets = targets.to(device)
 
-# Mover resultado a CPU para NumPy/Pandas
+# Move result to CPU for NumPy/Pandas
 predictions = model(inputs).cpu().numpy()
 
-# Multi-GPU (DataParallel - basico)
+# Multi-GPU (DataParallel - basic)
 if torch.cuda.device_count() > 1:
     model = nn.DataParallel(model)
 model = model.to(device)
@@ -947,16 +947,16 @@ model = model.to(device)
 
 ---
 
-## Hiperparametros Clave
+## Key Hyperparameters
 
-### Learning rate (el mas importante)
+### Learning rate (the most important)
 
 ```python
-# Encontrar el LR optimo con LR Finder (concepto de Leslie Smith)
+# Find the optimal LR with LR Finder (Leslie Smith's concept)
 from torch.optim.lr_scheduler import ExponentialLR
 
-# Idea: empezar con LR muy bajo e ir subiendo exponencialmente.
-# Graficar loss vs LR. El mejor LR esta justo antes de que la loss explote.
+# Idea: start with a very low LR and increase exponentially.
+# Plot loss vs LR. The best LR is just before the loss explodes.
 
 lrs = []
 losses = []
@@ -978,207 +978,207 @@ plt.xlabel('Learning Rate')
 plt.ylabel('Loss')
 plt.title('LR Finder')
 plt.show()
-# Elegir LR donde la loss baja mas rapido (pendiente mas pronunciada)
+# Choose LR where the loss drops fastest (steepest slope)
 ```
 
 ### Batch size
 
-| Batch size | Ventaja | Desventaja |
+| Batch size | Advantage | Disadvantage |
 |---|---|---|
-| **Pequeño** (16-32) | Mejor generalizacion, menos memoria | Mas lento, mas ruidoso |
-| **Medio** (64-128) | Buen balance | - |
-| **Grande** (256-1024) | Mas rapido, GPU mas eficiente | Puede generalizar peor, necesita LR alto |
+| **Small** (16-32) | Better generalization, less memory | Slower, noisier |
+| **Medium** (64-128) | Good balance | - |
+| **Large** (256-1024) | Faster, more GPU efficient | May generalize worse, needs high LR |
 
 ```
-Regla practica:
-- Usa el batch size mas grande que quepa en tu GPU
-- Si subes batch size, sube LR proporcionalmente
+Rule of thumb:
+- Use the largest batch size that fits in your GPU
+- If you increase batch size, increase LR proportionally
   (batch 32, lr=1e-3) -> (batch 64, lr=2e-3)
-- Para fine-tuning de LLMs: batch size 4-16 (modelos grandes)
+- For LLM fine-tuning: batch size 4-16 (large models)
 ```
 
-### Cuantas capas y neuronas
+### How many layers and neurons
 
 ```
-Regla general:
-- Empezar pequeno e ir creciendo
-- Mas datos -> puedes usar modelos mas grandes
-- La primera hidden layer suele ser la mas grande
-- Ir reduciendo tamano: 512 -> 256 -> 128
+General rule:
+- Start small and grow
+- More data -> you can use larger models
+- The first hidden layer is usually the largest
+- Gradually reduce size: 512 -> 256 -> 128
 
-Ejemplo tipico para datos tabulares:
+Typical example for tabular data:
   Input (20 features)
   -> Linear(20, 128) + ReLU + Dropout(0.3)
   -> Linear(128, 64) + ReLU + Dropout(0.3)
-  -> Linear(64, num_clases)
+  -> Linear(64, num_classes)
 ```
 
 ### Hyperparameter tuning
 
 ```python
-# Optuna (RECOMENDADO - el mejor framework de hyperparameter tuning)
+# Optuna (RECOMMENDED - the best hyperparameter tuning framework)
 import optuna
 
 def objective(trial):
-    # Sugerir hiperparametros
+    # Suggest hyperparameters
     lr = trial.suggest_float('lr', 1e-5, 1e-2, log=True)
     batch_size = trial.suggest_categorical('batch_size', [32, 64, 128])
     n_layers = trial.suggest_int('n_layers', 1, 4)
     dropout = trial.suggest_float('dropout', 0.1, 0.5)
     hidden_size = trial.suggest_categorical('hidden_size', [64, 128, 256, 512])
 
-    # Crear modelo con estos hiperparametros
-    model = crear_modelo(n_layers, hidden_size, dropout)
+    # Create model with these hyperparameters
+    model = create_model(n_layers, hidden_size, dropout)
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # Entrenar y evaluar
+    # Train and evaluate
     for epoch in range(20):
         train_one_epoch(model, train_loader, loss_fn, optimizer, device)
         val_loss, val_acc = validate(model, val_loader, loss_fn, device)
 
-        # Reportar metrica intermedia (permite poda de trials malos)
+        # Report intermediate metric (allows pruning of bad trials)
         trial.report(val_acc, epoch)
         if trial.should_prune():
             raise optuna.TrialPruned()
 
     return val_acc
 
-# Ejecutar busqueda
+# Run search
 study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=50, timeout=3600)  # 50 trials o 1 hora
+study.optimize(objective, n_trials=50, timeout=3600)  # 50 trials or 1 hour
 
-# Mejores hiperparametros
-print(f"Mejor accuracy: {study.best_value:.4f}")
-print(f"Mejores params: {study.best_params}")
+# Best hyperparameters
+print(f"Best accuracy: {study.best_value:.4f}")
+print(f"Best params: {study.best_params}")
 
-# Visualizar
+# Visualize
 optuna.visualization.plot_param_importances(study)
 optuna.visualization.plot_optimization_history(study)
 ```
 
-| Metodo | Descripcion | Cuando usarlo |
+| Method | Description | When to use |
 |---|---|---|
-| **Grid search** | Probar todas las combinaciones | Pocos hiperparametros (2-3) |
-| **Random search** | Probar combinaciones al azar | Mejor que grid search en general |
-| **Optuna (Bayesian)** | Busqueda inteligente guiada | **Siempre que puedas, es el mejor** |
+| **Grid search** | Try all combinations | Few hyperparameters (2-3) |
+| **Random search** | Try random combinations | Better than grid search in general |
+| **Optuna (Bayesian)** | Intelligent guided search | **Whenever you can, it's the best** |
 
 ---
 
 ## Transfer Learning
 
-### Que es y por que funciona
+### What it is and why it works
 
-En vez de entrenar un modelo desde cero, partimos de un modelo que ya fue entrenado en un dataset grande (como ImageNet con 1M de imagenes). Las primeras capas ya aprendieron patrones generales (bordes, texturas, formas) que son utiles para cualquier tarea visual.
+Instead of training a model from scratch, we start from a model that was already trained on a large dataset (like ImageNet with 1M images). The first layers already learned general patterns (edges, textures, shapes) that are useful for any visual task.
 
 ```
-Modelo preentrenado (ImageNet):
+Pretrained model (ImageNet):
 
-  [Bordes] -> [Texturas] -> [Partes] -> [Objetos] -> [1000 clases ImageNet]
-   Capa 1      Capa 2       Capa 3      Capa 4        Head
+  [Edges] -> [Textures] -> [Parts] -> [Objects] -> [1000 ImageNet classes]
+   Layer 1     Layer 2      Layer 3     Layer 4       Head
 
-Tu tarea (clasificar rayos X):
+Your task (classify X-rays):
 
-  [Bordes] -> [Texturas] -> [Partes] -> [Objetos] -> [2 clases: normal/anormal]
-   Reusar     Reusar       Reusar      Reusar        NUEVA head
-   (congelar) (congelar)   (congelar)  (congelar)    (entrenar)
+  [Edges] -> [Textures] -> [Parts] -> [Objects] -> [2 classes: normal/abnormal]
+   Reuse      Reuse        Reuse      Reuse         NEW head
+   (freeze)   (freeze)     (freeze)   (freeze)      (train)
 ```
 
 ### Fine-tuning vs Feature extraction
 
-| Estrategia | Que haces | Cuando usarlo |
+| Strategy | What you do | When to use |
 |---|---|---|
-| **Feature extraction** | Congelas todo, solo entrenas la head nueva | Pocos datos (<1K), tarea muy similar al preentrenamiento |
-| **Fine-tuning parcial** | Congelas primeras capas, entrenas las ultimas + head | Datos moderados (1K-10K) |
-| **Fine-tuning completo** | Entrenas todo el modelo con LR bajo | Muchos datos (>10K), tarea distinta al preentrenamiento |
+| **Feature extraction** | Freeze everything, only train the new head | Few data (<1K), task very similar to pretraining |
+| **Partial fine-tuning** | Freeze first layers, train last layers + head | Moderate data (1K-10K) |
+| **Full fine-tuning** | Train the entire model with low LR | Lots of data (>10K), task different from pretraining |
 
 ```python
 import torchvision.models as models
 
-# Cargar modelo preentrenado
+# Load pretrained model
 model = models.resnet50(weights='IMAGENET1K_V2')
 
-# === Estrategia 1: Feature Extraction ===
-# Congelar TODOS los parametros
+# === Strategy 1: Feature Extraction ===
+# Freeze ALL parameters
 for param in model.parameters():
     param.requires_grad = False
 
-# Reemplazar la ultima capa (head) para tu tarea
-num_clases = 5
-model.fc = nn.Linear(model.fc.in_features, num_clases)
-# Solo model.fc tiene requires_grad=True
+# Replace the last layer (head) for your task
+num_classes = 5
+model.fc = nn.Linear(model.fc.in_features, num_classes)
+# Only model.fc has requires_grad=True
 
-# Optimizer solo para parametros que requieren gradiente
+# Optimizer only for parameters that require gradient
 optimizer = optim.Adam(model.fc.parameters(), lr=1e-3)
 
 
-# === Estrategia 2: Fine-tuning parcial ===
+# === Strategy 2: Partial fine-tuning ===
 model = models.resnet50(weights='IMAGENET1K_V2')
 
-# Congelar todo
+# Freeze everything
 for param in model.parameters():
     param.requires_grad = False
 
-# Descongelar las ultimas capas (layer4) + head
+# Unfreeze the last layers (layer4) + head
 for param in model.layer4.parameters():
     param.requires_grad = True
 
-model.fc = nn.Linear(model.fc.in_features, num_clases)
+model.fc = nn.Linear(model.fc.in_features, num_classes)
 
-# LR distinto para capas preentrenadas vs head nueva
+# Different LR for pretrained layers vs new head
 optimizer = optim.AdamW([
-    {'params': model.layer4.parameters(), 'lr': 1e-5},   # LR bajo para preentrenadas
-    {'params': model.fc.parameters(), 'lr': 1e-3},        # LR alto para head nueva
+    {'params': model.layer4.parameters(), 'lr': 1e-5},   # Low LR for pretrained
+    {'params': model.fc.parameters(), 'lr': 1e-3},        # High LR for new head
 ], weight_decay=0.01)
 
 
-# === Estrategia 3: Fine-tuning completo ===
+# === Strategy 3: Full fine-tuning ===
 model = models.resnet50(weights='IMAGENET1K_V2')
-model.fc = nn.Linear(model.fc.in_features, num_clases)
+model.fc = nn.Linear(model.fc.in_features, num_classes)
 
-# LR bajo para todo (no destruir lo aprendido)
+# Low LR for everything (don't destroy what was learned)
 optimizer = optim.AdamW(model.parameters(), lr=1e-5, weight_decay=0.01)
 ```
 
-### Modelos preentrenados populares
+### Popular pretrained models
 
-| Modelo | Tipo | Parametros | Uso principal | PyTorch |
+| Model | Type | Parameters | Main use | PyTorch |
 |---|---|---|---|---|
-| **ResNet-50** | CNN | 25M | Imagenes (baseline) | `models.resnet50()` |
-| **EfficientNet-B0** | CNN | 5M | Imagenes (eficiente) | `models.efficientnet_b0()` |
-| **ViT-B/16** | Transformer | 86M | Imagenes (SOTA) | `models.vit_b_16()` |
-| **BERT** | Transformer | 110M | Texto (clasificacion, NER) | HuggingFace `transformers` |
-| **GPT-2** | Transformer | 124M-1.5B | Texto (generacion) | HuggingFace `transformers` |
-| **Whisper** | Transformer | 39M-1.5B | Audio (transcripcion) | HuggingFace `transformers` |
-| **CLIP** | Multimodal | 400M | Imagenes + Texto | OpenAI / HuggingFace |
+| **ResNet-50** | CNN | 25M | Images (baseline) | `models.resnet50()` |
+| **EfficientNet-B0** | CNN | 5M | Images (efficient) | `models.efficientnet_b0()` |
+| **ViT-B/16** | Transformer | 86M | Images (SOTA) | `models.vit_b_16()` |
+| **BERT** | Transformer | 110M | Text (classification, NER) | HuggingFace `transformers` |
+| **GPT-2** | Transformer | 124M-1.5B | Text (generation) | HuggingFace `transformers` |
+| **Whisper** | Transformer | 39M-1.5B | Audio (transcription) | HuggingFace `transformers` |
+| **CLIP** | Multimodal | 400M | Images + Text | OpenAI / HuggingFace |
 
 ---
 
 ## Mixed Precision Training
 
-### Que es
+### What it is
 
-Normalmente los modelos usan float32 (32 bits por numero). Mixed precision usa float16 para la mayoria de operaciones y float32 solo donde es necesario. Esto reduce la memoria a la mitad y acelera el entrenamiento en GPUs modernas.
+Normally models use float32 (32 bits per number). Mixed precision uses float16 for most operations and float32 only where necessary. This reduces memory by half and speeds up training on modern GPUs.
 
 ```
-Float32 (precision completa):    Float16 (media precision):
-  32 bits por peso                 16 bits por peso
-  Mas memoria                      Menos memoria (~50%)
-  Mas lento en GPUs nuevas         Mas rapido (Tensor Cores)
-  Siempre estable                  Puede ser inestable (loss scaling)
+Float32 (full precision):       Float16 (half precision):
+  32 bits per weight              16 bits per weight
+  More memory                     Less memory (~50%)
+  Slower on new GPUs              Faster (Tensor Cores)
+  Always stable                   Can be unstable (loss scaling)
 ```
 
-### Cuando usarlo
+### When to use it
 
-- Tienes GPU NVIDIA con Tensor Cores (V100, A100, RTX 3000+, RTX 4000+)
-- Tu modelo no cabe en GPU con float32
-- Quieres entrenar mas rapido sin sacrificar calidad
+- You have an NVIDIA GPU with Tensor Cores (V100, A100, RTX 3000+, RTX 4000+)
+- Your model doesn't fit on GPU with float32
+- You want to train faster without sacrificing quality
 
-### Implementacion con torch.amp
+### Implementation with torch.amp
 
 ```python
 from torch.amp import autocast, GradScaler
 
-# Crear scaler (previene underflow en float16)
+# Create scaler (prevents underflow in float16)
 scaler = GradScaler('cuda')
 
 for epoch in range(num_epochs):
@@ -1188,54 +1188,54 @@ for epoch in range(num_epochs):
 
         optimizer.zero_grad()
 
-        # Forward pass en mixed precision
+        # Forward pass in mixed precision
         with autocast('cuda'):
             outputs = model(inputs)
             loss = loss_fn(outputs, targets)
 
-        # Backward pass con scaling
+        # Backward pass with scaling
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
 
-        # El loss para logging debe ser .item() (float32)
+        # The loss for logging must be .item() (float32)
         print(f"Loss: {loss.item():.4f}")
 ```
 
-> **Punto clave:** Mixed precision es "gratis": casi no afecta la precision del modelo, reduce memoria ~50%, y acelera entrenamiento 1.5-3x. Usalo siempre que tu GPU lo soporte.
+> **Key point:** Mixed precision is "free": it barely affects model precision, reduces memory ~50%, and speeds up training 1.5-3x. Use it whenever your GPU supports it.
 
 ---
 
-## Tips Practicos
+## Practical Tips
 
-### 1. Empezar siempre con un modelo pequeno
+### 1. Always start with a small model
 
 ```python
-# Primero: modelo minimo para verificar que el pipeline funciona
+# First: minimal model to verify the pipeline works
 model = nn.Sequential(
     nn.Linear(input_size, 32),
     nn.ReLU(),
-    nn.Linear(32, num_clases)
+    nn.Linear(32, num_classes)
 )
-# Entrenar 5 epochs
-# Si funciona, ir aumentando complejidad
+# Train for 5 epochs
+# If it works, start increasing complexity
 ```
 
-### 2. Overfittear un batch pequeno (sanity check)
+### 2. Overfit a small batch (sanity check)
 
-Antes de entrenar en todo el dataset, verifica que tu modelo PUEDE aprender intentando memorizar un solo batch. Si no puede overfittear un batch, algo esta mal.
+Before training on the entire dataset, verify that your model CAN learn by trying to memorize a single batch. If it can't overfit a batch, something is wrong.
 
 ```python
-# Tomar un solo batch
+# Take a single batch
 batch = next(iter(train_loader))
 inputs, targets = batch
 inputs, targets = inputs.to(device), targets.to(device)
 
-model = MiModelo().to(device)
+model = MyModel().to(device)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 loss_fn = nn.CrossEntropyLoss()
 
-# Intentar overfittear este unico batch
+# Try to overfit this single batch
 for i in range(200):
     outputs = model(inputs)
     loss = loss_fn(outputs, targets)
@@ -1247,17 +1247,17 @@ for i in range(200):
         acc = (outputs.argmax(1) == targets).float().mean()
         print(f"Step {i}: Loss={loss.item():.4f}, Acc={acc:.4f}")
 
-# Si la loss llega a ~0 y acc a ~1.0 -> el modelo puede aprender -> OK
-# Si no baja -> bug en el codigo, modelo muy pequeno, o LR incorrecto
+# If loss reaches ~0 and acc ~1.0 -> the model can learn -> OK
+# If it doesn't go down -> bug in code, model too small, or incorrect LR
 ```
 
-### 3. Monitorizar loss y metricas
+### 3. Monitor loss and metrics
 
 ```python
-# Con Weights & Biases (wandb) - el estandar en la industria
+# With Weights & Biases (wandb) - the industry standard
 import wandb
 
-wandb.init(project="mi-proyecto", config={
+wandb.init(project="my-project", config={
     "lr": 1e-3,
     "batch_size": 32,
     "model": "resnet50",
@@ -1279,7 +1279,7 @@ for epoch in range(50):
 
 wandb.finish()
 
-# Con TensorBoard (alternativa gratuita)
+# With TensorBoard (free alternative)
 from torch.utils.tensorboard import SummaryWriter
 
 writer = SummaryWriter('logs/experiment_1')
@@ -1290,11 +1290,11 @@ for epoch in range(50):
     writer.add_scalar('Accuracy/val', val_acc, epoch)
 writer.close()
 
-# Lanzar TensorBoard
+# Launch TensorBoard
 # tensorboard --logdir=logs/
 ```
 
-### 4. Reproducibilidad
+### 4. Reproducibility
 
 ```python
 import torch
@@ -1302,50 +1302,50 @@ import numpy as np
 import random
 
 def set_seed(seed=42):
-    """Establece seed para reproducibilidad completa."""
+    """Set seed for full reproducibility."""
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    # Para reproducibilidad total (puede ser mas lento)
+    # For total reproducibility (may be slower)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
 set_seed(42)
 ```
 
-### Checklist antes de entrenar
+### Checklist before training
 
 ```
-Antes de lanzar un entrenamiento largo, verifica:
+Before launching a long training run, verify:
 
-[ ] Sanity check: overfittear un batch pequeno
-[ ] Data: verificar shapes, dtypes, rangos de valores
-[ ] Labels: verificar distribucion de clases
-[ ] Model: contar parametros, verificar output shape
-[ ] Loss: verificar que es la correcta para el problema
-[ ] Optimizer: verificar LR y weight decay
-[ ] Device: modelo y datos en el mismo device
-[ ] Reproducibilidad: seed establecida
-[ ] Logging: wandb/tensorboard configurado
-[ ] Checkpointing: guardar mejor modelo
-[ ] Early stopping: configurado
-[ ] Memoria GPU: verificar que cabe con nvidia-smi
+[ ] Sanity check: overfit a small batch
+[ ] Data: verify shapes, dtypes, value ranges
+[ ] Labels: verify class distribution
+[ ] Model: count parameters, verify output shape
+[ ] Loss: verify it's the correct one for the problem
+[ ] Optimizer: verify LR and weight decay
+[ ] Device: model and data on the same device
+[ ] Reproducibility: seed set
+[ ] Logging: wandb/tensorboard configured
+[ ] Checkpointing: save best model
+[ ] Early stopping: configured
+[ ] GPU memory: verify it fits with nvidia-smi
 ```
 
-### Debugging comun
+### Common debugging
 
-| Problema | Posible causa | Solucion |
+| Problem | Possible cause | Solution |
 |---|---|---|
-| Loss no baja | LR muy bajo o muy alto | Probar LR finder |
-| Loss es NaN | LR demasiado alto, overflow | Bajar LR, gradient clipping |
-| Loss sube | Bug en el codigo, LR alto | Revisar labels, bajar LR |
-| Val loss sube (train baja) | Overfitting | Dropout, weight decay, mas datos |
-| Train/val loss altos | Underfitting | Modelo mas grande, mas epochs |
-| OOM (Out of Memory) | Modelo/batch muy grande | Reducir batch size, mixed precision |
-| Training muy lento | CPU bottleneck en data loading | Mas num_workers, pin_memory |
-| Accuracy no sube de X% | Clase desbalanceada, metrica incorrecta | Class weights, cambiar metrica |
+| Loss doesn't go down | LR too low or too high | Try LR finder |
+| Loss is NaN | LR too high, overflow | Lower LR, gradient clipping |
+| Loss goes up | Bug in code, high LR | Check labels, lower LR |
+| Val loss goes up (train goes down) | Overfitting | Dropout, weight decay, more data |
+| Train/val loss both high | Underfitting | Larger model, more epochs |
+| OOM (Out of Memory) | Model/batch too large | Reduce batch size, mixed precision |
+| Training very slow | CPU bottleneck in data loading | More num_workers, pin_memory |
+| Accuracy doesn't go above X% | Imbalanced class, incorrect metric | Class weights, change metric |
 
 ---
 
-> **Resumen:** Deep Learning es una herramienta poderosa pero no siempre la mejor. Usalo cuando tengas muchos datos no tabulares (imagenes, texto, audio). Empieza simple, verifica que tu pipeline funciona con un sanity check, y luego escala. Usa transfer learning siempre que puedas. Adam/AdamW con cosine LR schedule es un setup robusto para empezar.
+> **Summary:** Deep Learning is a powerful tool but not always the best one. Use it when you have lots of non-tabular data (images, text, audio). Start simple, verify your pipeline works with a sanity check, and then scale up. Use transfer learning whenever you can. Adam/AdamW with cosine LR schedule is a robust setup to start with.

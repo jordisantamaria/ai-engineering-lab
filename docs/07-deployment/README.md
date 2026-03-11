@@ -1,58 +1,58 @@
-# Deployment de Modelos ML
+# ML Model Deployment
 
-> **Realidad incómoda:** El 87% de los modelos ML nunca llegan a producción.
-> El deployment es donde mueren la mayoría de proyectos. Saber entrenar un modelo es solo la mitad del camino.
+> **Uncomfortable reality:** 87% of ML models never make it to production.
+> Deployment is where most projects die. Knowing how to train a model is only half the battle.
 
 ---
 
-## Tabla de Contenidos
+## Table of Contents
 
-- [De Notebook a Producción](#de-notebook-a-producción)
-- [Servir Modelos con FastAPI](#servir-modelos-con-fastapi)
-- [Optimización de Inference](#optimización-de-inference)
-- [Docker para ML](#docker-para-ml)
-- [Deployment en Cloud](#deployment-en-cloud)
+- [From Notebook to Production](#from-notebook-to-production)
+- [Serving Models with FastAPI](#serving-models-with-fastapi)
+- [Inference Optimization](#inference-optimization)
+- [Docker for ML](#docker-for-ml)
+- [Cloud Deployment](#cloud-deployment)
 - [Serverless ML](#serverless-ml)
 - [Streaming vs Batch Inference](#streaming-vs-batch-inference)
-- [CI/CD para ML](#cicd-para-ml)
-- [Monitoring en Producción](#monitoring-en-producción)
-- [Tips de Consultoría](#tips-de-consultoría)
+- [CI/CD for ML](#cicd-for-ml)
+- [Production Monitoring](#production-monitoring)
+- [Consulting Tips](#consulting-tips)
 
 ---
 
-## Por Qué Deployment Es Donde Fallan los Proyectos ML
+## Why Deployment Is Where ML Projects Fail
 
-El gap entre "funciona en mi notebook" y "funciona en producción" es enorme:
+The gap between "works in my notebook" and "works in production" is enormous:
 
-| Notebook | Producción |
+| Notebook | Production |
 |----------|-----------|
-| Código lineal, sin estructura | Módulos, clases, funciones reutilizables |
-| Datos estáticos (CSV local) | Datos dinámicos (APIs, DBs, streams) |
-| Sin manejo de errores | Errores gestionados, logging, retries |
-| Una ejecución manual | Miles de requests concurrentes 24/7 |
-| "Funciona en mi máquina" | Funciona en cualquier máquina (Docker) |
-| Sin tests | Unit tests, integration tests, load tests |
-| Un usuario (tú) | Múltiples usuarios, SLAs, latencia |
+| Linear code, no structure | Modules, classes, reusable functions |
+| Static data (local CSV) | Dynamic data (APIs, DBs, streams) |
+| No error handling | Managed errors, logging, retries |
+| One manual execution | Thousands of concurrent requests 24/7 |
+| "Works on my machine" | Works on any machine (Docker) |
+| No tests | Unit tests, integration tests, load tests |
+| One user (you) | Multiple users, SLAs, latency |
 
-**Punto clave:** Un modelo con 95% de accuracy que no está en producción tiene valor cero para el negocio. Un modelo con 85% de accuracy en producción genera valor real.
+**Key point:** A model with 95% accuracy that's not in production has zero value to the business. A model with 85% accuracy in production generates real value.
 
 ---
 
-## De Notebook a Producción
+## From Notebook to Production
 
-### El Gap
+### The Gap
 
-El notebook es perfecto para exploración. Pero el código de un notebook típico tiene:
+The notebook is perfect for exploration. But typical notebook code has:
 
-- Variables globales por todos lados
-- Celdas que dependen del orden de ejecución
-- Código duplicado
-- Sin manejo de errores
-- Dependencias no documentadas
+- Global variables everywhere
+- Cells that depend on execution order
+- Duplicated code
+- No error handling
+- Undocumented dependencies
 
-### Refactorizar a Módulos Python
+### Refactor to Python Modules
 
-**Estructura de proyecto recomendada:**
+**Recommended project structure:**
 
 ```
 ml-project/
@@ -60,30 +60,30 @@ ml-project/
 │   ├── __init__.py
 │   ├── data/
 │   │   ├── __init__.py
-│   │   ├── loader.py          # Carga de datos
-│   │   └── preprocessing.py   # Limpieza, transformaciones
+│   │   ├── loader.py          # Data loading
+│   │   └── preprocessing.py   # Cleaning, transformations
 │   ├── features/
 │   │   ├── __init__.py
 │   │   └── engineering.py     # Feature engineering
 │   ├── models/
 │   │   ├── __init__.py
-│   │   ├── train.py           # Entrenamiento
-│   │   ├── predict.py         # Inferencia
-│   │   └── evaluate.py        # Métricas
+│   │   ├── train.py           # Training
+│   │   ├── predict.py         # Inference
+│   │   └── evaluate.py        # Metrics
 │   └── utils/
 │       ├── __init__.py
-│       └── config.py          # Configuración
+│       └── config.py          # Configuration
 ├── api/
 │   ├── __init__.py
 │   ├── main.py                # FastAPI app
 │   ├── schemas.py             # Pydantic models
-│   └── dependencies.py        # Dependencias (modelo cargado)
+│   └── dependencies.py        # Dependencies (loaded model)
 ├── tests/
 │   ├── test_data.py
 │   ├── test_model.py
 │   └── test_api.py
-├── models/                    # Modelos serializados (.pkl, .onnx)
-├── notebooks/                 # Notebooks de exploración
+├── models/                    # Serialized models (.pkl, .onnx)
+├── notebooks/                 # Exploration notebooks
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -91,7 +91,7 @@ ml-project/
 └── README.md
 ```
 
-### Testing de Modelos ML
+### ML Model Testing
 
 ```python
 # tests/test_model.py
@@ -100,26 +100,26 @@ import numpy as np
 from src.models.predict import ModelPredictor
 
 class TestModelPredictor:
-    """Tests unitarios para el modelo."""
+    """Unit tests for the model."""
 
     @pytest.fixture
     def predictor(self):
         return ModelPredictor(model_path="models/model_v1.pkl")
 
     def test_prediction_shape(self, predictor):
-        """La predicción debe tener la forma correcta."""
+        """Prediction must have the correct shape."""
         input_data = np.random.rand(1, 10)
         prediction = predictor.predict(input_data)
         assert prediction.shape == (1,)
 
     def test_prediction_range(self, predictor):
-        """Las predicciones deben estar en rango válido."""
+        """Predictions must be in a valid range."""
         input_data = np.random.rand(5, 10)
         predictions = predictor.predict(input_data)
         assert all(0 <= p <= 1 for p in predictions)
 
     def test_prediction_deterministic(self, predictor):
-        """Misma entrada → misma salida."""
+        """Same input -> same output."""
         input_data = np.array([[1.0, 2.0, 3.0, 4.0, 5.0,
                                 6.0, 7.0, 8.0, 9.0, 10.0]])
         pred1 = predictor.predict(input_data)
@@ -127,10 +127,10 @@ class TestModelPredictor:
         np.testing.assert_array_equal(pred1, pred2)
 
     def test_handles_missing_values(self, predictor):
-        """El modelo debe manejar NaN correctamente."""
+        """The model must handle NaN correctly."""
         input_data = np.array([[1.0, np.nan, 3.0, 4.0, 5.0,
                                 6.0, 7.0, 8.0, 9.0, 10.0]])
-        # No debe lanzar excepción
+        # Should not raise an exception
         prediction = predictor.predict(input_data)
         assert not np.isnan(prediction).any()
 ```
@@ -143,7 +143,7 @@ from api.main import app
 
 @pytest.mark.asyncio
 async def test_predict_endpoint():
-    """Test del endpoint de predicción."""
+    """Test the prediction endpoint."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post("/predict", json={
@@ -155,7 +155,7 @@ async def test_predict_endpoint():
 
 @pytest.mark.asyncio
 async def test_predict_invalid_input():
-    """Input inválido debe retornar 422."""
+    """Invalid input should return 422."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post("/predict", json={
@@ -165,7 +165,7 @@ async def test_predict_invalid_input():
 
 @pytest.mark.asyncio
 async def test_health_check():
-    """Health check debe retornar 200."""
+    """Health check should return 200."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.get("/health")
@@ -175,11 +175,11 @@ async def test_health_check():
 
 ---
 
-## Servir Modelos con FastAPI
+## Serving Models with FastAPI
 
-FastAPI es la opción preferida para servir modelos ML en Python: rápido, tipado, documentación automática con OpenAPI/Swagger.
+FastAPI is the preferred option for serving ML models in Python: fast, typed, automatic documentation with OpenAPI/Swagger.
 
-### Estructura Completa
+### Complete Structure
 
 ```python
 # api/schemas.py
@@ -187,23 +187,23 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 class PredictionRequest(BaseModel):
-    """Schema de entrada para predicciones."""
+    """Input schema for predictions."""
     features: list[float] = Field(
         ...,
         min_length=10,
         max_length=10,
-        description="Vector de 10 features numéricas"
+        description="Vector of 10 numeric features"
     )
     model_version: Optional[str] = Field(
         default="latest",
-        description="Versión del modelo a usar"
+        description="Model version to use"
     )
 
     @field_validator("features")
     @classmethod
     def validate_features(cls, v):
         if any(not isinstance(x, (int, float)) for x in v):
-            raise ValueError("Todas las features deben ser numéricas")
+            raise ValueError("All features must be numeric")
         return v
 
     model_config = {
@@ -219,18 +219,18 @@ class PredictionRequest(BaseModel):
     }
 
 class PredictionResponse(BaseModel):
-    """Schema de salida."""
+    """Output schema."""
     prediction: float
     confidence: float
     model_version: str
 
 class BatchPredictionRequest(BaseModel):
-    """Schema para predicciones en batch."""
+    """Schema for batch predictions."""
     instances: list[list[float]] = Field(
         ...,
         min_length=1,
         max_length=100,
-        description="Lista de vectores de features"
+        description="List of feature vectors"
     )
 
 class BatchPredictionResponse(BaseModel):
@@ -259,7 +259,7 @@ from api.schemas import (
 
 logger = logging.getLogger(__name__)
 
-# Estado global de la app
+# App global state
 class AppState:
     model = None
     model_version = "unknown"
@@ -268,30 +268,30 @@ class AppState:
 state = AppState()
 
 def load_model():
-    """Carga el modelo al iniciar la aplicación."""
+    """Load the model at application startup."""
     import joblib
     try:
         state.model = joblib.load("models/model_latest.pkl")
         state.model_version = "v1.2.0"
-        logger.info(f"Modelo {state.model_version} cargado correctamente")
+        logger.info(f"Model {state.model_version} loaded successfully")
     except Exception as e:
-        logger.error(f"Error cargando modelo: {e}")
+        logger.error(f"Error loading model: {e}")
         raise
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifecycle: cargar modelo al startup, cleanup al shutdown."""
+    """Lifecycle: load model at startup, cleanup at shutdown."""
     # Startup
     state.start_time = time.time()
     load_model()
-    logger.info("Aplicación iniciada")
+    logger.info("Application started")
     yield
     # Shutdown
-    logger.info("Aplicación apagándose")
+    logger.info("Application shutting down")
 
 app = FastAPI(
     title="ML Prediction API",
-    description="API para servir predicciones del modelo XYZ",
+    description="API for serving predictions from model XYZ",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -300,7 +300,7 @@ app = FastAPI(
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
-    """Health check: verificar que el modelo está cargado."""
+    """Health check: verify the model is loaded."""
     return HealthResponse(
         status="healthy" if state.model else "unhealthy",
         model_loaded=state.model is not None,
@@ -310,15 +310,15 @@ async def health_check():
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
-    """Predicción individual."""
+    """Individual prediction."""
     if state.model is None:
-        raise HTTPException(status_code=503, detail="Modelo no disponible")
+        raise HTTPException(status_code=503, detail="Model not available")
 
     try:
         features = np.array(request.features).reshape(1, -1)
         prediction = state.model.predict(features)[0]
 
-        # Si el modelo soporta predict_proba
+        # If the model supports predict_proba
         confidence = 0.0
         if hasattr(state.model, "predict_proba"):
             proba = state.model.predict_proba(features)[0]
@@ -330,14 +330,14 @@ async def predict(request: PredictionRequest):
             model_version=state.model_version,
         )
     except Exception as e:
-        logger.error(f"Error en predicción: {e}")
-        raise HTTPException(status_code=500, detail=f"Error en predicción: {str(e)}")
+        logger.error(f"Prediction error: {e}")
+        raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
 @app.post("/predict/batch", response_model=BatchPredictionResponse)
 async def predict_batch(request: BatchPredictionRequest):
-    """Predicciones en batch (hasta 100 instancias)."""
+    """Batch predictions (up to 100 instances)."""
     if state.model is None:
-        raise HTTPException(status_code=503, detail="Modelo no disponible")
+        raise HTTPException(status_code=503, detail="Model not available")
 
     try:
         features = np.array(request.instances)
@@ -348,21 +348,21 @@ async def predict_batch(request: BatchPredictionRequest):
             model_version=state.model_version,
         )
     except Exception as e:
-        logger.error(f"Error en batch prediction: {e}")
+        logger.error(f"Batch prediction error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 ```
 
-### Async vs Sync para Inference
+### Async vs Sync for Inference
 
-| Aspecto | Sync | Async |
+| Aspect | Sync | Async |
 |---------|------|-------|
-| Inference CPU-bound (sklearn, XGBoost) | Funciona bien con workers | `run_in_executor` necesario |
-| Inference GPU (PyTorch, TF) | Bloquea el event loop | Usar `asyncio.to_thread` |
-| I/O (cargar datos, llamar APIs) | Bloquea el thread | Nativo async, ideal |
-| Recomendación general | Usar Gunicorn con workers | Para I/O heavy |
+| CPU-bound inference (sklearn, XGBoost) | Works well with workers | `run_in_executor` needed |
+| GPU inference (PyTorch, TF) | Blocks the event loop | Use `asyncio.to_thread` |
+| I/O (loading data, calling APIs) | Blocks the thread | Native async, ideal |
+| General recommendation | Use Gunicorn with workers | For I/O heavy |
 
 ```python
-# Para modelos CPU-bound, usar run_in_executor
+# For CPU-bound models, use run_in_executor
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
@@ -371,7 +371,7 @@ executor = ThreadPoolExecutor(max_workers=4)
 @app.post("/predict")
 async def predict(request: PredictionRequest):
     loop = asyncio.get_event_loop()
-    # Ejecutar inference en thread pool para no bloquear event loop
+    # Run inference in thread pool to not block event loop
     prediction = await loop.run_in_executor(
         executor,
         lambda: state.model.predict(np.array(request.features).reshape(1, -1))
@@ -379,18 +379,18 @@ async def predict(request: PredictionRequest):
     return {"prediction": float(prediction[0])}
 ```
 
-**Regla general:** Si la inference tarda menos de 100ms, sync con Gunicorn workers está bien. Si tarda más, usar async con thread pool.
+**General rule:** If inference takes less than 100ms, sync with Gunicorn workers is fine. If it takes longer, use async with thread pool.
 
 ---
 
-## Optimización de Inference
+## Inference Optimization
 
 ### ONNX Runtime
 
-ONNX (Open Neural Network Exchange) es un formato intermedio que permite optimizar la inference independientemente del framework de entrenamiento.
+ONNX (Open Neural Network Exchange) is an intermediate format that allows optimizing inference independently of the training framework.
 
 ```python
-# Convertir PyTorch a ONNX
+# Convert PyTorch to ONNX
 import torch
 import torch.onnx
 
@@ -398,7 +398,7 @@ model = MyModel()
 model.load_state_dict(torch.load("model.pth"))
 model.eval()
 
-# Input de ejemplo para trazar el grafo
+# Example input to trace the graph
 dummy_input = torch.randn(1, 10)
 
 torch.onnx.export(
@@ -414,15 +414,15 @@ torch.onnx.export(
         "output": {0: "batch_size"},
     },
 )
-print("Modelo exportado a ONNX")
+print("Model exported to ONNX")
 ```
 
 ```python
-# Inference con ONNX Runtime
+# Inference with ONNX Runtime
 import onnxruntime as ort
 import numpy as np
 
-# Crear sesión (solo una vez al startup)
+# Create session (only once at startup)
 session = ort.InferenceSession(
     "model.onnx",
     providers=["CUDAExecutionProvider", "CPUExecutionProvider"]
@@ -437,15 +437,15 @@ prediction = outputs[0]
 ### TorchScript
 
 ```python
-# Opción 1: torch.jit.trace (para modelos sin control flow dinámico)
+# Option 1: torch.jit.trace (for models without dynamic control flow)
 traced_model = torch.jit.trace(model, dummy_input)
 traced_model.save("model_traced.pt")
 
-# Opción 2: torch.jit.script (para modelos con if/for dinámicos)
+# Option 2: torch.jit.script (for models with dynamic if/for)
 scripted_model = torch.jit.script(model)
 scripted_model.save("model_scripted.pt")
 
-# Cargar e inferir
+# Load and infer
 loaded_model = torch.jit.load("model_traced.pt")
 output = loaded_model(torch.randn(1, 10))
 ```
@@ -455,46 +455,46 @@ output = loaded_model(torch.randn(1, 10))
 ```python
 import torch.quantization
 
-# Dynamic Quantization (más fácil, menos speedup)
-# Funciona bien para modelos con muchas capas lineales (NLP)
+# Dynamic Quantization (easiest, less speedup)
+# Works well for models with many linear layers (NLP)
 quantized_model = torch.quantization.quantize_dynamic(
     model,
     {torch.nn.Linear},
     dtype=torch.qint8,
 )
 
-# El modelo ahora es ~2-4x más pequeño y ~1.5-2x más rápido
+# The model is now ~2-4x smaller and ~1.5-2x faster
 torch.save(quantized_model.state_dict(), "model_quantized.pth")
 ```
 
-| Tipo | Cómo funciona | Speedup | Pérdida de accuracy |
+| Type | How it works | Speedup | Accuracy loss |
 |------|--------------|---------|-------------------|
-| Dynamic | Pesos cuantizados, activaciones en runtime | 1.5-2x | Mínima |
-| Static | Pesos + activaciones cuantizados con calibración | 2-3x | Baja |
-| QAT (Quantization-Aware Training) | Simulación de quantization durante training | 2-4x | Muy baja |
+| Dynamic | Quantized weights, activations at runtime | 1.5-2x | Minimal |
+| Static | Quantized weights + activations with calibration | 2-3x | Low |
+| QAT (Quantization-Aware Training) | Quantization simulation during training | 2-4x | Very low |
 
-### Tabla Resumen de Optimización
+### Optimization Summary Table
 
-| Técnica | Speedup Típico | Complejidad | Mejor Para |
+| Technique | Typical Speedup | Complexity | Best For |
 |---------|---------------|-------------|-----------|
-| ONNX Runtime | 1.5-3x | Baja | Cualquier modelo, producción |
-| TorchScript | 1.2-2x | Baja | Modelos PyTorch |
-| Dynamic Quantization | 1.5-2x | Baja | NLP, modelos lineales |
-| Static Quantization | 2-3x | Media | CV, modelos convolucionales |
-| Batching de requests | 2-5x (throughput) | Media | Alto tráfico |
-| Model pruning | 1.5-3x | Alta | Modelos grandes |
-| Distillation | 2-10x | Alta | Cuando puedes reentrenar |
-| GPU inference | 5-50x | Media | Modelos deep learning |
-| TensorRT (NVIDIA) | 2-6x vs PyTorch | Alta | GPU NVIDIA en producción |
+| ONNX Runtime | 1.5-3x | Low | Any model, production |
+| TorchScript | 1.2-2x | Low | PyTorch models |
+| Dynamic Quantization | 1.5-2x | Low | NLP, linear models |
+| Static Quantization | 2-3x | Medium | CV, convolutional models |
+| Request Batching | 2-5x (throughput) | Medium | High traffic |
+| Model pruning | 1.5-3x | High | Large models |
+| Distillation | 2-10x | High | When you can retrain |
+| GPU inference | 5-50x | Medium | Deep learning models |
+| TensorRT (NVIDIA) | 2-6x vs PyTorch | High | NVIDIA GPUs in production |
 
-### Batching de Requests
+### Request Batching
 
 ```python
 import asyncio
 from collections import deque
 
 class BatchPredictor:
-    """Acumula requests y las procesa en batch para mayor throughput."""
+    """Accumulates requests and processes them in batch for higher throughput."""
 
     def __init__(self, model, batch_size=32, max_wait_ms=50):
         self.model = model
@@ -509,7 +509,7 @@ class BatchPredictor:
         if len(self.queue) >= self.batch_size:
             await self._process_batch()
         else:
-            # Esperar un poco por más requests
+            # Wait a bit for more requests
             await asyncio.sleep(self.max_wait)
             if not future.done():
                 await self._process_batch()
@@ -538,24 +538,24 @@ class BatchPredictor:
 ```python
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Cargar modelo
+    # Load model
     load_model()
 
-    # Warmup: hacer predicciones dummy para cargar todo en memoria/cache
-    logger.info("Warming up modelo...")
+    # Warmup: make dummy predictions to load everything into memory/cache
+    logger.info("Warming up model...")
     dummy = np.random.rand(10, 10).astype(np.float32)
     for _ in range(5):
         state.model.predict(dummy)
-    logger.info("Warmup completado")
+    logger.info("Warmup completed")
 
     yield
 ```
 
 ---
 
-## Docker para ML
+## Docker for ML
 
-### Dockerfile Multi-Stage
+### Multi-Stage Dockerfile
 
 ```dockerfile
 # ---- Stage 1: Builder ----
@@ -563,12 +563,12 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Instalar dependencias de compilación
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar requirements primero (capa cacheada si no cambian)
+# Copy requirements first (cached layer if they don't change)
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
@@ -577,27 +577,27 @@ FROM python:3.11-slim AS runtime
 
 WORKDIR /app
 
-# Copiar solo las dependencias instaladas
+# Copy only installed dependencies
 COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
-# Copiar código de la aplicación
+# Copy application code
 COPY src/ ./src/
 COPY api/ ./api/
 COPY models/ ./models/
 
-# Puerto
+# Port
 EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Comando de inicio
+# Start command
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
 ```
 
-### Docker Compose para Desarrollo
+### Docker Compose for Development
 
 ```yaml
 # docker-compose.yml
@@ -611,7 +611,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./models:/app/models    # Montar modelos para desarrollo
+      - ./models:/app/models    # Mount models for development
     environment:
       - MODEL_PATH=/app/models/model_latest.pkl
       - LOG_LEVEL=DEBUG
@@ -624,7 +624,7 @@ services:
     volumes:
       - redis_data:/data
 
-  # Opcional: para caching de predicciones
+  # Optional: for prediction caching
   api-with-cache:
     build: .
     ports:
@@ -639,18 +639,18 @@ volumes:
   redis_data:
 ```
 
-### Tips para Reducir Tamaño de Imagen
+### Tips for Reducing Image Size
 
-| Técnica | Ahorro Típico | Ejemplo |
+| Technique | Typical Savings | Example |
 |---------|--------------|---------|
-| Multi-stage build | 40-60% | Separar builder de runtime |
-| `python:3.11-slim` en vez de `python:3.11` | ~800MB | Base image mínima |
-| `--no-cache-dir` en pip | 10-20% | `pip install --no-cache-dir` |
-| `.dockerignore` | Variable | Excluir notebooks, datos, .git |
-| Instalar solo lo necesario | 20-50% | No incluir dev dependencies |
-| Limpiar apt cache | 50-100MB | `rm -rf /var/lib/apt/lists/*` |
+| Multi-stage build | 40-60% | Separate builder from runtime |
+| `python:3.11-slim` instead of `python:3.11` | ~800MB | Minimal base image |
+| `--no-cache-dir` in pip | 10-20% | `pip install --no-cache-dir` |
+| `.dockerignore` | Variable | Exclude notebooks, data, .git |
+| Install only what's needed | 20-50% | Don't include dev dependencies |
+| Clean apt cache | 50-100MB | `rm -rf /var/lib/apt/lists/*` |
 
-**Ejemplo `.dockerignore`:**
+**Example `.dockerignore`:**
 
 ```
 notebooks/
@@ -664,16 +664,16 @@ tests/
 docs/
 ```
 
-### GPU en Docker
+### GPU in Docker
 
 ```bash
-# Instalar nvidia-container-toolkit
+# Install nvidia-container-toolkit
 # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
 
-# Ejecutar con acceso a GPU
+# Run with GPU access
 docker run --gpus all -p 8000:8000 ml-api:latest
 
-# Docker Compose con GPU
+# Docker Compose with GPU
 ```
 
 ```yaml
@@ -694,24 +694,24 @@ services:
 
 ---
 
-## Deployment en Cloud
+## Cloud Deployment
 
 ### AWS
 
-**ECS/Fargate (Containers serverless):**
+**ECS/Fargate (Serverless Containers):**
 
 ```bash
-# 1. Crear repositorio ECR
+# 1. Create ECR repository
 aws ecr create-repository --repository-name ml-api
 
-# 2. Build y push
+# 2. Build and push
 docker build -t ml-api .
 docker tag ml-api:latest <account>.dkr.ecr.<region>.amazonaws.com/ml-api:latest
 aws ecr get-login-password | docker login --username AWS --password-stdin <account>.dkr.ecr.<region>.amazonaws.com
 docker push <account>.dkr.ecr.<region>.amazonaws.com/ml-api:latest
 
-# 3. Crear task definition y servicio en ECS
-# (usar la consola o Terraform para configurar)
+# 3. Create task definition and service in ECS
+# (use the console or Terraform to configure)
 ```
 
 **SageMaker Endpoints (Managed):**
@@ -744,7 +744,7 @@ client.register_scalable_target(
 )
 ```
 
-**Lambda (para modelos ligeros):**
+**Lambda (for lightweight models):**
 
 ```python
 # lambda_handler.py
@@ -752,7 +752,7 @@ import json
 import onnxruntime as ort
 import numpy as np
 
-# Cargar modelo fuera del handler (reutilizado entre invocaciones)
+# Load model outside the handler (reused between invocations)
 session = ort.InferenceSession("/opt/model.onnx")
 
 def handler(event, context):
@@ -768,55 +768,55 @@ def handler(event, context):
     }
 ```
 
-### Tabla Comparativa de Servicios Cloud
+### Cloud Services Comparison Table
 
-| Servicio | Coste Mensual (aprox) | Auto-scaling | Complejidad | GPU | Mejor Para |
+| Service | Monthly Cost (approx) | Auto-scaling | Complexity | GPU | Best For |
 |----------|----------------------|-------------|-------------|-----|-----------|
-| **AWS ECS/Fargate** | $30-200 | Si | Media | No (Fargate) | APIs containerizadas |
-| **AWS SageMaker** | $50-500+ | Si (managed) | Baja | Si | Equipos ML enterprise |
-| **AWS Lambda** | $0-50 | Automático | Baja | No | Modelos ligeros, tráfico variable |
-| **GCP Cloud Run** | $0-150 | Si | Baja | Si (limitado) | APIs containerizadas |
-| **GCP Vertex AI** | $50-500+ | Si | Media | Si | Equipos ML en GCP |
-| **Azure Container Apps** | $30-200 | Si | Media | Si | APIs containerizadas en Azure |
-| **Azure ML** | $50-500+ | Si | Media | Si | Enterprise en Azure |
+| **AWS ECS/Fargate** | $30-200 | Yes | Medium | No (Fargate) | Containerized APIs |
+| **AWS SageMaker** | $50-500+ | Yes (managed) | Low | Yes | Enterprise ML teams |
+| **AWS Lambda** | $0-50 | Automatic | Low | No | Lightweight models, variable traffic |
+| **GCP Cloud Run** | $0-150 | Yes | Low | Yes (limited) | Containerized APIs |
+| **GCP Vertex AI** | $50-500+ | Yes | Medium | Yes | ML teams on GCP |
+| **Azure Container Apps** | $30-200 | Yes | Medium | Yes | Containerized APIs on Azure |
+| **Azure ML** | $50-500+ | Yes | Medium | Yes | Enterprise on Azure |
 
 ---
 
 ## Serverless ML
 
-### Cuándo Tiene Sentido
+### When It Makes Sense
 
-- Modelos pequenos (< 250MB empaquetado)
-- Inference rápida (< 10 segundos)
-- Tráfico variable (picos y valles)
-- Budget limitado (pagas solo por uso)
+- Small models (< 250MB packaged)
+- Fast inference (< 10 seconds)
+- Variable traffic (peaks and valleys)
+- Limited budget (pay only for usage)
 
-### El Problema del Cold Start
+### The Cold Start Problem
 
-| Factor | Impacto en Cold Start |
+| Factor | Impact on Cold Start |
 |--------|---------------------|
-| Tamaño del paquete | Mayor paquete = más tiempo |
+| Package size | Larger package = more time |
 | Runtime (Python) | ~500ms-1s base |
-| Carga del modelo | La parte más lenta (1-10s) |
-| VPC config | +2-5s si está en VPC |
+| Model loading | The slowest part (1-10s) |
+| VPC config | +2-5s if in VPC |
 
-**Soluciones:**
+**Solutions:**
 
 ```python
 # 1. Provisioned Concurrency (AWS Lambda)
-# Mantener N instancias siempre calientes
-# Coste: ~$15/mes por instancia
+# Keep N instances always warm
+# Cost: ~$15/month per instance
 
-# 2. Modelo en formato ONNX (más rápido de cargar)
-# 3. Modelo en EFS (no descargarlo cada vez)
-# 4. Ping periódico (CloudWatch Events cada 5 min)
-# 5. Usar layers para dependencias (se cachean)
+# 2. Model in ONNX format (faster to load)
+# 3. Model on EFS (don't download it every time)
+# 4. Periodic ping (CloudWatch Events every 5 min)
+# 5. Use layers for dependencies (they're cached)
 ```
 
-### Lambda + ONNX para Computer Vision
+### Lambda + ONNX for Computer Vision
 
 ```python
-# Estructura del Lambda Layer:
+# Lambda Layer structure:
 # layer/
 # ├── python/
 # │   ├── onnxruntime/
@@ -834,7 +834,7 @@ import base64
 session = ort.InferenceSession("/opt/model.onnx")
 
 def handler(event, context):
-    # Decodificar imagen base64
+    # Decode base64 image
     img_bytes = base64.b64decode(event["body"])
     img = Image.open(BytesIO(img_bytes)).resize((224, 224))
 
@@ -857,49 +857,49 @@ def handler(event, context):
 
 ## Streaming vs Batch Inference
 
-### Tabla de Decisión
+### Decision Table
 
-| Modo | Latencia | Caso de Uso | Herramientas | Coste |
+| Mode | Latency | Use Case | Tools | Cost |
 |------|---------|-------------|-------------|-------|
-| **Batch** | Minutos-horas | Scoring nocturno, reports | Airflow, cron, Spark | Bajo |
-| **Real-time** | Milisegundos | API de predicción, chatbots | FastAPI, SageMaker | Medio-Alto |
-| **Near real-time** | Segundos | Fraud detection, recommendations | Kafka, SQS + consumer | Medio |
-| **Streaming** | Milisegundos (continuo) | Sensor data, logs en vivo | Kafka Streams, Flink | Alto |
+| **Batch** | Minutes-hours | Nightly scoring, reports | Airflow, cron, Spark | Low |
+| **Real-time** | Milliseconds | Prediction API, chatbots | FastAPI, SageMaker | Medium-High |
+| **Near real-time** | Seconds | Fraud detection, recommendations | Kafka, SQS + consumer | Medium |
+| **Streaming** | Milliseconds (continuous) | Sensor data, live logs | Kafka Streams, Flink | High |
 
 ### Batch Inference
 
 ```python
-# batch_predict.py - Ejecutar con Airflow o cron
+# batch_predict.py - Run with Airflow or cron
 import pandas as pd
 import joblib
 from datetime import datetime
 
 def run_batch_predictions():
-    # Cargar datos nuevos
+    # Load new data
     df = pd.read_sql("SELECT * FROM customers WHERE scored_at IS NULL", engine)
 
-    # Cargar modelo
+    # Load model
     model = joblib.load("models/model_latest.pkl")
 
-    # Predecir
+    # Predict
     features = df[feature_columns].values
     df["prediction"] = model.predict(features)
     df["scored_at"] = datetime.utcnow()
 
-    # Guardar resultados
+    # Save results
     df[["customer_id", "prediction", "scored_at"]].to_sql(
         "predictions", engine, if_exists="append", index=False
     )
-    print(f"Procesados {len(df)} registros")
+    print(f"Processed {len(df)} records")
 
 if __name__ == "__main__":
     run_batch_predictions()
 ```
 
-### Near Real-Time con Message Queue
+### Near Real-Time with Message Queue
 
 ```python
-# consumer.py - Consumidor de SQS/Kafka
+# consumer.py - SQS/Kafka consumer
 import json
 import boto3
 import numpy as np
@@ -913,7 +913,7 @@ def process_messages():
     while True:
         response = sqs.receive_message(
             QueueUrl=QUEUE_URL,
-            MaxNumberOfMessages=10,  # Batch de hasta 10
+            MaxNumberOfMessages=10,  # Batch of up to 10
             WaitTimeSeconds=20,       # Long polling
         )
 
@@ -921,7 +921,7 @@ def process_messages():
         if not messages:
             continue
 
-        # Procesar en batch
+        # Process in batch
         features_batch = []
         for msg in messages:
             body = json.loads(msg["Body"])
@@ -929,7 +929,7 @@ def process_messages():
 
         predictions = model.predict(np.array(features_batch))
 
-        # Guardar resultados y eliminar mensajes
+        # Save results and delete messages
         for msg, pred in zip(messages, predictions):
             body = json.loads(msg["Body"])
             save_prediction(body["request_id"], float(pred))
@@ -942,24 +942,24 @@ if __name__ == "__main__":
     process_messages()
 ```
 
-### Cuándo Usar Cada Modo
+### When to Use Each Mode
 
 ```
-¿Necesitas respuesta inmediata (< 1s)?
-├── Sí → Real-time API (FastAPI)
+Do you need an immediate response (< 1s)?
+├── Yes -> Real-time API (FastAPI)
 └── No
-    ├── ¿Datos llegan continuamente?
-    │   ├── Sí → ¿Necesitas resultado en < 30s?
-    │   │   ├── Sí → Streaming (Kafka Streams)
-    │   │   └── No → Near real-time (SQS + consumer)
-    │   └── No → Batch (Airflow/cron)
-    └── ¿Procesamiento periódico?
-        └── Sí → Batch (Airflow/cron)
+    ├── Does data arrive continuously?
+    │   ├── Yes -> Do you need result in < 30s?
+    │   │   ├── Yes -> Streaming (Kafka Streams)
+    │   │   └── No  -> Near real-time (SQS + consumer)
+    │   └── No  -> Batch (Airflow/cron)
+    └── Periodic processing?
+        └── Yes -> Batch (Airflow/cron)
 ```
 
 ---
 
-## CI/CD para ML
+## CI/CD for ML
 
 ### GitHub Actions Pipeline
 
@@ -1032,54 +1032,54 @@ jobs:
             --force-new-deployment
 ```
 
-### Model Validation antes de Deploy
+### Model Validation before Deploy
 
 ```python
 # scripts/validate_model.py
 """
-Validar que el nuevo modelo es al menos tan bueno como el de producción.
-Se ejecuta en CI antes de deploy.
+Validate that the new model is at least as good as the production one.
+Runs in CI before deploy.
 """
 import json
 import joblib
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
 
-# Cargar test set estándar
+# Load standard test set
 X_test = np.load("data/X_test.npy")
 y_test = np.load("data/y_test.npy")
 
-# Cargar modelo nuevo (candidato)
+# Load new model (candidate)
 new_model = joblib.load("models/model_latest.pkl")
 new_preds = new_model.predict(X_test)
 
-# Métricas del nuevo modelo
+# New model metrics
 new_accuracy = accuracy_score(y_test, new_preds)
 new_f1 = f1_score(y_test, new_preds, average="weighted")
 
-# Cargar métricas del modelo en producción
+# Load production model metrics
 with open("models/production_metrics.json") as f:
     prod_metrics = json.load(f)
 
-print(f"Modelo nuevo    - Accuracy: {new_accuracy:.4f}, F1: {new_f1:.4f}")
-print(f"Modelo en prod  - Accuracy: {prod_metrics['accuracy']:.4f}, F1: {prod_metrics['f1']:.4f}")
+print(f"New model      - Accuracy: {new_accuracy:.4f}, F1: {new_f1:.4f}")
+print(f"Prod model     - Accuracy: {prod_metrics['accuracy']:.4f}, F1: {prod_metrics['f1']:.4f}")
 
-# Validar: el nuevo modelo no puede ser peor
-TOLERANCE = 0.01  # 1% de tolerancia
+# Validate: the new model cannot be worse
+TOLERANCE = 0.01  # 1% tolerance
 if new_f1 < prod_metrics["f1"] - TOLERANCE:
-    print("FALLO: El nuevo modelo es significativamente peor que producción")
+    print("FAIL: New model is significantly worse than production")
     exit(1)
 
-print("OK: Modelo validado, listo para deploy")
+print("OK: Model validated, ready for deploy")
 ```
 
 ---
 
-## Monitoring en Producción
+## Production Monitoring
 
 ### Data Drift
 
-El data drift ocurre cuando la distribución de los datos de entrada cambia respecto a los datos de entrenamiento. El modelo fue entrenado con cierta distribución y puede no funcionar bien con datos diferentes.
+Data drift occurs when the distribution of input data changes compared to the training data. The model was trained with a certain distribution and may not work well with different data.
 
 ```python
 # monitoring/drift_detector.py
@@ -1087,14 +1087,14 @@ import numpy as np
 from scipy import stats
 
 class DriftDetector:
-    """Detectar drift comparando distribuciones."""
+    """Detect drift by comparing distributions."""
 
     def __init__(self, reference_data: np.ndarray, threshold: float = 0.05):
         self.reference = reference_data
         self.threshold = threshold
 
     def check_drift(self, current_data: np.ndarray) -> dict:
-        """Kolmogorov-Smirnov test por feature."""
+        """Kolmogorov-Smirnov test per feature."""
         results = {}
         for i in range(self.reference.shape[1]):
             stat, p_value = stats.ks_2samp(
@@ -1116,90 +1116,90 @@ class DriftDetector:
         return results
 ```
 
-### Métricas a Monitorizar
+### Metrics to Monitor
 
-| Categoría | Métrica | Alerta Si |
+| Category | Metric | Alert If |
 |-----------|---------|----------|
-| **Latencia** | P50, P95, P99 response time | P95 > 500ms |
-| **Throughput** | Requests/segundo | Caída > 50% |
-| **Errores** | Error rate (4xx, 5xx) | > 1% |
-| **Modelo** | Prediction distribution | Shift significativo |
-| **Modelo** | Confidence score distribution | Media baja > 10% |
-| **Datos** | Input feature distributions | KS test p < 0.05 |
-| **Datos** | Missing values rate | Aumento > 5% |
-| **Infra** | CPU/Memory usage | > 80% sostenido |
-| **Negocio** | Conversion rate, revenue impact | Caída > X% |
+| **Latency** | P50, P95, P99 response time | P95 > 500ms |
+| **Throughput** | Requests/second | Drop > 50% |
+| **Errors** | Error rate (4xx, 5xx) | > 1% |
+| **Model** | Prediction distribution | Significant shift |
+| **Model** | Confidence score distribution | Mean drops > 10% |
+| **Data** | Input feature distributions | KS test p < 0.05 |
+| **Data** | Missing values rate | Increase > 5% |
+| **Infra** | CPU/Memory usage | > 80% sustained |
+| **Business** | Conversion rate, revenue impact | Drop > X% |
 
-### Herramientas de Monitoring
+### Monitoring Tools
 
-| Herramienta | Tipo | Coste | Mejor Para |
+| Tool | Type | Cost | Best For |
 |-------------|------|-------|-----------|
-| **Evidently AI** | Data/model drift | Open source | Dashboards de drift |
-| **WhyLabs** | ML monitoring | Free tier + paid | Monitoring continuo |
-| **Prometheus + Grafana** | Métricas infra | Open source | Latencia, throughput |
-| **CloudWatch** (AWS) | Infra + custom | Pay per use | Si ya estás en AWS |
-| **Arize AI** | ML observability | Free tier + paid | Debugging de modelos |
+| **Evidently AI** | Data/model drift | Open source | Drift dashboards |
+| **WhyLabs** | ML monitoring | Free tier + paid | Continuous monitoring |
+| **Prometheus + Grafana** | Infra metrics | Open source | Latency, throughput |
+| **CloudWatch** (AWS) | Infra + custom | Pay per use | If you're already on AWS |
+| **Arize AI** | ML observability | Free tier + paid | Model debugging |
 
-### Cuándo Reentrenar
+### When to Retrain
 
 ```
-Checklist para decidir reentrenamiento:
-- [ ] Data drift detectado en > 30% de features
-- [ ] Accuracy en producción baja > 5% vs baseline
-- [ ] Han pasado > 3 meses desde último entrenamiento
-- [ ] Hay nuevos datos etiquetados disponibles
-- [ ] El negocio reporta degradación en resultados
+Checklist for deciding retraining:
+- [ ] Data drift detected in > 30% of features
+- [ ] Production accuracy dropped > 5% vs baseline
+- [ ] More than 3 months since last training
+- [ ] New labeled data is available
+- [ ] Business reports degradation in results
 
-Si >= 2 de estos son true → Reentrenar
+If >= 2 of these are true -> Retrain
 ```
 
 ---
 
-## Tips de Consultoría
+## Consulting Tips
 
-### Enfoque Pragmático de Deployment
+### Pragmatic Deployment Approach
 
 ```
-Fase 1 (Semana 1-2): MVP
-├── Modelo entrenado en notebook
-├── Script batch que lee CSV → genera predicciones → guarda CSV
-├── Cliente valida resultados manualmente
-└── Coste: $0
+Phase 1 (Week 1-2): MVP
+├── Model trained in notebook
+├── Batch script that reads CSV -> generates predictions -> saves CSV
+├── Client validates results manually
+└── Cost: $0
 
-Fase 2 (Semana 3-4): API
+Phase 2 (Week 3-4): API
 ├── FastAPI + Docker
-├── Endpoint simple de predicción
-├── Deploy en un servidor (EC2, Cloud Run)
-├── Documentación con Swagger
-└── Coste: $30-100/mes
+├── Simple prediction endpoint
+├── Deploy on a server (EC2, Cloud Run)
+├── Documentation with Swagger
+└── Cost: $30-100/month
 
-Fase 3 (Mes 2-3): Producción
-├── CI/CD con GitHub Actions
-├── Monitoring básico (latencia, errores)
-├── Auto-scaling si es necesario
+Phase 3 (Month 2-3): Production
+├── CI/CD with GitHub Actions
+├── Basic monitoring (latency, errors)
+├── Auto-scaling if needed
 ├── Data drift detection
-└── Coste: $100-500/mes
+└── Cost: $100-500/month
 
-Fase 4 (Mes 4+): Escalar
-├── MLOps pipeline completo
-├── Reentrenamiento automático
+Phase 4 (Month 4+): Scale
+├── Complete MLOps pipeline
+├── Automatic retraining
 ├── A/B testing
 ├── Multi-model serving
-└── Coste: $500+/mes
+└── Cost: $500+/month
 ```
 
-### Reglas de Oro
+### Golden Rules
 
-1. **No sobre-engineerear la primera versión.** Un CSV con predicciones que el cliente puede revisar vale más que una API perfecta que nadie usa.
+1. **Don't over-engineer the first version.** A CSV with predictions that the client can review is worth more than a perfect API that nobody uses.
 
-2. **FastAPI te regala documentación.** El Swagger UI generado automáticamente (disponible en `/docs`) es perfecto para que el cliente entienda y pruebe la API sin documentación adicional.
+2. **FastAPI gives you free documentation.** The automatically generated Swagger UI (available at `/docs`) is perfect for the client to understand and test the API without additional documentation.
 
-3. **Docker desde el día 1.** Aunque el deploy inicial sea simple, tener un Dockerfile elimina el "funciona en mi máquina" desde el principio.
+3. **Docker from day 1.** Even if the initial deploy is simple, having a Dockerfile eliminates "works on my machine" from the start.
 
-4. **Monitoring > más accuracy.** Saber cuándo tu modelo falla es más valioso que mejorar la accuracy un 2%.
+4. **Monitoring > more accuracy.** Knowing when your model fails is more valuable than improving accuracy by 2%.
 
-5. **Empezar con batch.** Si el cliente no necesita respuesta en milisegundos, un proceso batch nocturno es 10x más fácil de mantener que una API.
+5. **Start with batch.** If the client doesn't need a response in milliseconds, a nightly batch process is 10x easier to maintain than an API.
 
 ---
 
-> **Resumen para llevar:** Deployment no es un paso final, es una disciplina. El camino más seguro es iterativo: batch primero, API después, escalar cuando se justifique. FastAPI + Docker + GitHub Actions te dan el 80% de lo que necesitas para el 90% de los proyectos de consultoría.
+> **Takeaway:** Deployment is not a final step, it's a discipline. The safest path is iterative: batch first, API next, scale when justified. FastAPI + Docker + GitHub Actions gives you 80% of what you need for 90% of consulting projects.
